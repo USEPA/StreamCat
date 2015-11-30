@@ -42,8 +42,7 @@ def dbf2DF(dbfile, upper=True):
     db.close() #Close dbf 
     pandasDF = pd.DataFrame(cols)
     if upper == True:
-        pandasDF.columns = map(str.upper, db.header)
-    db.close() #Make columns uppercase 
+        pandasDF.columns = map(str.upper, pandasDF.columns)
     return pandasDF
  
 #####################################################################################################################
