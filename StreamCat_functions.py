@@ -24,6 +24,11 @@ import rasterio
 from rasterio import transform
 os.environ['GDAL_DATA'] = 'C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data'
 from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
+import geopandas as gpd
+from geopandas import GeoDataFrame, read_file
+sys.path.append('F:/Watershed Integrity Spatial Prediction/Scripts')
+from GeoPandasOverlay import overlay
+from GeoPandasSjoin import sjoin
 arcpy.CheckOutExtension("Spatial")
 
 #####################################################################################################################
@@ -348,7 +353,31 @@ def ProjectResamp(inras, outras, template_raster, resamp_type):
                         dst_crs=dst.crs,
                         resampling=RESAMPLING.nearest
                         )
+#####################################################################################################################
+def PointInPolyCount(points, polys, groupingID, countfield=None, summaryfield=None):
+    '''
+    __author__ =  "Marc Weber <weber.marc@epa.gov>" 
+    Gets the point count of a spatial points feature for every polyton in a spatial polygons feature
     
+    Arguments
+    ---------
+    InPoints         : input points geographic features (any format readable by fiona)
+    InPolys          : input polygons geographic features (any format readable by fiona)
+    groupingID       : attribute field in polygon features used for grouping of point results
+    countfield       : field in points feature to use for getting count in polygons
+    summaryfield     : field in points feature to use for getting summary stats in polygons
+    '''
+    try:
+        gp_points  = gpd.GeoDataFrame.from_file(points) 
+        gp_polys = gpd.GeoDataFrame.from_file(polys)
+        if gp_points.crs==gp_polys.crs:
+            if countfield!=None:
+                point_poly_join = sjoin(gp_points, gp_polys, how="right", op="within")
+                grouped = point_poly_join.groupby(groupingID)
+                point_poly_count = grouped[countfield].count()
+                return point_poly_count
+    except:
+        print 'features are not in same crs!'     
 #####################################################################################################################
 def interVPUfix(Accumulation, accum_type, zone, allocMet_dir, Connector, interVPUtbl):
     '''
