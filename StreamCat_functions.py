@@ -26,9 +26,7 @@ os.environ['GDAL_DATA'] = 'C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs
 from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
 import geopandas as gpd
 from geopandas import GeoDataFrame, read_file
-sys.path.append('F:/Watershed Integrity Spatial Prediction/Scripts')
-from GeoPandasOverlay import overlay
-from GeoPandasSjoin import sjoin
+from geopandas.tools import sjoin
 arcpy.CheckOutExtension("Spatial")
 
 #####################################################################################################################
