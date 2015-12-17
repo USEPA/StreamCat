@@ -161,6 +161,7 @@ def getRasterInfo(FileName):
     '''
     SourceDS = gdal.Open(FileName, GA_ReadOnly)
     NDV = SourceDS.GetRasterBand(1).GetNoDataValue()
+    stats = SourceDS.GetRasterBand(1).GetStatistics(True, True)
     xsize = SourceDS.RasterXSize
     ysize = SourceDS.RasterYSize
     GeoT = SourceDS.GetGeoTransform()
@@ -172,17 +173,21 @@ def getRasterInfo(FileName):
     Proj_geogcs = Projection.GetAttrValue('geogcs')
     DataType = SourceDS.GetRasterBand(1).DataType
     DataType = gdal.GetDataTypeName(DataType)
-    return (NDV, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType)
+    return (NDV, stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType)
 #####################################################################################################################
-def Reclass(inras, outras, inval, outval, comparison, NDV):
+def Reclass(inras, outras, inval, outval, NDV):
     '''
     __author__ =   "Marc Weber <weber.marc@epa.gov>"  
                    "Ryan Hill <hill.ryan@epa.gov>" 
-    returns basic raster information for a given raster
+    reclass a set of values in a raster to another value
     
     Arguments
     ---------
-    raster          : a raster file 
+    inras           : an input raster file 
+    outras          : an output raster file 
+    inval           : value to convert 
+    outval          : value to convert to
+    NDV             : no data value
     '''
     with rasterio.drivers():
         with rasterio.open(inras) as src:
@@ -201,18 +206,54 @@ def Reclass(inras, outras, inval, outval, comparison, NDV):
                 for idx, window in windows:
                     src_data = src.read(1, window=window) 
                     # Convert a value
-                    if comparison == 'eq':
-                        src_data = np.where(src_data == inval, outval, src_data)
-                    if comparison == 'lt':
-                        src_data = np.where(src_data < inval, outval, src_data)
-                    if comparison == 'gt':
-                        src_data = np.where(src_data > inval, outval, src_data)
-                    if comparison == 'lte':
-                        src_data = np.where(src_data <= inval, outval, src_data)
-                    if comparison == 'gte':
-                        src_data = np.where(src_data >= inval, outval, src_data)
+                    src_data = np.where(src_data == inval, outval, src_data)
                     dst_data = src_data
                     dst.write_band(1, dst_data, window=window)
+ #####################################################################################################################
+def Multiply(inras, outras, val, RastType):
+    '''
+    __author__ =   "Marc Weber <weber.marc@epa.gov>"  
+                   “Ryan Hill<hill.ryan@epa.gov>"
+    Multiplies a raster by a given value and returns raster in a specified data type - ideas from https://sgillies.net/page3.html
+    
+    Arguments
+    ---------
+    inras           : an input raster file 
+    outras          : an output raster file 
+    val             : a value to muliply raster by 
+    RastType        : the data type of the raster, i.e. 'float32', 'uint8' 
+    '''
+    with rasterio.drivers():
+        with rasterio.open(inras, masked=True) as src:
+            kwargs = src.meta.copy()    
+            kwargs.update(
+                driver='GTiff',
+                count=1,
+                compress='lzw',
+#                dtype=rasterio.uint16
+#                nodata=222
+            )
+            
+            windows = src.block_windows(1)
+            
+            with rasterio.open(outras, 'w', **kwargs) as dst:
+                for idx, window in windows:
+                    src_data = src.read(1, window=window, masked=True) 
+ 
+                    #Where scr_data eq original nodata make new nodata value. All other data keep same.
+                    src_data = np.ma.masked_array(src_data * val, mask=src.meta['nodata']) 
+                    dst_data = np.where(src_data == src.meta['nodata'], kwargs['nodata'], src_data).astype(rasterio.float32)
+#                    src_data = np.where(src_data == kwargs['nodata'], 0, prG)
+#                    dst_data = (src_data * val).astype(rasterio.uint16)
+                    # Convert a value
+#                    kwargs.update(
+#                        dtype=RastType
+#                    )
+#                    profile = dst.profile
+#                    profile.update(
+#                        dtype=RastType)
+                    dst.write_band(1, dst_data, window=window)
+#                    dst.write(dst_data.astype(rasterio.uint8), 1)   
 #####################################################################################################################                
 def Project(inras, outras, dst_crs, template_raster, nodata):
     '''
@@ -351,6 +392,7 @@ def ProjectResamp(inras, outras, template_raster, resamp_type):
 def PointInPoly(points,inZoneData, pct_full, summaryfield=None):   
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
+                  "Rick Debbout <debbout.rick@epa.gov>"
     Gets the point count of a spatial points feature for every polygon in a spatial polygons feature
     
     Arguments
