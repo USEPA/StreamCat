@@ -210,7 +210,7 @@ def Reclass(inras, outras, inval, outval, NDV):
                     dst_data = src_data
                     dst.write_band(1, dst_data, window=window)
  #####################################################################################################################
-def Multiply(inras, outras, val, RastType,out_dtype=None):
+def Multiply(inras, outras, val, out_dtype=None):
     '''
     __author__ =   "Marc Weber <weber.marc@epa.gov>"  
                    "Ryan Hill<hill.ryan@epa.gov>"
@@ -221,7 +221,7 @@ def Multiply(inras, outras, val, RastType,out_dtype=None):
     inras           : an input raster file 
     outras          : an output raster file 
     val             : a value to muliply raster by 
-    RastType        : the data type of the raster, i.e. 'float32', 'uint8' 
+    out_dtype        : the data type of the raster, i.e. 'float32', 'uint8' 
     '''
     with rasterio.drivers():
         with rasterio.open(inras) as src:
