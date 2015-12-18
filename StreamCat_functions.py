@@ -210,10 +210,10 @@ def Reclass(inras, outras, inval, outval, NDV):
                     dst_data = src_data
                     dst.write_band(1, dst_data, window=window)
  #####################################################################################################################
-def Multiply(inras, outras, val, RastType):
+def Multiply(inras, outras, val, RastType,out_dtype=None):
     '''
     __author__ =   "Marc Weber <weber.marc@epa.gov>"  
-                   “Ryan Hill<hill.ryan@epa.gov>"
+                   "Ryan Hill<hill.ryan@epa.gov>"
     Multiplies a raster by a given value and returns raster in a specified data type - ideas from https://sgillies.net/page3.html
     
     Arguments
@@ -224,36 +224,30 @@ def Multiply(inras, outras, val, RastType):
     RastType        : the data type of the raster, i.e. 'float32', 'uint8' 
     '''
     with rasterio.drivers():
-        with rasterio.open(inras, masked=True) as src:
+        with rasterio.open(inras) as src:
+            #Set dtype and nodata values
+            if out_dtype is None: #If no dtype defined, use input dtype                
+                nd = src.meta['nodata']
+                dt = src.meta['dtype']
+            else:
+                exec 'nd = np.iinfo(np.'+out_dtype+').max' 
+                dt = out_dtype      
             kwargs = src.meta.copy()    
             kwargs.update(
                 driver='GTiff',
                 count=1,
                 compress='lzw',
-#                dtype=rasterio.uint16
-#                nodata=222
+                dtype=dt,
+                nodata= nd
             )
             
             windows = src.block_windows(1)
             
-            with rasterio.open(outras, 'w', **kwargs) as dst:
+            with rasterio.open(outras, 'w', **kwargs) as dst:        
                 for idx, window in windows:
-                    src_data = src.read(1, window=window, masked=True) 
- 
-                    #Where scr_data eq original nodata make new nodata value. All other data keep same.
-                    src_data = np.ma.masked_array(src_data * val, mask=src.meta['nodata']) 
-                    dst_data = np.where(src_data == src.meta['nodata'], kwargs['nodata'], src_data).astype(rasterio.float32)
-#                    src_data = np.where(src_data == kwargs['nodata'], 0, prG)
-#                    dst_data = (src_data * val).astype(rasterio.uint16)
-                    # Convert a value
-#                    kwargs.update(
-#                        dtype=RastType
-#                    )
-#                    profile = dst.profile
-#                    profile.update(
-#                        dtype=RastType)
+                    src_data = src.read(1, window=window) 
+                    dst_data = np.where(src_data != src.meta['nodata'], src_data * val, kwargs['nodata']).astype(dt)
                     dst.write_band(1, dst_data, window=window)
-#                    dst.write(dst_data.astype(rasterio.uint8), 1)   
 #####################################################################################################################                
 def Project(inras, outras, dst_crs, template_raster, nodata):
     '''
