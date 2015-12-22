@@ -28,6 +28,7 @@ os.environ['GDAL_DATA'] = 'C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs
 from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
 import geopandas as gpd
 from geopandas.tools import sjoin
+import fiona
 
 #####################################################################################################################
 def dbf2DF(dbfile, upper=True): 
@@ -210,43 +211,61 @@ def Reclass(inras, outras, inval, outval, NDV):
                     dst_data = src_data
                     dst.write_band(1, dst_data, window=window)
  #####################################################################################################################
-def Multiply(inras, outras, val, out_dtype=None):
+def rasterMath(inras, outras, expression=None, out_dtype=None):     
     '''
     __author__ =   "Marc Weber <weber.marc@epa.gov>"  
                    "Ryan Hill<hill.ryan@epa.gov>"
-    Multiplies a raster by a given value and returns raster in a specified data type - ideas from https://sgillies.net/page3.html
+    Applies arithmetic operation to a raster by a given value and returns raster in a specified data type - 
+    ideas from https://sgillies.net/page3.html
     
     Arguments
     ---------
-    inras           : an input raster file 
-    outras          : an output raster file 
-    val             : a value to muliply raster by 
-    out_dtype        : the data type of the raster, i.e. 'float32', 'uint8' 
+    inras           : an input raster file (string)
+    outras          : an output raster file (string)    
+    expression      : string of mathematical expression to be used that includes the input raster
+                      as variable. If no expression provided, raster is copied. Function can be 
+                      used to change dtype of original raster.
+                      Example: 
+                      inras = 'C:/some_locat_raster.tif'
+                      expression = 'log(' + inras + '+1)' or inras + ' * 100'   
+    out_dtype       : the data type of the raster, i.e. 'float32', 'uint8' (string)    
     '''
+    
+    expression = expression.replace(inras, 'src_data')    
+         
     with rasterio.drivers():
         with rasterio.open(inras) as src:
-            #Set dtype and nodata values
+                #Set dtype and nodata values
             if out_dtype is None: #If no dtype defined, use input dtype                
                 nd = src.meta['nodata']
                 dt = src.meta['dtype']
             else:
-                exec 'nd = np.iinfo(np.'+out_dtype+').max' 
-                dt = out_dtype      
+                try:
+                    nd = eval('np.iinfo(np.'+out_dtype+').max')
+                except:
+                    nd = eval('np.finfo(np.'+out_dtype+').max')  
+                #exec 'nd = np.iinfo(np.'+out_dtype+').max' 
+                dt = out_dtype        
             kwargs = src.meta.copy()    
             kwargs.update(
                 driver='GTiff',
                 count=1,
                 compress='lzw',
-                dtype=dt,
-                nodata= nd
+                dtype = dt,
+                nodata = nd
             )
             
             windows = src.block_windows(1)
             
-            with rasterio.open(outras, 'w', **kwargs) as dst:        
+            with rasterio.open(outras, 'w', **kwargs) as dst:
                 for idx, window in windows:
                     src_data = src.read(1, window=window) 
-                    dst_data = np.where(src_data != src.meta['nodata'], src_data * val, kwargs['nodata']).astype(dt)
+                        #Where src not eq to orig nodata, multiply by val, else set to new nodata. Set dtype
+                    if expression == None:
+                            #No expression produces copy of original raster (can use new data type)
+                        dst_data = np.where(src_data != src.meta['nodata'], src_data, kwargs['nodata']).astype(dt)
+                    else:
+                        dst_data = np.where(src_data != src.meta['nodata'], eval(expression), kwargs['nodata']).astype(dt)
                     dst.write_band(1, dst_data, window=window)
 #####################################################################################################################                
 def Project(inras, outras, dst_crs, template_raster, nodata):
@@ -285,6 +304,36 @@ def Project(inras, outras, dst_crs, template_raster, nodata):
                     dst_transform=affine,
                     dst_crs=dst_crs,
                     )
+#####################################################################################################################                
+def ShapefileProject(InShp, OutShp, CRS):
+    '''
+    __author__ =  "Marc Weber <weber.marc@epa.gov>" 
+    reprojects a shapefile with Fiona
+    
+    Arguments
+    ---------
+    InShp           : an input shapefile as a string, i.e. 'C:/Temp/outshape.shp'
+    OutShp          : an output shapefile as a string, i.e. 'C:/Temp/outshape.shp'
+    CRS             : the output CRS in Fiona format
+    '''
+    # Open a file for reading   
+    with fiona.open(InShp, 'r') as source:
+        sink_schema = source.schema.copy()
+        sink_schema['geometry'] = 'Point'
+    
+        # Open an output file, using the same format driver and passing the desired
+        # coordinate reference system
+        with fiona.open(
+                OutShp, 'w',
+                crs=CRS, driver=source.driver, schema=sink_schema,
+                ) as sink:
+                    for f in source:
+                        # Write the record out.
+                        sink.write(f)
+    
+        # The sink's contents are flushed to disk and the file is closed
+        # when its ``with`` block ends. This effectively executes
+        # ``sink.flush(); sink.close()``.
 #####################################################################################################################
 def Resample(inras, outras, resamp_type, resamp_res):
     '''
@@ -335,12 +384,11 @@ def Resample(inras, outras, resamp_type, resamp_res):
                     compress='lzw'
                     )
 #####################################################################################################################
-def ProjectResamp(inras, outras, template_raster, resamp_type):
+def ProjectResamp(inras, outras, out_proj, resamp_type, out_res):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
                   "Ryan Hill <hill.ryan@epa.gov>"
-    reprojects a raster using rasterio
-	
+    reprojects and resamples a raster using rasterio	
 	
 	    Arguments
     ---------
@@ -349,39 +397,43 @@ def ProjectResamp(inras, outras, template_raster, resamp_type):
     outproj         : projection to apply to output raster in EPSG format, i.e. EPSG:5070
     resamp          : resampling method to use - either nearest or bilinear
     '''
-    with rasterio.open(inras) as src:
-        with rasterio.open(template_raster) as dst:        
-            affine, width, height = calculate_default_transform(src.crs, dst.crs, src.width, src.height, *src.bounds)
+    with rasterio.drivers():
+        with rasterio.open(inras) as src:        
+            affine, width, height = calculate_default_transform(src.crs, out_proj, src.width, src.height, *src.bounds)
             kwargs = src.meta.copy()
             kwargs.update({
-                'crs': dst.crs,
+                'crs': out_proj,
                 'transform': affine,
                 'affine': affine,
                 'width': width,
                 'height': height,
                 'driver': 'GTiff'
             })
+            
+            windows = src.block_windows(1)
+            
             with rasterio.open(outras, 'w', **kwargs) as dst:
-                if resamp_type=='bilinear':
-                    reproject(
-                        source=rasterio.band(src, 1),
-                        destination=rasterio.band(dst, 1),
-                        src_transform=src.affine,
-                        src_crs=src.crs,
-                        dst_transform=transform.from_origin(affine[2],affine[5],dist.transform[0],dst.transform[0]),
-                        dst_crs=dst_crs,
-                        resampling=RESAMPLING.bilinear
-                        )
-                elif resamp_type=='nearest':
-                    reproject(
-                        source=rasterio.band(src, 1),
-                        destination=rasterio.band(dst, 1),
-                        src_transform=src.transform,
-                        src_crs=src.crs,
-                        dst_transform=transform.from_origin(dst.transform[0],dst.transform[3],dst.transform[1],dst.transform[1]),
-                        dst_crs=dst.crs,
-                        resampling=RESAMPLING.nearest
-                        )    
+                for idx, window in windows:
+                    if resamp_type=='bilinear':
+                        reproject(
+                            source=rasterio.band(src, 1),
+                            destination=rasterio.band(dst, 1),
+                            src_transform=src.affine,
+                            src_crs=src.crs,
+                            dst_transform=transform.from_origin(affine[2],affine[5],dist.transform[0],dst.transform[0]),
+                            dst_crs=dst_crs,
+                            resampling=RESAMPLING.bilinear
+                            )
+                    elif resamp_type=='nearest':
+                        reproject(
+                            source=rasterio.band(src, 1),
+                            destination=rasterio.band(dst, 1),
+                            src_transform=src.transform,
+                            src_crs=src.crs,
+                            dst_transform=transform.from_origin(dst.transform[0],dst.transform[3],dst.transform[1],dst.transform[1]),
+                            dst_crs=dst.crs,
+                            resampling=RESAMPLING.nearest
+                            )    
 #####################################################################################################################
 def PointInPoly(points,inZoneData, pct_full, summaryfield=None):   
     '''
