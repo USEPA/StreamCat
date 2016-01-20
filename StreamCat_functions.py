@@ -12,14 +12,10 @@ import arcpy
 from arcpy.sa import *
 arcpy.CheckOutExtension("Spatial")
 import pysal as ps
-import time, os, sys, string, math
 import numpy as np
-import numpy.lib.recfunctions as rfn
 import pandas as pd
 from datetime import datetime as dt
-from collections import deque, defaultdict, OrderedDict
-import struct, decimal 
-import itertools as it
+from collections import deque, defaultdict
 from osgeo import gdal, osr
 from gdalconst import *
 import rasterio
@@ -110,7 +106,7 @@ def children(token, tree, chkset):
     ---------
     token           : an NHDPlusV2 hydroregion acronnym, i.e. 'MS', 'PN', 'GB'
     tree            : an NHDPlusV2 VPU number, i.e. 10, 16, 17
-	chkset          : set of all the NHD catchment COMIDs used to remove flowlines with no associated catchment
+    chkset          : set of all the NHD catchment COMIDs used to remove flowlines with no associated catchment
     '''
     visited = set()
     to_crawl = deque([token])
@@ -176,7 +172,7 @@ def getRasterInfo(FileName):
     DataType = gdal.GetDataTypeName(DataType)
     return (NDV, stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType)
 #####################################################################################################################
-def Reclass(inras, outras, inval, outval, NDV):
+def Reclass(inras, outras, inval, outval, out_dtype=None):
     '''
     __author__ =   "Marc Weber <weber.marc@epa.gov>"  
                    "Ryan Hill <hill.ryan@epa.gov>" 
@@ -188,16 +184,27 @@ def Reclass(inras, outras, inval, outval, NDV):
     outras          : an output raster file 
     inval           : value to convert 
     outval          : value to convert to
-    NDV             : no data value
+    out_dtype       : the data type of the raster, i.e. 'float32', 'uint8' (string) 
     '''
     with rasterio.drivers():
         with rasterio.open(inras) as src:
-            kwargs = src.meta
+            #Set dtype and nodata values
+            if out_dtype is None: #If no dtype defined, use input dtype                
+                nd = src.meta['nodata']
+                dt = src.meta['dtype']
+            else:
+                try:
+                    nd = eval('np.iinfo(np.'+out_dtype+').max')
+                except:
+                    nd = eval('np.finfo(np.'+out_dtype+').max')  
+                #exec 'nd = np.iinfo(np.'+out_dtype+').max' 
+                dt = out_dtype 
+            kwargs = src.meta.copy()
             kwargs.update(
                 driver='GTiff',
                 count=1,
                 compress='lzw',
-                nodata=NDV,
+                nodata=nd,
                 bigtiff='YES' # Output will be larger than 4GB
             )
             
@@ -207,10 +214,14 @@ def Reclass(inras, outras, inval, outval, NDV):
                 for idx, window in windows:
                     src_data = src.read(1, window=window) 
                     # Convert a value
-                    src_data = np.where(src_data == inval, outval, src_data)
+                    if np.isnan(outval).any():
+                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dt)
+                    else:
+                        src_data = np.where(src_data == inval, outval, src_data).astype(dt)
+#                    src_data = np.where(src_data == inval, outval, src_data)
                     dst_data = src_data
                     dst.write_band(1, dst_data, window=window)
- #####################################################################################################################
+#####################################################################################################################
 def rasterMath(inras, outras, expression=None, out_dtype=None):     
     '''
     __author__ =   "Marc Weber <weber.marc@epa.gov>"  
@@ -235,7 +246,7 @@ def rasterMath(inras, outras, expression=None, out_dtype=None):
          
     with rasterio.drivers():
         with rasterio.open(inras) as src:
-                #Set dtype and nodata values
+            #Set dtype and nodata values
             if out_dtype is None: #If no dtype defined, use input dtype                
                 nd = src.meta['nodata']
                 dt = src.meta['dtype']
@@ -334,7 +345,7 @@ def ShapefileProject(InShp, OutShp, CRS):
         # The sink's contents are flushed to disk and the file is closed
         # when its ``with`` block ends. This effectively executes
         # ``sink.flush(); sink.close()``.
-#####################################################################################################################
+#####################################################################################################################                
 def Resample(inras, outras, resamp_type, resamp_res):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
@@ -435,139 +446,117 @@ def ProjectResamp(inras, outras, out_proj, resamp_type, out_res):
                             resampling=RESAMPLING.nearest
                             )    
 #####################################################################################################################
-def PointInPoly(points,inZoneData, pct_full, summaryfield=None):   
+def PointInPoly(points, inZoneData, pct_full, summaryfield=None):   
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
                   "Rick Debbout <debbout.rick@epa.gov>"
-    Gets the point count of a spatial points feature for every polygon in a spatial polygons feature
+    Returns either the count of spatial points feature in every polygon in a spatial polygons feature or the summary of 
+    an attribute field for all the points in every polygon of a spatial polygons feature
     
     Arguments
     ---------
-    points        : input points geographic features (any format readable by fiona)
-    InZoneData    : input polygons geographic features (any format readable by fiona)
+    points        : input points geographic features as a GeoPandas GeoDataFrame
+    InZoneData    : input polygon shapefile as a string, i.e. 'C:/Temp/outshape.shp'
     pct_full      : table that links COMIDs to pct_full, determined from catchments that are  not within the US Census border
     summaryfield  : a list of the field/s in points feature to use for getting summary stats in polygons
-    '''   
-    polys = gpd.GeoDataFrame.from_file(inZoneData)        
+    '''  
+    #startTime = dt.now()
+    polys = gpd.GeoDataFrame.from_file(inZoneData)     
     points = points.to_crs(polys.crs)
-    points2 = points.ix[~points.duplicated(['LATITUDE','LONGITUDE'])]
-    point_poly_join = sjoin(points2, polys, how="left", op="within")   
+    # Get list of lat/long fields in the table
+    latlon = [s for s in points.columns if any(xs in s.upper() for xs in ['LONGIT','LATIT'])]
+    # Remove duplicate points for 'Count' 
+    points2 = points.ix[~points.duplicated(latlon)]
+    point_poly_join = sjoin(points2, polys, how="left", op="within")
+    # Create group of all points in catchment
     grouped = point_poly_join.groupby('FEATUREID')    
     point_poly_count = grouped[points2.columns[0]].count()
+    # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count,on='FEATUREID', how='left')
     final = final[['FEATUREID','AreaSqKM',points2.columns[0]]].fillna(0)
-    cols = ['COMID','AreaSqKm','Count']
-    if not summaryfield == None:
+    cols = ['COMID','CatAreaSqKm','CatCount']
+    if not summaryfield == None: # Summarize fields in list with gpd table including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")   
         grouped2 = point_poly_dups.groupby('FEATUREID')
-        for x in summaryfield:
+        for x in summaryfield: # Sum the field in summary field list for each catchment
             point_poly_stats = grouped2[x].sum()
             final = final.join(point_poly_stats,on='FEATUREID', how='left').fillna(0)
-            cols.append(x)
+            cols.append('Cat' + x)
     final.columns = cols
+    # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final,pct_full, on='COMID', how='left')
     final.CatPctFull = final.CatPctFull.fillna(100)
-    return final    
+    #print "elapsed time " + str(dt.now()-startTime)
+    return final   
 #####################################################################################################################
-def interVPUfix(Accumulation, accum_type, zone, allocMet_dir, Connector, interVPUtbl):
+def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     '''
     __author__ = "Rick Debbout <debbout.rick@epa.gov>"     
     Loads watershed values for given COMIDs to be appended to catResults table for accumulation.
     
     Arguments
     ---------
-    Accumulation          : location of Accumulation file
-    accum_type            : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
-    zone                  : an NHDPlusV2 VPU number, i.e. 10, 16, 17
-    allocMet_dir          : string of the directory containing catResults tables including the landscape variable
-    Connector             : Location of the connector file
-    InterVPUtbl           : table of interVPU exchanges
-    '''
-    tbl = pd.read_csv(Accumulation).set_index('COMID')
-    tbl = tbl[tbl.index.isin(interVPUtbl.thruCOMIDs.values)].copy()    
-    throughVPUs = loadInterVPUs(tbl.copy(), accum_type)
-    del tbl
-    interVPUtbl = interVPUtbl.ix[interVPUtbl.FromZone.values == zone]
-    if [x for x in interVPUtbl.toCOMIDs if x > 0]:
-           interAlloc = '%s%s.csv'%(allocMet_dir,interVPUtbl.ToZone.values[0].zfill(2)) 
-           tbl = pd.read_csv(interAlloc).set_index('COMID')
-           toVPUs = tbl[tbl.index.isin([x for x in interVPUtbl.toCOMIDs if x > 0])].copy()        
-    for interLine in interVPUtbl.values:
-        if interLine[4] > 0:
-            AdjustCOMs(toVPUs,int(interLine[4]),int(interLine[0]),accum_type,throughVPUs)           
-        if interLine[3] > 0:
-            AdjustCOMs(throughVPUs,int(interLine[3]),int(interLine[0]),accum_type,None)
-        if interLine[5] > 0:
-            throughVPUs = throughVPUs.drop(int(interLine[5]))
-    if [x for x in interVPUtbl.toCOMIDs if x > 0]:
-        con = pd.read_csv(Connector).set_index('COMID') 
-        con.columns = map(str, con.columns)
-        toVPUs = toVPUs.append(con)	
-        toVPUs.to_csv(Connector)
-    if os.path.exists(Connector):
-        con = pd.read_csv(Connector).set_index('COMID') 
-        con.columns = map(str, con.columns)
-        throughVPUs = throughVPUs.append(con)
-    throughVPUs.to_csv(Connector)
-#####################################################################################################################
-def interVPUfix2(tbl, cols, accum_type, zone, Connector, interVPUtbl):
-    '''
-    __author__ = "Rick Debbout <debbout.rick@epa.gov>"     
-    Loads watershed values for given COMIDs to be appended to catResults table for accumulation.
-    
-    Arguments
-    ---------
-    Accumulation          : location of Accumulation file
+    tbl                   : Watershed Results table
+    cols                  : list of columns from Cat Results table needed to append back onto Cat Results tables
     accum_type            : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
     zone                  : an NHDPlusV2 VPU number, i.e. 10, 16, 17
     Connector             : Location of the connector file
     InterVPUtbl           : table of interVPU exchanges
+    summaryfield          : list of fields to summarize, only used when accum_type is 'Count'
     '''
-    throughVPUs = tbl[tbl.COMID.isin(interVPUtbl.thruCOMIDs.values)].set_index('COMID').copy()    
+    # Create subset of the tbl with a COMID in interVPUtbl
+    throughVPUs = tbl[tbl.COMID.isin(interVPUtbl.thruCOMIDs.values)].set_index('COMID').copy()  
+    # Create subset of InterVPUtbl that identifies the zone we are working on
     interVPUtbl = interVPUtbl.ix[interVPUtbl.FromZone.values == zone]
     throughVPUs.columns = cols
-    if [x for x in interVPUtbl.toCOMIDs if x > 0]:
-           interAlloc = '%s_%s.csv'%(Connector.split('_')[0],interVPUtbl.ToZone.values[0]) 
+    # COMIDs in the toCOMID column need to swap values with COMIDs in other zones, those COMIDS are then sotred in toVPUS
+    if any(interVPUtbl.toCOMIDs.values > 0): # [x for x in interVPUtbl.toCOMIDs if x > 0]
+           interAlloc = '%s_%s.csv'%(Connector[:Connector.find('_connectors')],interVPUtbl.ToZone.values[0])
            tbl = pd.read_csv(interAlloc).set_index('COMID')
            toVPUs = tbl[tbl.index.isin([x for x in interVPUtbl.toCOMIDs if x > 0])].copy()        
     for interLine in interVPUtbl.values:
+    # Loop through sub-setted interVPUtbl to make adjustments to COMIDS listed in the table 
         if interLine[4] > 0:
-            AdjustCOMs(toVPUs,int(interLine[4]),int(interLine[0]),accum_type,throughVPUs)           
+            AdjustCOMs(toVPUs,int(interLine[4]),int(interLine[0]),accum_type,throughVPUs,summaryfield)           
         if interLine[3] > 0:
-            AdjustCOMs(throughVPUs,int(interLine[3]),int(interLine[0]),accum_type,None)
+            AdjustCOMs(throughVPUs,int(interLine[3]),int(interLine[0]),accum_type,None,summaryfield)
         if interLine[5] > 0:
             throughVPUs = throughVPUs.drop(int(interLine[5]))
-    if [x for x in interVPUtbl.toCOMIDs if x > 0]:
+    if any(interVPUtbl.toCOMIDs.values > 0): # if COMIDs came from other zone append to Connector table
+    #!!!! This format assumes that the Connector table has already been made by the time it gets to these COMIDs!!!!!                
         con = pd.read_csv(Connector).set_index('COMID') 
         con.columns = map(str, con.columns)
         toVPUs = toVPUs.append(con)	
         toVPUs.to_csv(Connector)
-    if os.path.exists(Connector):
+    if os.path.exists(Connector): # if Connector already exists, read it in and append
         con = pd.read_csv(Connector).set_index('COMID') 
         con.columns = map(str, con.columns)
         throughVPUs = throughVPUs.append(con)
     throughVPUs.to_csv(Connector)
 #####################################################################################################################
-def AdjustCOMs(tbl, comid1, comid2, accum, tbl2 = None):
+def AdjustCOMs(tbl, comid1, comid2, accum, tbl2 = None, summaryfield=None):
     '''
     __author__ = "Rick Debbout <debbout.rick@epa.gov>"     
-    Adjusts values for COMIDs where values from one need to be subtracted from another
+    Adjusts values for COMIDs where values from one need to be subtracted from another.  
+    Depending on the type of accum, subtracts values for each column in the table other than COMID and Pct_Full
     
     Arguments
     ---------
-    tbl                   : table containing watershed values 
-    accum_type            : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
-    zone                  : an NHDPlusV2 VPU number, i.e. 10, 16, 17
-    allocMet_dir          : string of the directory containing catResults tables including the landscape variable
-    Connector             : Location of the connector file
-    InterVPUtbl           : table of interVPU exchanges
+    tbl                   : throughVPU table from InterVPU function 
+    comid1                : COMID which will be adjusted
+    comid2                : COMID whose values will be subtracted from comid1
+    accum                 : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
+    tbl2                  : toVPU table from InterVPU function in the case where a COMID comes from a different zone
+    summaryfield          : list of fields to summarize, only used when accum_type is 'Count'
     '''
     if tbl2 is None:
         tbl2 = tbl.copy()
     if accum == 'Count':
         tbl.ix[comid1,'CatAreaSqKm'] = tbl.ix[comid1,'CatAreaSqKm'] - tbl2.ix[comid2,'CatAreaSqKm']
         tbl.ix[comid1,'CatCount'] = tbl.ix[comid1,'CatCount'] - tbl2.ix[comid2,'CatCount']
-        tbl.ix[comid1,'CatMean'] = tbl.ix[comid1,'CatCount'] / tbl2.ix[comid2,'CatAreaSqKm']
+        if summaryfield != None:
+            for field in summaryfield:
+                tbl.ix[comid1,'Cat' + field] = tbl.ix[comid1,'Cat' + field] - tbl2.ix[comid2,'Cat' + field]
     if accum == 'Continuous':
         for att in ['CatAreaSqKm','CatCount','CatSum']:
             tbl.ix[comid1,att] = tbl.ix[comid1,att]- tbl2.ix[comid2,att]
@@ -575,46 +564,6 @@ def AdjustCOMs(tbl, comid1, comid2, accum, tbl2 = None):
         for idx in tbl.columns[:-1]:
             tbl.ix[comid1,idx] = tbl.ix[comid1,idx] - tbl2.ix[comid2,idx]
 #####################################################################################################################
-def loadInterVPUs(tbl, accum):
-    '''
-    __author__ = "Rick Debbout <debbout.rick@epa.gov>"     
-    Uses the 'Cat' and 'UpCat' columns to caluculate watershed values and returns those values in 'Cat' columns 
-	so they can be appended to 'CatResult' tables in other zones before accumulation.
-    
-    Arguments
-    ---------
-    tbl                   : table containing watershed values 
-    accum                 : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
-    '''
-    if accum == 'Continuous':     
-        tbl['WsArea'] = tbl.CatAreaSqKm + tbl.UpCatAreaSqKm
-        #tbl['WsMean'] = ((tbl.CatSum + tbl.UpCatSum)/(tbl.CatCount + tbl.UpCatCount)).fillna(0)
-        tbl['WsPctFull'] = ((((tbl.CatAreaSqKm * (tbl.CatPctFull/100)) + (tbl.UpCatAreaSqKm * (tbl.UpCatPctFull/100)))/ (tbl.CatAreaSqKm + tbl.UpCatAreaSqKm))*100)
-        tbl['WsCount'] = tbl.CatCount + tbl.UpCatCount
-        tbl['WsSum'] = tbl.CatSum + tbl.UpCatSum      
-        result = tbl.iloc[:,[8,9,10,11]]
-        result.columns = ['CatAreaSqKm','CatPctFull','CatCount','CatSum']
-        return result
-    if accum == 'Categorical':
-        catch_full_index = (len(tbl.columns))/2
-        result = tbl.copy()
-        names = tbl.columns[:catch_full_index]
-        result['WsArea'] = result.CatAreaSqKm + result.UpCatAreaSqKm
-        for i in range(1, catch_full_index-1):
-            result.insert((len(result.columns)),tbl.columns[i] + 'Ws', tbl.ix[:,i] + tbl.ix[:,(catch_full_index+i)])
-        result = result.ix[:,len(tbl.columns):]
-        result.insert(len(result.columns),'WsPctFull', np.round((((result.ix[:,1:].sum(axis=1)*1e-06)/result.WsArea)*100)), 2)
-        result.columns = names
-        return result
-    if accum == 'Count':
-        tbl['WsArea'] = tbl.CatAreaSqKm + tbl.UpCatAreaSqKm
-        tbl['WsCount'] = tbl.CatCount + tbl.UpCatCount
-        tbl['WsMean'] = tbl['WsCount']/tbl['WsArea']
-        tbl['WsPctFull'] = (((tbl.CatAreaSqKm * tbl.CatPctFull) + (tbl.UpCatAreaSqKm * tbl.UpCatPctFull))/tbl.WsArea)
-        result = tbl.ix[:,[8,9,10,11]]
-        result.columns = ['CatAreaSqKm','CatCount','CatMean','CatPctFull']
-        return result
-#####################################################################################################################	
 def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
@@ -627,11 +576,11 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     arr                   : table containing watershed values 
     COMIDs                : numpy array of all zones COMIDs 
     lengths               : numpy array with lengths of upstream COMIDs
-    upstream                : numpy array of all upstream arrays for each COMID
+    upstream              : numpy array of all upstream arrays for each COMID
     tbl_type              : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
     '''
     coms = np.array(arr.COMID) #Read in COMIDs    
-    indices = swapper2(coms, upStream) #Get indices that will be used to map values
+    indices = swapper(coms, upStream) #Get indices that will be used to map values
     del upStream # a and indices are big - clean up to minimize RAM
     cols = arr.columns[1:] #Get column names that will be accumulated
     z = np.zeros(COMIDs.shape) #Make empty vector for placing values
@@ -663,10 +612,33 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
         outDF.columns = np.append('COMID', 'Up'+cols.values)
     return outDF			
 #####################################################################################################################
-def createCatStats(accum_type, outTable, ingrid, inZoneData):
-    startTime = dt.now()
-    arcpySettings()
-    arcpy.env.snapRaster = inZoneData        	
+def createCatStats(accum_type, ingrid, inZoneData, out_dir, zone):
+    '''
+    __author__ =  "Marc Weber <weber.marc@epa.gov>" 
+                  "Ryan Hill <hill.ryan@epa.gov>"
+    Uses the arcpy tools to perform ZonalStatisticsAsTable or TabulateArea based on accum_type and then formats 
+    the results into a Catchment Results table
+    
+    Arguments
+    ---------
+    accum_type            : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count' 
+    ingrid                : string to the landscape raster being summarized
+    inZoneData            : string to the NHD catchment grid 
+    out_dir               : string to directory where output is being stored
+    zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
+    '''
+    #startTime = dt.now()
+    arcpy.CheckOutExtension("spatial")
+    arcpy.OverWriteOutput = 1
+    arcpy.env.outputCoordinateSystem = "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-96.0],PARAMETER['Standard_Parallel_1',29.5],PARAMETER['Standard_Parallel_2',45.5],PARAMETER['Latitude_Of_Origin',23.0],UNIT['Meter',1.0]]"
+    arcpy.env.pyramid = "NONE"
+    arcpy.env.cellSize = "30"
+    arcpy.env.resamplingMethod = "NEAREST"
+    arcpy.env.snapRaster = inZoneData
+    if ingrid.count('.tif') or ingrid.count('.img'):
+        outTable ="%s/zonalstats_%s%s.dbf"%(out_dir,ingrid.split("/")[-1].split(".")[0],zone)
+    else:
+        outTable ="%s/zonalstats_%s%s.dbf"%(out_dir,ingrid.split("/")[-1],zone)        	
     if not os.path.exists(outTable):
         if accum_type == 'Categorical':
             arcpy.gp.TabulateArea_sa(inZoneData, 'VALUE', ingrid, "Value", outTable, "30")
@@ -693,15 +665,19 @@ def createCatStats(accum_type, outTable, ingrid, inZoneData):
         # Get ALL categorical values from the dbf associated with the raster to retain all values
         # in the raster in every table, even when a given value doesn't exist in a given hydroregion
         AllCols = dbf2DF(ingrid + '.vat.dbf').VALUE.tolist()
-        col_list = table.columns.tolist()[1:]
-        if len(AllCols) != len(col_list):
+        col_list = table.columns.tolist()
+        col_list.sort()
+        col_list.sort(key=len)         # table.columns
+        table = table[col_list]
+        if len(AllCols) != len(col_list[1:]):
             AllCols = ['VALUE_'+str(x) for x in AllCols]
-            diff = list(set(AllCols) - set(col_list))
+            diff = list(set(AllCols) - set(col_list[1:]))
             diff.sort()
+            diff.sort(key=len)
             for spot in diff:
                 here = AllCols.index(spot) + 1
                 table.insert(here,spot,0)
-        table['AREA'] = table[col_list].sum(axis=1)
+        table['AREA'] = table[table.columns.tolist()[1:]].sum(axis=1)
     #nhdTable = dbf2DF(inZoneData[:-3] + 'Catchment.dbf').ix[:,[1,0,2]]
     nhdTable = dbf2DF(inZoneData[:-3] + 'Catchment.dbf').ix[:,['FEATUREID','AREASQKM','GRIDCODE']]
     nhdTable = nhdTable.rename(columns = {'FEATUREID':'COMID','AREASQKM':'AreaSqKm'})
@@ -710,25 +686,22 @@ def createCatStats(accum_type, outTable, ingrid, inZoneData):
     result = result.drop(['GRIDCODE','VALUE','AREA'], axis=1).fillna(0)
     cols = result.columns[1:]
     result.columns = np.append('COMID', 'Cat' + cols.values) 
-    print "elapsed time " + str(dt.now()-startTime)
+    #print "elapsed time " + str(dt.now()-startTime)
     return result
 #####################################################################################################################    
-def arcpySettings():
-    arcpy.CheckOutExtension("spatial")
-    arcpy.OverWriteOutput = 1
-    arcpy.env.outputCoordinateSystem = "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-96.0],PARAMETER['Standard_Parallel_1',29.5],PARAMETER['Standard_Parallel_2',45.5],PARAMETER['Latitude_Of_Origin',23.0],UNIT['Meter',1.0]]"
-    arcpy.env.pyramid = "NONE"
-    arcpy.env.cellSize = "30"
-    arcpy.env.resamplingMethod = "NEAREST"
-#####################################################################################################################    
-def makeOutTable(ingrid, out_dir, zone):
-    if ingrid.count('.tif') or ingrid.count('.img'):
-        outTable ="%s/zonalstats_%s%s.dbf"%(out_dir,ingrid.split("/")[-1].split(".")[0],zone)
-    else:
-        outTable ="%s/zonalstats_%s%s.dbf"%(out_dir,ingrid.split("/")[-1],zone)
-    return outTable 
-#####################################################################################################################
-def appendConnectors(cat, Connector, zone, interVPUtbl):    
+def appendConnectors(cat, Connector, zone, interVPUtbl):
+    '''
+    __author__ =  "Marc Weber <weber.marc@epa.gov>" 
+                  "Ryan Hill <hill.ryan@epa.gov>"
+    Appends the connector file of inter VPU COMIDS to the cat table before going into accumulation process
+    
+    Arguments
+    ---------
+    cat                   : Results table of catchment summarizations
+    Connector             : string to file holding the table of inter VPU COMIDs
+    zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
+    interVPUtbl           : table of interVPU adjustments
+    '''    
     con = pd.read_csv(Connector)
     for comidx in con.COMID.values.astype(int):
         if comidx in cat.COMID.values.astype(int):
@@ -739,6 +712,19 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
     return cat
 #####################################################################################################################   
 def createAccumTable(table, directory, zone, tbl_type):
+    '''
+    __author__ =  "Marc Weber <weber.marc@epa.gov>" 
+                  "Ryan Hill <hill.ryan@epa.gov>"
+    Uses the 'Cat' and 'UpCat' columns to caluculate watershed values and returns those values in 'Cat' columns 
+	so they can be appended to 'CatResult' tables in other zones before accumulation.
+    
+    Arguments
+    ---------
+    table                 : table containing watershed values 
+    directory             : numpy array of all zones COMIDs 
+    zone                  : numpy array with lengths of upstream COMIDs
+    tbl_type              : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
+    '''
     if tbl_type == 'UpCat':
         directory = directory + '/bastards'
     if tbl_type == 'Ws':
@@ -749,7 +735,18 @@ def createAccumTable(table, directory, zone, tbl_type):
     add = Accumulation(table, COMIDs, lengths, upStream, tbl_type)
     return add
 #####################################################################################################################
-def swapper2(coms, upStream):
+def swapper(coms, upStream):
+    '''
+    __author__ =  "Marc Weber <weber.marc@epa.gov>" 
+                  "Ryan Hill <hill.ryan@epa.gov>"
+    Uses the 'Cat' and 'UpCat' columns to caluculate watershed values and returns those values in 'Cat' columns 
+	so they can be appended to 'CatResult' tables in other zones before accumulation.
+    
+    Arguments
+    ---------
+    coms                  : numpy array of all zones COMIDs 
+    upstream              : numpy array of all upstream arrays for each COMID
+    '''
     #Run numpy query to replace COMID raster with desired values:
     bsort = np.argsort(coms) 
     apos = np.searchsorted(coms[bsort], upStream) 
