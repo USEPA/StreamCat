@@ -4,7 +4,6 @@
 #          Darren Thornbrugh<thornbrugh.darren@epa.gov>, Rick Debbout<debbout.rick@epa.gov>, 
 #          and Tad Larsen<laresn.tad@epa.gov>
 # Date: October 2015
-# ArcGIS 10.2.1, Python 2.7
 
 # load modules
 import os
@@ -504,7 +503,7 @@ def PointInPoly(points, inZoneData, pct_full, summaryfield=None):
 #####################################################################################################################
 def rat_to_dict(inraster, old_val, new_val):
     """
-    __author__ =  "Matt Gregory <matt.gregory@ogregonstate.edu>" 
+    __author__ =  "Matt Gregory <matt.gregory@oregonstate.edu>" 
                   "Marc Weber <weber.marc@epa.gov>" 
     
     Given a GDAL raster attribute table, convert to a pandas DataFrame.  Idea from 
@@ -561,9 +560,9 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     for interLine in interVPUtbl.values:
     # Loop through sub-setted interVPUtbl to make adjustments to COMIDS listed in the table 
         if interLine[4] > 0:
-            AdjustCOMs(toVPUs,int(interLine[4]),int(interLine[0]),accum_type,throughVPUs,summaryfield)           
+            AdjustCOMs(toVPUs,int(interLine[4]),int(interLine[0]),throughVPUs)           
         if interLine[3] > 0:
-            AdjustCOMs(throughVPUs,int(interLine[3]),int(interLine[0]),accum_type,None,summaryfield)
+            AdjustCOMs(throughVPUs,int(interLine[3]),int(interLine[0]),None)
         if interLine[5] > 0:
             throughVPUs = throughVPUs.drop(int(interLine[5]))
     if any(interVPUtbl.toCOMIDs.values > 0): # if COMIDs came from other zone append to Connector table
@@ -578,7 +577,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
         throughVPUs = throughVPUs.append(con)
     throughVPUs.to_csv(Connector)
 #####################################################################################################################
-def AdjustCOMs(tbl, comid1, comid2, accum, tbl2 = None, summaryfield=None):
+def AdjustCOMs(tbl, comid1, comid2, tbl2 = None):  #  ,accum, summaryfield=None
     '''
     __author__ = "Rick Debbout <debbout.rick@epa.gov>"     
     Adjusts values for COMIDs where values from one need to be subtracted from another.  
@@ -589,22 +588,11 @@ def AdjustCOMs(tbl, comid1, comid2, accum, tbl2 = None, summaryfield=None):
     tbl                   : throughVPU table from InterVPU function 
     comid1                : COMID which will be adjusted
     comid2                : COMID whose values will be subtracted from comid1
-    accum                 : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
     tbl2                  : toVPU table from InterVPU function in the case where a COMID comes from a different zone
-    summaryfield          : list of fields to summarize, only used when accum_type is 'Count'
     '''
     if tbl2 is None: # might be able to fix this in the arguments...
         tbl2 = tbl.copy()  ###
-#    if accum == 'Count':
-#        tbl.ix[comid1,'CatAreaSqKm'] = tbl.ix[comid1,'CatAreaSqKm'] - tbl2.ix[comid2,'CatAreaSqKm']
-#        tbl.ix[comid1,'CatCount'] = tbl.ix[comid1,'CatCount'] - tbl2.ix[comid2,'CatCount']
-#        if summaryfield != None:
-#            for field in summaryfield:
-#                tbl.ix[comid1,'Cat' + field] = tbl.ix[comid1,'Cat' + field] - tbl2.ix[comid2,'Cat' + field]
-#    if accum == 'Continuous':
-#        for att in ['CatAreaSqKm','CatCount','CatSum']:
-#            tbl.ix[comid1,att] = tbl.ix[comid1,att]- tbl2.ix[comid2,att]
-#    if accum == 'Categorical':
+
     for idx in tbl.columns[:-1]:
         tbl.ix[comid1,idx] = tbl.ix[comid1,idx] - tbl2.ix[comid2,idx]
 #####################################################################################################################
@@ -661,7 +649,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     outDF.loc[(outDF[area] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no riparion zone, thus NA values across the table
     return outDF	
 #####################################################################################################################
-def createCatStats(accum_type, ingrid, inZoneData, out_dir, zone, by_RPU, mask_dir, NHD_dir, hydroregion): 
+def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU, mask_dir, NHD_dir, hydroregion): 
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
                   "Ryan Hill <hill.ryan@epa.gov>"
@@ -671,7 +659,7 @@ def createCatStats(accum_type, ingrid, inZoneData, out_dir, zone, by_RPU, mask_d
     Arguments
     ---------
     accum_type            : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count' 
-    ingrid                : string to the landscape raster being summarized
+    LandscapeLayer                : string to the landscape raster being summarized
     inZoneData            : string to the NHD catchment grid 
     out_dir               : string to directory where output is being stored
     zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
@@ -684,15 +672,15 @@ def createCatStats(accum_type, ingrid, inZoneData, out_dir, zone, by_RPU, mask_d
     arcpy.env.resamplingMethod = "NEAREST"
     arcpy.env.snapRaster = inZoneData
     if by_RPU == 0:
-        if ingrid.count('.tif') or ingrid.count('.img'):
-            outTable ="%s/zonalstats_%s%s.dbf"%(out_dir,ingrid.split("/")[-1].split(".")[0],zone)
+        if LandscapeLayer.count('.tif') or LandscapeLayer.count('.img'):
+            outTable ="%s/zonalstats_%s%s.dbf"%(out_dir,LandscapeLayer.split("/")[-1].split(".")[0],zone)
         else:
-            outTable ="%s/zonalstats_%s%s.dbf"%(out_dir,ingrid.split("/")[-1],zone)        	
+            outTable ="%s/zonalstats_%s%s.dbf"%(out_dir,LandscapeLayer.split("/")[-1],zone)        	
         if not os.path.exists(outTable):
             if accum_type == 'Categorical':
-                arcpy.gp.TabulateArea_sa(inZoneData, 'VALUE', ingrid, "Value", outTable, "30")
+                arcpy.gp.TabulateArea_sa(inZoneData, 'VALUE', LandscapeLayer, "Value", outTable, "30")
             if accum_type == 'Continuous':
-                arcpy.gp.ZonalStatisticsAsTable_sa(inZoneData, 'VALUE', ingrid, outTable, "DATA", "ALL")                           
+                arcpy.gp.ZonalStatisticsAsTable_sa(inZoneData, 'VALUE', LandscapeLayer, outTable, "DATA", "ALL")                           
         table = dbf2DF(outTable)                
     if by_RPU == 1:         
         hydrodir = '/'.join(inZoneData.split('/')[:-2]) + '/NEDSnapshot'
@@ -717,7 +705,7 @@ def createCatStats(accum_type, ingrid, inZoneData, out_dir, zone, by_RPU, mask_d
         nhdtbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf'%(NHD_dir, hydroregion, zone)).ix[:,['FEATUREID','AREASQKM','GRIDCODE']]    
         tbl = dbf2DF(outTable)
         if accum_type == 'Categorical':
-            tbl = chkColumnLength(tbl,ingrid)
+            tbl = chkColumnLength(tbl,LandscapeLayer)
         tbl2 = dbf2DF('%s\\zonalstats_RipBuf100_%s.dbf'%(mask_dir,zone))
         tbl2 = pd.merge(tbl2[['FEATUREID','COUNT']],nhdtbl,how='right',on='FEATUREID').fillna(0)
         result = pd.merge(tbl2,tbl,left_on='GRIDCODE',right_on='VALUE',how='left')
@@ -738,7 +726,7 @@ def createCatStats(accum_type, ingrid, inZoneData, out_dir, zone, by_RPU, mask_d
             table = table[['VALUE','AREA','COUNT','SUM']]
             table = table.rename(columns = {'COUNT':'Count','SUM':'Sum'})
         if accum_type == 'Categorical':
-            table = chkColumnLength(table,ingrid)
+            table = chkColumnLength(table,LandscapeLayer)
             table['AREA'] = table[table.columns.tolist()[1:]].sum(axis=1)
         nhdTable = dbf2DF(inZoneData[:-3] + 'Catchment.dbf').ix[:,['FEATUREID','AREASQKM','GRIDCODE']]
         nhdTable = nhdTable.rename(columns = {'FEATUREID':'COMID','AREASQKM':'AreaSqKm'})
@@ -748,19 +736,11 @@ def createCatStats(accum_type, ingrid, inZoneData, out_dir, zone, by_RPU, mask_d
     cols = result.columns[1:]
     result.columns = np.append('COMID', 'Cat' + cols.values) 
     return result
-    #result.to_csv('%s/%s_%s.csv'%(out_dir, landscape_var, zone), index=False)
-#    tbl['TotCount'] = tbl[tbl.columns.tolist()[1:]].sum(axis=1)
-#    result.columns
-#    tbl.columns
-#    tbl2.columns
-#    nhdtbl.columns
-#    result.to_csv('C:/Users/Rdebbout/Desktop/prac.csv', index=False)
-#    len(result.loc[result['TotCount'].isnull()])
 #####################################################################################################################    
-def chkColumnLength(table, ingrid):
+def chkColumnLength(table, LandscapeLayer):
     # Get ALL categorical values from the dbf associated with the raster to retain all values
     # in the raster in every table, even when a given value doesn't exist in a given hydroregion
-    AllCols = dbf2DF(ingrid + '.vat.dbf').VALUE.tolist()
+    AllCols = dbf2DF(LandscapeLayer + '.vat.dbf').VALUE.tolist()
     col_list = table.columns.tolist()
     col_list.sort()
     col_list.sort(key=len)         # table.columns

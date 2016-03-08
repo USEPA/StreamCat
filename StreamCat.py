@@ -5,7 +5,6 @@
 #          Darren Thornbrugh<thornbrugh.darren@epa.gov>, Rick Debbout<debbout.rick@epa.gov>, 
 #          and Tad Larsen<laresn.tad@epa.gov>
 # Date: November 30, 2015
-# ArcGIS 10.2.1, Python 2.7
 
 # NOTE: run script from command line passing directory and name of this script 
 # and then directory and name of the control table to use like:
@@ -19,7 +18,7 @@ import pandas as pd
 # Load table used in function argument
 ctl = pd.read_csv(sys.argv[1])
 
-#ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv')
+#ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_MW.csv')
 
 # Import system modules
 from collections import  OrderedDict
@@ -45,62 +44,61 @@ if not os.path.exists(numpy_dir):
     os.mkdir(numpy_dir)
     makeNumpyVectors(numpy_dir, interVPU_dir, inputs, NHD_dir)
 
-for line in range(len(ctl.values)): # loop through each landscape_var in control table 
+for line in range(len(ctl.values)): # loop through each FullTableName in control table 
     if ctl.run[line] == 1:   # check 'run' field from the table, if 1 run, if not, skip
-        print 'running ' + str(ctl.landscape_var[line])
+        print 'running ' + str(ctl.FullTableName[line])
         accum_type = ctl.accum_type[line]             # Load metric specific variables
         RPU = ctl.by_RPU[line]
         mask_dir = ctl.mask_dir[line]
-        ingrid = '%s/%s'%(ingrid_dir, ctl.ingrid[line]) # ingrid = 'D:/Projects/lakesAnalysis/MetricData/' + 'mines_rpBuf100.shp'
-        if not os.path.exists(ingrid) and RPU == 0: # this is currently a placeholder for scripting the select by location process to get masked point file
+        LandscapeLayer = '%s/%s'%(ingrid_dir, ctl.LandscapeLayer[line]) # ingrid = 'D:/Projects/lakesAnalysis/MetricData/' + 'mines_rpBuf100.shp'
+        if not os.path.exists(LandscapeLayer) and RPU == 0: # this is currently a placeholder for scripting the select by location process to get masked point file
             print "This shouldn't happen yet"
-            # make masked tables for points, Used QGIS 'Select by Location' to make the rpBuf100 files
-        landscape_var = ctl.landscape_var[line]
+            # make masked tables for points, Used QGIS 'point sampling tool' to make the rpBuf100 files
+        FullTableName = ctl.FullTableName[line]
         summaryfield = None
         if type(ctl.summaryfield[line]) == str:
-            summaryfield = ctl.summaryfield[line].split(',')  
+            summaryfield = ctl.summaryfield[line].split(';')  
         interVPUtbl = pd.read_csv(interVPU_dir)  # Load Inter_VPU table
-        if accum_type == 'Count': # Load in point geopandas table and Pct_Full table 
+        if accum_type == 'Point': # Load in point geopandas table and Pct_Full table 
             pct_full = dbf2DF(pct_full_file)[['FEATUREID','PCT_FULL']] # pct_full_file ='L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/QA/BorderCatchmentPCT_FULL/catFINAL_Clip.dbf'
             pct_names = ['COMID','CatPctFull']
             pct_full['PCT_FULL'] = pct_full['PCT_FULL']*100
             pct_full.columns = pct_names
-            points = gpd.GeoDataFrame.from_file(ingrid) 
+            points = gpd.GeoDataFrame.from_file(LandscapeLayer) 
         if not os.path.exists(out_dir):
         	os.mkdir(out_dir)
-        Connector = "%s/%s_connectors.csv"%(out_dir,landscape_var) # File string to store InterVPUs needed for adjustments
+        Connector = "%s/%s_connectors.csv"%(out_dir,FullTableName) # File string to store InterVPUs needed for adjustments
         catTime = dt.now()
         for zone in inputs:
-            if not os.path.exists(out_dir + '/' + landscape_var + '_' + zone + '.csv'):
+            if not os.path.exists(out_dir + '/' + FullTableName + '_' + zone + '.csv'):
                 hydroregion = inputs[zone]  
-                if not accum_type == 'Count':
+                if not accum_type == 'Point':
                     if len(mask_dir) > 1:
                         inZoneData = '%s/%s.tif'%(mask_dir, zone)
                     else:
                         inZoneData = NHD_dir + '/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/cat'%(hydroregion, zone) # NHD_dir = 'C:/Users/Rdebbout/temp/NHDPlusV21' hydroregion = 'MS' zone = '10U' hydroregion = 'SR' zone = '09'
-                    cat = createCatStats(accum_type, ingrid, inZoneData, out_dir, zone, RPU, mask_dir, NHD_dir, hydroregion)
-                if accum_type == 'Count':
+                    cat = createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, RPU, mask_dir, NHD_dir, hydroregion)
+                if accum_type == 'Point':
                     inZoneData = NHD_dir + '/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.shp'%(hydroregion, zone)
                     cat = PointInPoly(points,inZoneData,pct_full,summaryfield)
-                cat.to_csv('%s/%s_%s.csv'%(out_dir, landscape_var, zone), index=False)
+                cat.to_csv('%s/%s_%s.csv'%(out_dir, FullTableName, zone), index=False)
                 in2accum = len(cat.columns)
 
         print 'Cat Results Complete in : ' + str(dt.now()-catTime) 
         accumTime = dt.now()
         for zone in inputs:           
-            cat = pd.read_csv(out_dir + '/' + landscape_var + '_' + zone + '.csv')
-            print len(cat.columns)
+            cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
             if len(cat.columns) == in2accum:
                 if zone in interVPUtbl.ToZone.values:
                     cat = appendConnectors(cat, Connector, zone, interVPUtbl)
                 up = createAccumTable(cat, numpy_dir, zone, tbl_type = 'UpCat')
                 ws = createAccumTable(cat, numpy_dir, zone, tbl_type = 'Ws')
                 if zone in interVPUtbl.ToZone.values:
-                    cat = pd.read_csv(out_dir + '/' + landscape_var + '_' + zone + '.csv')
+                    cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
                 if zone in interVPUtbl.FromZone.values: 
                     interVPU(ws, cat.columns[1:], accum_type, zone, Connector, interVPUtbl.copy(),summaryfield)			        
                 upFinal = pd.merge(up,ws,on='COMID')
                 final = pd.merge(cat,upFinal,on='COMID') 
-                final.to_csv(out_dir + '/' + landscape_var + '_' + zone + '.csv', index=False)
+                final.to_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv', index=False)
         print 'Accumulation Results Complete in : ' + str(dt.now()-accumTime)
 print "total elapsed time " + str(dt.now()-totTime)
