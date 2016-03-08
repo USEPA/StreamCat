@@ -79,17 +79,16 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
     #                    if not np.isnan(OldVal).any() and not np.isnan(NewVal).any() and DataType.count('Float'):
                         reclass_dict[float(OldVal[i])] = float(NewVal[i])
                 tempras = TempDir + '/' + Rast + '.tif'
-                Reclass(InDir + '/' + InRas, tempras, reclass_dict, in_nodata = NDV, out_dtype=RastType)
+                if not os.path.isfile(tempras):
+                    Reclass(InDir + '/' + InRas, tempras, reclass_dict, in_nodata = NDV, out_dtype=RastType)
             # Check if we need to multiply or modify any raster values
             if not ModifyBy==0:
                 tempras = TempDir + '/' + Rast + '_2.tif'
                 inras = InDir + '/' + InRas
-                # for now we assume multiplication of values but may modify this in future
-                rasterMath(inras, tempras, expression= inras + ' * ' + str(ModifyBy), out_dtype=RastType)
-        
-            
+                if not os.path.isfile(tempras):
+                    rasterMath(inras, tempras, expression= inras + ' * ' + str(ModifyBy), out_dtype=RastType)                 
             # if temp raster hasn't been created in previous steps, just poiint to input raster
-            if not os.path.isfile(TempDir + '/' + Rast + '.tif') or not os.path.isfile(TempDir + '/' + Rast + '_2.tif'):
+            if not os.path.isfile(TempDir + '/' + Rast + '.tif') and not os.path.isfile(TempDir + '/' + Rast + '_2.tif'):
                 if FileType=='ESRI raster':
                     tempras = InDir + '/' + Rast
                 if FileType=='Geotiff':
@@ -112,21 +111,38 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
             # Also apply a mask if needed to produce final raster
             if not os.path.isfile(FinalDir + '/' + Rast + '.tif'):
                if UseArcpy=='Yes': 
+                   finalras = FinalDir + '/' + Rast + '.tif'
                    if UseStatesMask=='No':
-                       # Project to temporary raster      
-                       finalras = FinalDir + '/' + Rast + '.tif'
-                       arcpy.ProjectRaster_management(tempras, finalras, "PROJCS['NAD_1983_Contiguous_USA_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['false_easting',0.0],PARAMETER['false_northing',0.0],PARAMETER['central_meridian',-96.0],PARAMETER['standard_parallel_1',29.5],PARAMETER['standard_parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]", "NEAREST", "1000 1000", "", "", "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['central_meridian',-96.0],PARAMETER['Standard_Parallel_1',29.5],PARAMETER['Standard_Parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]")
+                       # Project to temporary raster                           
+                       arcpy.ProjectRaster_management(tempras, finalras, "PROJCS['NAD_1983_Contiguous_USA_Albers',\
+                       GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],\
+                       PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['false_easting',0.0],\
+                       PARAMETER['false_northing',0.0],PARAMETER['central_meridian',-96.0],PARAMETER['standard_parallel_1',29.5],\
+                       PARAMETER['standard_parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]", "NEAREST", \
+                       "%s %s"%(ConvertRes, ConvertRes), "", "", "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',\
+                       SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],\
+                       PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['central_meridian',-96.0],\
+                       PARAMETER['Standard_Parallel_1',29.5],PARAMETER['Standard_Parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]")
                    if UseStatesMask=='Yes':
-                        # Project to temporary raster      
-                        projras = TempDir + '/' + Rast + 'proj.tif'
                         # Execute ExtractByMask
-                        MaskRas = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/States_limited_borders.shp'
+#                        MaskRas = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/States_limited_borders.shp'
                         from arcpy.sa import *
                         arcpy.CheckOutExtension("Spatial")
-                        outExtractByMask = ExtractByMask(projras, MaskRas)
+#                        outExtractByMask = ExtractByMask(projras, MaskRas)
+                        arcpy.env.mask = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/States_limited_borders.shp'
         #               Save the output      
-                        finalras = FinalDir + '/' + Rast + '.tif'
-                        outExtractByMask.save(finalras)
+#                        finalras = FinalDir + '/' + Rast + '.tif'
+#                        outExtractByMask.save(finalras)
+                        # Project to temporary raster                           
+                        arcpy.ProjectRaster_management(tempras, finalras, "PROJCS['NAD_1983_Contiguous_USA_Albers',\
+                       GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],\
+                       PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['false_easting',0.0],\
+                       PARAMETER['false_northing',0.0],PARAMETER['central_meridian',-96.0],PARAMETER['standard_parallel_1',29.5],\
+                       PARAMETER['standard_parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]", "NEAREST", \
+                       "%s %s"%(ConvertRes, ConvertRes), "", "", "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',\
+                       SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],\
+                       PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['central_meridian',-96.0],\
+                       PARAMETER['Standard_Parallel_1',29.5],PARAMETER['Standard_Parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]")
                if UseArcpy=='No':
                    if not Proj_projcs==dst_crs and not type(MaskRas) is str:
                         resamp_ras = FinalDir + '/' + Rast + '.tif'

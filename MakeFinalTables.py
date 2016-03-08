@@ -45,7 +45,8 @@ for table in tables:
                 conversion = float(ctl.Conversion.ix[ctl.FullTableName == tables[table][var]].values[0])
                 tbl = pd.read_csv(inDir + '/%s_%s.csv'%(tables[table][var],zone)) 
                 frontCols = [title for title in tbl.columns for x in ['COMID','AreaSqKm','PctFull'] if x in title and not 'Up' in title]            
-                catArea = frontCols[1];catPct = frontCols[2];wsArea = frontCols[3];wsPct = frontCols[4]            
+                catArea = frontCols[1];catPct = frontCols[2];wsArea = frontCols[3];wsPct = frontCols[4] 
+                frontCols = [frontCols[i] for i in [0,1,3,2,4]] #re-order for correct sequence
                 summary = None
                 if ctl.summaryfield.ix[ctl.Final_Table_Name == table].any():
                     summary = ctl.summaryfield.ix[ctl.FullTableName == tables[table][var]].item().split(';')         
@@ -83,11 +84,10 @@ for table in tables:
                             final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')              
                 if metricType == 'Percent':
                     lookup = pd.read_csv(metricName)                    
-                    #lookup = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/' + table + '_lookup.csv')
-                    if table == 'Lithology':                       
-                        tbl['CatVALUE_12'] = tbl['CatVALUE_12'] + tbl['CatVALUE_14']
-                        tbl['WsVALUE_12'] = tbl['WsVALUE_12'] + tbl['WsVALUE_14']
-                        tbl = tbl.drop(['CatVALUE_14','WsVALUE_14'], axis=1)
+#                    if table == 'Lithology':                       
+#                        tbl['CatVALUE_12'] = tbl['CatVALUE_12'] + tbl['CatVALUE_14']
+#                        tbl['WsVALUE_12'] = tbl['WsVALUE_12'] + tbl['WsVALUE_14']
+#                        tbl = tbl.drop(['CatVALUE_14','WsVALUE_14'], axis=1)
                     catcols,wscols = [],[]
                     for col in tbl.columns:
                         if 'CatVALUE' in col and not 'Up' in col:
@@ -104,4 +104,4 @@ for table in tables:
                 final = final.drop(rmtbl.COMID.tolist(),axis=0)
             final = final[final.columns.tolist()[:5] + [x for x in final.columns[5:] if 'Cat' in x] + [x for x in final.columns[5:] if 'Ws' in x]].fillna('NA')                  
             final.to_csv(outDir  + '/%s_Region%s.csv'%(table,zone))
-
+    print 'All Done.....'

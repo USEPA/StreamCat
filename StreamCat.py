@@ -1,9 +1,14 @@
-# Script to call StreamCat functions script and run allocation and accumulation of landscape metrics to
-# NHDPlus catchments.  Assumes landscape rasters in desired projection with appropriate pre-processing to deal with
-# any reclassing of values or recoding of NA, and directories of NHDPlusV2 data installed in standard directory format
-# Authors: Marc Weber<weber.marc@epa.gov>, Ryan Hill<hill.ryan@epa.gov>,
-#          Darren Thornbrugh<thornbrugh.darren@epa.gov>, Rick Debbout<debbout.rick@epa.gov>, 
-#          and Tad Larsen<laresn.tad@epa.gov>
+# Script to call StreamCat functions script and run allocation and 
+#accumulation of landscape metrics to NHDPlus catchments.  Assumes 
+#landscape rasters in desired projection with appropriate 
+#pre-processing to deal with any reclassing of values or recoding 
+#of NA, and directories of NHDPlusV2 data installed in standard 
+#directory format
+# Authors:  Marc Weber<weber.marc@epa.gov>, 
+#           Ryan Hill<hill.ryan@epa.gov>,
+#           Darren Thornbrugh<thornbrugh.darren@epa.gov>, 
+#           Rick Debbout<debbout.rick@epa.gov>, 
+#           and Tad Larsen<laresn.tad@epa.gov>
 # Date: November 30, 2015
 
 # NOTE: run script from command line passing directory and name of this script 
@@ -18,7 +23,7 @@ import pandas as pd
 # Load table used in function argument
 ctl = pd.read_csv(sys.argv[1])
 
-#ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_MW.csv')
+#ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv')
 
 # Import system modules
 from collections import  OrderedDict
@@ -35,6 +40,7 @@ out_dir = ctl.DirectoryLocations.values[2]
 numpy_dir = ctl.DirectoryLocations.values[3]
 interVPU_dir = ctl.DirectoryLocations.values[4]
 pct_full_file = ctl.DirectoryLocations.values[5]
+mask_dir = ctl.DirectoryLocations.values[8]
 #####################################################################################################################
 inputs = OrderedDict([('10U','MS'),('10L','MS'),('07','MS'),('11','MS'),('06','MS'),('05','MS'),('08','MS'),\
                       ('01','NE'),('02','MA'),('03N','SA'),('03S','SA'),('03W','SA'),('04','GL'),('09','SR'),\
@@ -46,10 +52,13 @@ if not os.path.exists(numpy_dir):
 
 for line in range(len(ctl.values)): # loop through each FullTableName in control table 
     if ctl.run[line] == 1:   # check 'run' field from the table, if 1 run, if not, skip
+        #break
         print 'running ' + str(ctl.FullTableName[line])
         accum_type = ctl.accum_type[line]             # Load metric specific variables
-        RPU = ctl.by_RPU[line]
-        mask_dir = ctl.mask_dir[line]
+        RPU = int(ctl.by_RPU[line])
+        mask = ctl.use_mask[line]
+        if mask == 0:
+            mask_dir = ''
         LandscapeLayer = '%s/%s'%(ingrid_dir, ctl.LandscapeLayer[line]) # ingrid = 'D:/Projects/lakesAnalysis/MetricData/' + 'mines_rpBuf100.shp'
         if not os.path.exists(LandscapeLayer) and RPU == 0: # this is currently a placeholder for scripting the select by location process to get masked point file
             print "This shouldn't happen yet"
@@ -86,7 +95,7 @@ for line in range(len(ctl.values)): # loop through each FullTableName in control
 
         print 'Cat Results Complete in : ' + str(dt.now()-catTime) 
         accumTime = dt.now()
-        for zone in inputs:           
+        for zone in inputs:  
             cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
             if len(cat.columns) == in2accum:
                 if zone in interVPUtbl.ToZone.values:
@@ -96,7 +105,7 @@ for line in range(len(ctl.values)): # loop through each FullTableName in control
                 if zone in interVPUtbl.ToZone.values:
                     cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
                 if zone in interVPUtbl.FromZone.values: 
-                    interVPU(ws, cat.columns[1:], accum_type, zone, Connector, interVPUtbl.copy(),summaryfield)			        
+                    interVPU(ws, cat.columns[1:], accum_type, zone, Connector, interVPUtbl.copy(),summaryfield)
                 upFinal = pd.merge(up,ws,on='COMID')
                 final = pd.merge(cat,upFinal,on='COMID') 
                 final.to_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv', index=False)

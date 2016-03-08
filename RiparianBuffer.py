@@ -74,6 +74,21 @@ for regions in inputs.keys():
 #                StrmRas = Con(IsNull(NullRaster),1)
 #                if not arcpy.Exists('%s/StreamRaster_%s.tif'%(working_dir,subdirs.split('Null',2)[1])):
 #                    StrmRas.save('%s/StreamRaster_%s.tif'%(working_dir,subdirs.split('Null',2)[1]))
+                flowline = NHDDir + "/NHDPlus%s/NHDPlus%s/NHDSnapshot/Hydrography/NHDFlowline.shp"%(regions,hydro)
+                flowgrid = "J:/Watershed Integrity Spatial Prediction/Spatial Data/line100mbuffer/flowgrid%s"%(hydro)
+                if not arcpy.Exists(flowgrid):
+                    print 'on region ' + regions + ' and hydro number ' + hydro
+                    # Process: Make Feature Layer
+                    arcpy.MakeFeatureLayer_management(flowline, "flowline","\"FLOWDIR\" = 'With Digitized' OR \"FTYPE\" IN ( 'ArtificialPath', 'Connector', 'StreamRiver')")
+                    arcpy.env.snapRaster = NHDDir + "NHDPlus%s/NHDPlus%s/NHDPlusCatchment/cat"
+                    # Process: Add Field
+                    arcpy.AddField_management("flowline", "Junk", "SHORT", "", "", "", "", "NULLABLE", "NON_REQUIRED", "")
+                    # Process: Calculate Field
+                    arcpy.CalculateField_management("flowline", "Junk", "1", "PYTHON", "")
+                    # Process: Polyline to Raster
+                    arcpy.PolylineToRaster_conversion("flowline", "Junk", flowgrid, "MAXIMUM_LENGTH", "NONE", "30")
+                    # Process: Delete Field
+                    arcpy.DeleteField_management("flowline", "Junk")
                 StrmRas = Raster('J:/Watershed Integrity Spatial Prediction/Spatial Data/line100mbuffer/flowgrid%s'%(hydro))
                 # Process: Region Group - this gives each group of contiguous pixels a unique region ID
                 NLCDWat = Raster('%s/nlcd_water.tif'%(working_dir))
