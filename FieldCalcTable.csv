@@ -1,0 +1,8 @@
+FileName,InField,OutField,Operation,Value,JoinTable
+dams,NORM_STORA,NrmStorM3,Multiply,1233.48,
+dams,NID_STORAG,NIDStorM3,Multiply,1233.48,
+tl_2010_US_bg10,AREA,SQKM,Multiply,0.000001,
+tl_2010_US_bg10,HSUNITS,,,,SF1HOUBG.dbf
+tl_2010_US_bg10,HSUNITS,HU_SQKM,Divide,SQKM,SF1HOUBG.dbf
+tl_2010_US_bg10,TOTALPOP,,,,SF1POPBG.dbf
+tl_2010_US_bg10,TOTALPOP,POP_SQKM,Divide,SQKM,SF1POPBG.dbf
