@@ -23,7 +23,7 @@ import arcpy
 #############################
 # Parameters
 ControlTable  = pd.read_csv(sys.argv[1])
-ControlTable = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/RasterControlTable_MW.csv')
+# ControlTable = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/RasterControlTable_MW.csv')
 ReClassTable = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ReclassTable.csv')
 FieldCalcTable =pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/FieldCalcTable.csv')
 #####################################################################################################################
