@@ -23,7 +23,7 @@ import arcpy
 #############################
 # Parameters
 ControlTable  = pd.read_csv(sys.argv[1])
-#ControlTable = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/RasterControlTable.csv')
+ControlTable = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/RasterControlTable_MW.csv')
 ReClassTable = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ReclassTable.csv')
 FieldCalcTable =pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/FieldCalcTable.csv')
 #####################################################################################################################
@@ -113,33 +113,26 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                if UseArcpy=='Yes': 
                    finalras = FinalDir + '/' + Rast + '.tif'
                    if UseStatesMask=='No':
-                       # Project to temporary raster                           
-                       arcpy.ProjectRaster_management(tempras, finalras, "PROJCS['NAD_1983_Contiguous_USA_Albers',\
-                       GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],\
-                       PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['false_easting',0.0],\
-                       PARAMETER['false_northing',0.0],PARAMETER['central_meridian',-96.0],PARAMETER['standard_parallel_1',29.5],\
-                       PARAMETER['standard_parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]", "NEAREST", \
-                       "%s %s"%(ConvertRes, ConvertRes), "", "", "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',\
+                       desc = arcpy.Describe(tempras) 
+                       sr = desc.spatialReference.exportToString()
+                       if DataCategory=='continuous':
+                           resamp_type='BILINEAR'
+                       if DataCategory=='categorical':
+                           resmap_type='NEAREST'
+                       snapping_pnt = "%f %f"%(desc.extent.XMin,desc.extent.YMin)
+                       arcpy.ProjectRaster_management(tempras, finalras, sr, "%s"%(resamp_type), \
+                       "%s %s"%(ConvertRes, ConvertRes), "", snapping_pnt, "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',\
                        SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],\
                        PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['central_meridian',-96.0],\
                        PARAMETER['Standard_Parallel_1',29.5],PARAMETER['Standard_Parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]")
                    if UseStatesMask=='Yes':
                         # Execute ExtractByMask
-#                        MaskRas = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/States_limited_borders.shp'
-                        from arcpy.sa import *
-                        arcpy.CheckOutExtension("Spatial")
-#                        outExtractByMask = ExtractByMask(projras, MaskRas)
-                        arcpy.env.mask = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/Census_US_boundary.shp'
-        #               Save the output      
-#                        finalras = FinalDir + '/' + Rast + '.tif'
-#                        outExtractByMask.save(finalras)
-                        # Project to temporary raster                           
-                        arcpy.ProjectRaster_management(tempras, finalras, "PROJCS['NAD_1983_Contiguous_USA_Albers',\
-                       GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],\
-                       PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['false_easting',0.0],\
-                       PARAMETER['false_northing',0.0],PARAMETER['central_meridian',-96.0],PARAMETER['standard_parallel_1',29.5],\
-                       PARAMETER['standard_parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]", "NEAREST", \
-                       "%s %s"%(ConvertRes, ConvertRes), "", "", "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',\
+                       MaskRas = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/States_limited_borders.shp'
+                       from arcpy.sa import *
+                       arcpy.CheckOutExtension("Spatial")
+                       arcpy.env.mask = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/Census_US_boundary.shp'                         
+                       arcpy.ProjectRaster_management(tempras, finalras, sr, "%s"%(resamp_type), \
+                       "%s %s"%(ConvertRes, ConvertRes), "", snapping_pnt, "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',\
                        SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],\
                        PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['central_meridian',-96.0],\
                        PARAMETER['Standard_Parallel_1',29.5],PARAMETER['Standard_Parallel_2',45.5],PARAMETER['latitude_of_origin',23.0],UNIT['Meter',1.0]]")
