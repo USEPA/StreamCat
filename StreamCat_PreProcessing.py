@@ -129,7 +129,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                         from arcpy.sa import *
                         arcpy.CheckOutExtension("Spatial")
 #                        outExtractByMask = ExtractByMask(projras, MaskRas)
-                        arcpy.env.mask = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/States_limited_borders.shp'
+                        arcpy.env.mask = 'L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/Census_US_boundary.shp'
         #               Save the output      
 #                        finalras = FinalDir + '/' + Rast + '.tif'
 #                        outExtractByMask.save(finalras)
@@ -206,7 +206,6 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                         Feat[OutField[k]] = eval(expression)
             if not Feat.crs['proj']=='aea':
                 Feat = Feat.to_crs(epsg=5070)
-            Feat.to_file(FinalDir + '/' + Rast + '.shp', driver = 'ESRI Shapefile')
             # Do we need to rasterize shapefile? (Right now only for census block groups)
             if Convert=='Yes':
                 for item in ConvertFields.split(';'):    
@@ -217,6 +216,10 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                     startTime = dt.now()
                     call(resamp_string)
                     print "elapsed time " + str(dt.now()-startTime)
-                    
+            if UseStatesMask=='Yes':
+                mask = gpd.GeoDataFrame.from_file('L:/Priv/CORFiles/Geospatial_Library/Data/RESOURCE/POLITICAL/BOUNDARIES/NATIONAL/Census_US_boundary.shp')
+                mask = mask.ix[0].geometry # see https://michelleful.github.io/code-blog/2015/04/29/geopandas-manipulation/ for explanation - geopandas still a bit beta
+                Feat = Feat[Feat.geometry.within(mask)]
+            Feat.to_file(FinalDir + '/' + Rast + '.shp', driver = 'ESRI Shapefile')       
 
 
