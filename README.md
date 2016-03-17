@@ -4,7 +4,22 @@
 The StreamCat Dataset (http://www2.epa.gov/national-aquatic-resource-surveys/streamcat) provides summaries of natural and anthropogenic landscape features for ~2.65 million streams, and their associated catchments, within the conterminous USA. This repo contains code used in StreamCat to process a suite of landscape rasters to watersheds for streams and their associated catchments (local reach contributing area) within the conterminous USA using the [NHDPlus Version 2](http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php) as the geospatial framework.
 
 ##Necessary Python Packages and Installation Tips
-The scripts for StreamCat rely on several python modules a user will need to install, including numpy, pandas, osgeo, fiona, rasterio, geopandas, shapely, and pysal.  We highly recommend using a scientific python distribution such as [Anaconda](https://www.continuum.io/downloads) or [Enthought Canopy](https://www.enthought.com/products/canopy/).  We used the conda package manager to install necessary python modules.
+The scripts for StreamCat rely on several python modules a user will need to install, including numpy, pandas, osgeo, fiona, rasterio, geopandas, shapely, pysal, and ArcPy with an ESRI license (minimal steps still using ArcPy).  We highly recommend using a scientific python distribution such as [Anaconda](https://www.continuum.io/downloads) or [Enthought Canopy](https://www.enthought.com/products/canopy/).  We used the conda package manager to install necessary python modules. our environment and essential packages and versions used are listed below (Windows 64 and Python 2.7.11):
+
+| Package       | Version       | 
+| ------------- |--------------:|
+| fiona         | 1.6.0         | 
+| gdal          | 1.11.2        | 
+| geopandas     | 0.1.0.dev     |  
+| geos          | 3.4.2         |
+| libgdal       | 2.0.0         |
+| numpy         | 1.10.1        |
+| pandas        | 0.17.1        |
+| pyproj        | 1.9.4         |
+| pysal         | 1.10.0        |
+| pyshp         | 1.2.3         |
+| rasterio      | 0.24.0        |
+| shapely       | 1.5.13        |
 
 ##How to Run Scripts
 ###The scripts make use of 'control tables' to pass all the particular parameters to the three primary scripts: 
