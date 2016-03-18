@@ -64,13 +64,13 @@ for table in tables:
                     colname2 = metricName + 'DensWs' + appendMetric                   
                     if summary:
                         finalNameList = []
-                        for sname in summary: # table[:-1] below is specific to dams to make dams-dam, silly
+                        for sname in summary: 
                             fnlname1 = metricName + sname + 'Cat' + appendMetric
                             fnlname2 = metricName + sname + 'Ws' + appendMetric
                             tbl[fnlname1] = tbl['Cat' + sname] / (tbl[catArea] * (tbl[catPct]/100))
                             tbl[fnlname2] = tbl['Ws' + sname] / (tbl[wsArea] * (tbl[wsPct]/100)) 
                             finalNameList.append(fnlname1);finalNameList.append(fnlname2)
-                    tbl[colname1] = tbl.CatCount / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                    tbl[colname1] = tbl.CatCount / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) 
                     tbl[colname2] = tbl.WsCount / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))
                     if var == 0:
                         if summary:
