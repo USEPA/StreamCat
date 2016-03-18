@@ -902,7 +902,7 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
     cats = set(cat)
     cats.discard(0)
     for zone in inputs:
-        if not os.path.exists(directory +'/bastards' + '/upStream' + zone + '.npy'):  #directory = 'D:/Projects/CatCOMs'
+        if not os.path.exists(directory +'/bastards' + '/upStream' + zone + '.npy'):  
             print zone
             hydroregion = inputs[zone]
             print 'Making UpStreamComs dictionary...'
