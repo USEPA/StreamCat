@@ -493,22 +493,22 @@ def PointInPoly(points, inZoneData, pct_full, summaryfield=None):
     summaryfield  : a list of the field/s in points feature to use for getting summary stats in polygons
     '''
     #startTime = dt.now()
-    polys = gpd.GeoDataFrame.from_file(inZoneData)#.set_index('FEATUREID')
+    polys = gpd.GeoDataFrame.from_file(inZoneData)  #.set_index('FEATUREID')
     points = points.to_crs(polys.crs)
     # Get list of lat/long fields in the table
     latlon = [s for s in points.columns if any(xs in s.upper() for xs in ['LONGIT','LATIT'])]
     # Remove duplicate points for 'Count'
     points2 = points.ix[~points.duplicated(latlon)] # points2.head() polys.head() point_poly_join.head()
     try:
-        point_poly_join = sjoin(points2, polys, how="left", op="within") # point_poly_join.ix[point_poly_join.FEATUREID > 1]
-        fld = 'GRIDCODE'  #next(str(unicode(x)) for x in polys.columns if x != 'geometry')
+        point_poly_join = sjoin(points2, polys, how="left", op="within") 
+        fld = 'GRIDCODE' 
     except:
         polys['link'] = np.nan
         point_poly_join = polys #gpd.GeoDataFrame( pd.concat( [points2, polys], ignore_index=True) ) 
         fld = 'link'
     # Create group of all points in catchment
     grouped = point_poly_join.groupby('FEATUREID')
-    point_poly_count = grouped[fld].count() # point_poly_count.head() next((x for x in points2.columns if x != 'geometry'),None)
+    point_poly_count = grouped[fld].count() 
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on='FEATUREID', lsuffix='_', how='left')
     final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0) #  final.head()
@@ -523,7 +523,7 @@ def PointInPoly(points, inZoneData, pct_full, summaryfield=None):
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on='COMID', how='left')
-    final.CatPctFull = final.CatPctFull.fillna(100) # final.head() final.ix[final.CatCount == 0]
+    final.CatPctFull = final.CatPctFull.fillna(100) 
     #print "elapsed time " + str(dt.now()-startTime)
     return final
 ##############################################################################
@@ -582,7 +582,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     # Create subset of InterVPUtbl that identifies the zone we are working on
     interVPUtbl = interVPUtbl.ix[interVPUtbl.FromZone.values == zone]
     throughVPUs.columns = cols
-    # COMIDs in the toCOMID column need to swap values with COMIDs in other zones, those COMIDS are then sotred in toVPUS
+    # COMIDs in the toCOMID column need to swap values with COMIDs in other zones, those COMIDS are then sorted in toVPUS
     if any(interVPUtbl.toCOMIDs.values > 0): # [x for x in interVPUtbl.toCOMIDs if x > 0]
            interAlloc = '%s_%s.csv' % (Connector[:Connector.find('_connectors')], interVPUtbl.ToZone.values[0])
            tbl = pd.read_csv(interAlloc).set_index('COMID')
@@ -596,7 +596,6 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
         if interLine[5] > 0:
             throughVPUs = throughVPUs.drop(int(interLine[5]))
     if any(interVPUtbl.toCOMIDs.values > 0): # if COMIDs came from other zone append to Connector table
-    #!!!! This format assumes that the Connector table has already been made by the time it gets to these COMIDs!!!!!
         con = pd.read_csv(Connector).set_index('COMID') 
         con.columns = map(str, con.columns)
         toVPUs = toVPUs.append(con)
@@ -609,7 +608,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
 ##############################################################################
 
 
-def AdjustCOMs(tbl, comid1, comid2, tbl2 = None):  #  ,accum, summaryfield=None
+def AdjustCOMs(tbl, comid1, comid2, tbl2 = None): 
     '''
     __author__ = "Rick Debbout <debbout.rick@epa.gov>"
     Adjusts values for COMIDs where values from one need to be subtracted from another.
@@ -622,7 +621,7 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2 = None):  #  ,accum, summaryfield=None
     comid2                : COMID whose values will be subtracted from comid1
     tbl2                  : toVPU table from InterVPU function in the case where a COMID comes from a different zone
     '''
-    if tbl2 is None:  # might be able to fix this in the arguments...
+    if tbl2 is None: 
         tbl2 = tbl.copy()
     for idx in tbl.columns[:-1]:
         tbl.ix[comid1, idx] = tbl.ix[comid1, idx] - tbl2.ix[comid2, idx]
@@ -652,7 +651,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     #Loop and accumulate values
     for k in range(0,len(cols)):
         col = cols[k]
-        c = np.array(arr[col]) # arr[col].fillna(0) keep out zeros where no data!
+        c = np.array(arr[col]) 
         d = c[indices] #Make final vector from desired data (c)
         if 'PctFull' in col:
             area = np.array(arr.ix[:, 1])
@@ -667,7 +666,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
             for i in range(0, len(lengths)):
                 z[i] = np.nansum(d[x:x + lengths[i]])
                 x = x + lengths[i]
-        outT[:,k+1] = z  #np.nan_to_num() -used to convert to zeros here, now done above in the np.ma.average()
+        outT[:,k+1] = z  
     outT = outT[np.in1d(outT[:,0], coms),:]  #Remove the extra COMIDs
     outDF = pd.DataFrame(outT)
     if tbl_type == 'Ws':
@@ -677,7 +676,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     for name in outDF.columns:
         if 'AreaSqKm' in name:
             area = name
-    outDF.loc[(outDF[area] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no riparion zone, thus NA values across the table
+    outDF.loc[(outDF[area] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table
     return outDF
 ##############################################################################
 def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU, mask_dir, NHD_dir, hydroregion):
@@ -788,7 +787,7 @@ def chkColumnLength(table, LandscapeLayer):
     AllCols = dbf2DF(LandscapeLayer + '.vat.dbf').VALUE.tolist()
     col_list = table.columns.tolist()
     col_list.sort()
-    col_list.sort(key=len)         # table.columns
+    col_list.sort(key=len)       
     table = table[col_list]
     if len(AllCols) != len(col_list[1:]):
         print 'column adjust'
@@ -821,7 +820,6 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
         if comidx in cat.COMID.values.astype(int):
             cat = cat.drop(cat[cat.COMID == comidx].index)
     con = con.ix[con.COMID.isin(np.append(interVPUtbl.ix[interVPUtbl.ToZone.values == zone].thruCOMIDs.values,interVPUtbl.ix[interVPUtbl.ToZone.values == zone].toCOMIDs.values[np.nonzero(interVPUtbl.ix[interVPUtbl.ToZone.values == zone].toCOMIDs.values)]))]
-    #con = con.ix[con.COMID.isin(np.append(np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].thruCOMIDs),np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].toCOMIDs)[np.nonzero(np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].toCOMIDs))]))]
     cat = cat.append(con)
     return cat
 ##############################################################################   
@@ -900,12 +898,11 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
             chkval += 1
         AllCOMs = AllCOMs[np.nonzero(AllCOMs)]
         np.save(directory + '/allCatCOMs.npy', AllCOMs)
-    #cat_dir = "L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/PhaseThree/npStreamCat/allCatCOMs.npy"
     cat = np.load(directory + '/allCatCOMs.npy')
     cats = set(cat)
     cats.discard(0)
     for zone in inputs:
-        if not os.path.exists(directory +'/bastards' + '/upStream' + zone + '.npy'):  #directory = 'D:/Projects/CatCOMs'
+        if not os.path.exists(directory +'/bastards' + '/upStream' + zone + '.npy'):  
             print zone
             hydroregion = inputs[zone]
             print 'Making UpStreamComs dictionary...'
