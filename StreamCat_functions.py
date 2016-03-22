@@ -59,7 +59,7 @@ def UpcomDict(hydroregion, zone, NHD_dir, interVPUtbl):
                  "Marc Weber <weber.marc@epa.gov>"
     Creates a dictionary of all catchment connections in a major NHDPlus basin.
     For example, the function combines all from-to typology tables in the Mississippi
-    Basin if 'MS' is provided as hydroregion argument.
+    Basin if 'MS' is provided as 'hydroregion' argument.
 
     Arguments
     ---------
