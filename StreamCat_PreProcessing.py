@@ -34,7 +34,7 @@ import arcpy
 # Parameters
 ControlTable  = pd.read_csv(sys.argv[1])
 ReClassTable = pd.read_csv(ControlTable.DirectoryLocations[4])
-FieldCalcTable =pd.read_csv(ControlTable.DirectoryLocations[5])
+FieldCalcTable = pd.read_csv(ControlTable.DirectoryLocations[5])
 # ControlTable = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/RasterControlTable_MW.csv')
 #ReClassTable = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ReclassTable.csv')
 #FieldCalcTable =pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/FieldCalcTable.csv')
