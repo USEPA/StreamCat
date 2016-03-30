@@ -45,7 +45,10 @@ for table in tables:
                 conversion = float(ctl.Conversion.ix[ctl.FullTableName == tables[table][var]].values[0])
                 tbl = pd.read_csv(inDir + '/%s_%s.csv'%(tables[table][var],zone)) 
                 frontCols = [title for title in tbl.columns for x in ['COMID','AreaSqKm','PctFull'] if x in title and not 'Up' in title]            
-                catArea = frontCols[1];catPct = frontCols[2];wsArea = frontCols[3];wsPct = frontCols[4] 
+                catArea = frontCols[1]
+                catPct = frontCols[2]
+                wsArea = frontCols[3]
+                wsPct = frontCols[4] 
                 frontCols = [frontCols[i] for i in [0,1,3,2,4]] #re-order for correct sequence
                 summary = None
                 if ctl.summaryfield.ix[ctl.Final_Table_Name == table].any():
@@ -55,6 +58,11 @@ for table in tables:
                     colname2 = metricName + 'Ws' + appendMetric
                     tbl[colname1] = ((tbl.CatSum/tbl.CatCount) * conversion)
                     tbl[colname2] = ((tbl.WsSum/tbl.WsCount) * conversion)
+#                    if table == 'RoadStreamCrossings':
+#                         addNameList = []
+#                         addName = 'Wtd'
+                         
+                         
                     if var == 0:
                         final = tbl[frontCols + [colname1] + [colname2]]
                     else:
@@ -69,9 +77,10 @@ for table in tables:
                             fnlname2 = metricName + sname + 'Ws' + appendMetric
                             tbl[fnlname1] = tbl['Cat' + sname] / (tbl[catArea] * (tbl[catPct]/100))
                             tbl[fnlname2] = tbl['Ws' + sname] / (tbl[wsArea] * (tbl[wsPct]/100)) 
-                            finalNameList.append(fnlname1);finalNameList.append(fnlname2)
-                    tbl[colname1] = tbl.CatCount / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) 
-                    tbl[colname2] = tbl.WsCount / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))
+                            finalNameList.append(fnlname1)
+                            finalNameList.append(fnlname2)
+                    tbl[colname1] = tbl.CatCount / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                    tbl[colname2] = tbl.WsCount / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
                     if var == 0:
                         if summary:
                             final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  

@@ -14,8 +14,7 @@
 # load modules
 import os
 import arcpy
-from arcpy.sa import *
-arcpy.CheckOutExtension("Spatial")
+from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 import pysal as ps
 import numpy as np
 import pandas as pd
@@ -25,7 +24,7 @@ from osgeo import gdal, osr
 from gdalconst import *
 import rasterio
 from rasterio import transform
-os.environ['GDAL_DATA'] = 'C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data'
+#os.environ['GDAL_DATA'] = 'C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data'
 from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
 import geopandas as gpd
 from geopandas.tools import sjoin
@@ -33,6 +32,11 @@ import fiona
 ##############################################################################
 
 
+class LicenseError(Exception):
+    pass
+##############################################################################
+    
+    
 def dbf2DF(dbfile, upper=True):
     '''
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
@@ -48,7 +52,7 @@ def dbf2DF(dbfile, upper=True):
     db.close()  #Close dbf 
     pandasDF = pd.DataFrame(cols)
     if upper == True:
-        pandasDF.columns = map(str.upper, pandasDF.columns)
+        pandasDF.columns = map(str.upper, pandasDF.columns.values) 
     return pandasDF
 ##############################################################################
 
@@ -57,6 +61,7 @@ def UpcomDict(hydroregion, zone, NHD_dir, interVPUtbl):
     '''
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
                  "Marc Weber <weber.marc@epa.gov>"
+
     Creates a dictionary of all catchment connections in a major NHDPlus basin.
     For example, the function combines all from-to typology tables in the Mississippi
     Basin if 'MS' is provided as 'hydroregion' argument.
@@ -191,7 +196,7 @@ def getRasterInfo(FileName):
 ##############################################################################
 
 
-def Reclass(inras, outras, reclass_dict, in_nodata = None, out_dtype=None):
+def Reclass(inras, outras, reclass_dict, dtype=None):
     '''
     __author__ =   "Marc Weber <weber.marc@epa.gov>"
                    "Ryan Hill <hill.ryan@epa.gov>"
@@ -208,16 +213,16 @@ def Reclass(inras, outras, reclass_dict, in_nodata = None, out_dtype=None):
     with rasterio.drivers():
         with rasterio.open(inras) as src:
             #Set dtype and nodata values
-            if out_dtype is None: #If no dtype defined, use input dtype
+            if dtype is None: #If no dtype defined, use input dtype
                 nd = src.meta['nodata']
                 dt = src.meta['dtype']
             else:
                 try:
-                    nd = eval('np.iinfo(np.' + out_dtype + ').max')
+                    nd = eval('np.iinfo(np.' + dtype + ').max')
                 except:
-                    nd = eval('np.finfo(np.' + out_dtype + ').max')
+                    nd = eval('np.finfo(np.' + dtype + ').max')
                 #exec 'nd = np.iinfo(np.'+out_dtype+').max'
-                dt = out_dtype
+                dt = dtype
             kwargs = src.meta.copy()
             kwargs.update(
                 driver='GTiff',
@@ -234,7 +239,7 @@ def Reclass(inras, outras, reclass_dict, in_nodata = None, out_dtype=None):
                 for idx, window in windows:
                     src_data = src.read(1, window=window)
                     # Convert values
-                    src_data = np.where(src_data == in_nodata, nd, src_data).astype(dt)
+#                    src_data = np.where(src_data == in_nodata, nd, src_data).astype(dt)
                     for inval,outval in reclass_dict.iteritems():
                         if np.isnan(outval).any():
     #                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dt)
@@ -495,22 +500,22 @@ def PointInPoly(points, inZoneData, pct_full, summaryfield=None):
     summaryfield  : a list of the field/s in points feature to use for getting summary stats in polygons
     '''
     #startTime = dt.now()
-    polys = gpd.GeoDataFrame.from_file(inZoneData)  #.set_index('FEATUREID')
+    polys = gpd.GeoDataFrame.from_file(inZoneData)#.set_index('FEATUREID')
     points = points.to_crs(polys.crs)
     # Get list of lat/long fields in the table
     latlon = [s for s in points.columns if any(xs in s.upper() for xs in ['LONGIT','LATIT'])]
     # Remove duplicate points for 'Count'
     points2 = points.ix[~points.duplicated(latlon)] # points2.head() polys.head() point_poly_join.head()
     try:
-        point_poly_join = sjoin(points2, polys, how="left", op="within") 
-        fld = 'GRIDCODE' 
+        point_poly_join = sjoin(points2, polys, how="left", op="within") # point_poly_join.ix[point_poly_join.FEATUREID > 1]
+        fld = 'GRIDCODE'  #next(str(unicode(x)) for x in polys.columns if x != 'geometry')
     except:
         polys['link'] = np.nan
         point_poly_join = polys #gpd.GeoDataFrame( pd.concat( [points2, polys], ignore_index=True) ) 
         fld = 'link'
     # Create group of all points in catchment
     grouped = point_poly_join.groupby('FEATUREID')
-    point_poly_count = grouped[fld].count() 
+    point_poly_count = grouped[fld].count() # point_poly_count.head() next((x for x in points2.columns if x != 'geometry'),None)
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on='FEATUREID', lsuffix='_', how='left')
     final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0) #  final.head()
@@ -525,7 +530,7 @@ def PointInPoly(points, inZoneData, pct_full, summaryfield=None):
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on='COMID', how='left')
-    final.CatPctFull = final.CatPctFull.fillna(100) 
+    final.CatPctFull = final.CatPctFull.fillna(100) # final.head() final.ix[final.CatCount == 0]
     #print "elapsed time " + str(dt.now()-startTime)
     return final
 ##############################################################################
@@ -584,6 +589,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     # Create subset of InterVPUtbl that identifies the zone we are working on
     interVPUtbl = interVPUtbl.ix[interVPUtbl.FromZone.values == zone]
     throughVPUs.columns = cols
+    
     # COMIDs in the toCOMID column need to swap values with COMIDs in other zones, those COMIDS are then sorted in toVPUS
     if any(interVPUtbl.toCOMIDs.values > 0): # [x for x in interVPUtbl.toCOMIDs if x > 0]
            interAlloc = '%s_%s.csv' % (Connector[:Connector.find('_connectors')], interVPUtbl.ToZone.values[0])
@@ -598,6 +604,8 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
         if interLine[5] > 0:
             throughVPUs = throughVPUs.drop(int(interLine[5]))
     if any(interVPUtbl.toCOMIDs.values > 0): # if COMIDs came from other zone append to Connector table
+
+    #!!!! This format assumes that the Connector table has already been made by the time it gets to these COMIDs!!!!!
         con = pd.read_csv(Connector).set_index('COMID') 
         con.columns = map(str, con.columns)
         toVPUs = toVPUs.append(con)
@@ -610,7 +618,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
 ##############################################################################
 
 
-def AdjustCOMs(tbl, comid1, comid2, tbl2 = None): 
+def AdjustCOMs(tbl, comid1, comid2, tbl2 = None):  #  ,accum, summaryfield=None
     '''
     __author__ = "Rick Debbout <debbout.rick@epa.gov>"
     Adjusts values for COMIDs where values from one need to be subtracted from another.
@@ -623,11 +631,15 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2 = None):
     comid2                : COMID whose values will be subtracted from comid1
     tbl2                  : toVPU table from InterVPU function in the case where a COMID comes from a different zone
     '''
-    if tbl2 is None: 
+
+    if tbl2 is None:  # might be able to fix this in the arguments...
         tbl2 = tbl.copy()
     for idx in tbl.columns[:-1]:
         tbl.ix[comid1, idx] = tbl.ix[comid1, idx] - tbl2.ix[comid2, idx]
 ##############################################################################
+
+
+
 def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
@@ -653,7 +665,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     #Loop and accumulate values
     for k in range(0,len(cols)):
         col = cols[k]
-        c = np.array(arr[col]) 
+        c = np.array(arr[col]) # arr[col].fillna(0) keep out zeros where no data!
         d = c[indices] #Make final vector from desired data (c)
         if 'PctFull' in col:
             area = np.array(arr.ix[:, 1])
@@ -668,7 +680,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
             for i in range(0, len(lengths)):
                 z[i] = np.nansum(d[x:x + lengths[i]])
                 x = x + lengths[i]
-        outT[:,k+1] = z  
+        outT[:,k+1] = z  #np.nan_to_num() -used to convert to zeros here, now done above in the np.ma.average()
     outT = outT[np.in1d(outT[:,0], coms),:]  #Remove the extra COMIDs
     outDF = pd.DataFrame(outT)
     if tbl_type == 'Ws':
@@ -681,7 +693,10 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     outDF.loc[(outDF[area] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table
     return outDF
 ##############################################################################
-def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU, mask_dir, NHD_dir, hydroregion):
+
+
+def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU, mask_dir, NHD_dir, hydroregion, appendMetric):
+
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
                   "Ryan Hill <hill.ryan@epa.gov>"
@@ -691,78 +706,92 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
     Arguments
     ---------
     accum_type            : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
-    LandscapeLayer                : string to the landscape raster being summarized
+    LandscapeLayer        : string of the landscape raster name
     inZoneData            : string to the NHD catchment grid
     out_dir               : string to directory where output is being stored
     zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
     '''
-    arcpy.CheckOutExtension("spatial")
-    arcpy.OverWriteOutput = 1
-    arcpy.env.outputCoordinateSystem = "PROJCS['NAD_1983_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-96.0],PARAMETER['Standard_Parallel_1',29.5],PARAMETER['Standard_Parallel_2',45.5],PARAMETER['Latitude_Of_Origin',23.0],UNIT['Meter',1.0]]"
-    arcpy.env.pyramid = "NONE"
-    arcpy.env.cellSize = "30"
-    arcpy.env.resamplingMethod = "NEAREST"
-    arcpy.env.snapRaster = inZoneData
-    if by_RPU == 0:
-        if LandscapeLayer.count('.tif') or LandscapeLayer.count('.img'):
-            outTable ="%s/zonalstats_%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1].split(".")[0],zone)
+
+    try:
+        if arcpy.CheckExtension("spatial") == "Available":
+            arcpy.CheckOutExtension("spatial")
         else:
-            outTable ="%s/zonalstats_%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1],zone)
-        if not os.path.exists(outTable):
-            if accum_type == 'Categorical':
-                arcpy.gp.TabulateArea_sa(inZoneData, 'VALUE', LandscapeLayer, "Value", outTable, "30")
-            if accum_type == 'Continuous':
-                arcpy.gp.ZonalStatisticsAsTable_sa(inZoneData, 'VALUE', LandscapeLayer, outTable, "DATA", "ALL")
-        table = dbf2DF(outTable)
-    if by_RPU == 1:
-        hydrodir = '/'.join(inZoneData.split('/')[:-2]) + '/NEDSnapshot'
-        rpuList = []
-        for subdirs in os.listdir(hydrodir):
-            elev = "%s/%s/elev_cm" % (hydrodir, subdirs)
-            rpuList.append(subdirs[-3:])
-            print 'working on ' + elev
-            outTable = out_dir + "/zonalstats_elev%s.dbf" % (subdirs[-3:])
-            if not os.path.exists(outTable):
-                arcpy.gp.ZonalStatisticsAsTable_sa(inZoneData, 'VALUE', elev, outTable, "DATA", "ALL")
-        for rpu in range(len(rpuList)):
-            if rpu == 0:
-                table = dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))
+            raise LicenseError
+        arcpy.env.cellSize = "30"
+        arcpy.env.snapRaster = inZoneData
+        if by_RPU == 0:
+            if LandscapeLayer.count('.tif') or LandscapeLayer.count('.img'):
+                outTable ="%s/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1].split(".")[0], appendMetric, zone)
             else:
-                table = pd.concat([table, dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))])
-        if len(rpuList) > 1:
-            clean = table.groupby('VALUE')['AREA'].nlargest(1).reset_index().rename(columns={0:'AREA', 'level_1': 'index'})
-            table = pd.merge(table.reset_index(), clean, on=['VALUE','AREA', 'index'], how ='right').set_index('index')
-            table = table.drop_duplicates(subset='VALUE')
+                outTable ="%s/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1], appendMetric, zone)
+            if not os.path.exists(outTable):
+                if accum_type == 'Categorical':
+                    TabulateArea(inZoneData, 'VALUE', LandscapeLayer, "Value", outTable, "30")
+                if accum_type == 'Continuous':
+                    ZonalStatisticsAsTable(inZoneData, 'VALUE', LandscapeLayer, outTable, "DATA", "ALL")
+            table = dbf2DF(outTable)
+        if by_RPU == 1:
+            hydrodir = '/'.join(inZoneData.split('/')[:-2]) + '/NEDSnapshot'
+            rpuList = []
+            for subdirs in os.listdir(hydrodir):
+                elev = "%s/%s/elev_cm" % (hydrodir, subdirs)
+                rpuList.append(subdirs[-3:])
+                print 'working on ' + elev
+                outTable = out_dir + "/zonalstats_elev%s.dbf" % (subdirs[-3:])
+                if not os.path.exists(outTable):
+                    ZonalStatisticsAsTable(inZoneData, 'VALUE', elev, outTable, "DATA", "ALL")
+            for rpu in range(len(rpuList)):
+                if rpu == 0:
+                    table = dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))
+                else:
+                    table = pd.concat([table, dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))])
+            if len(rpuList) > 1:
+                clean = table.groupby('VALUE')['AREA'].nlargest(1).reset_index().rename(columns={0:'AREA', 'level_1': 'index'})
+                table = pd.merge(table.reset_index(), clean, on=['VALUE','AREA', 'index'], how ='right').set_index('index')
+                table = table.drop_duplicates(subset='VALUE')
+        arcpy.CheckInExtension("spatial")
+    except LicenseError:
+        print("Spatial Analyst license is unavailable")
+    except arcpy.ExecuteError:
+        print(arcpy.GetMessages(2))
+
     if len(mask_dir) > 1:
         nhdtbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf' % (NHD_dir, hydroregion, zone)).ix[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
         tbl = dbf2DF(outTable)
         if accum_type == 'Categorical':
-            tbl = chkColumnLength(tbl, LandscapeLayer)
-        tbl2 = dbf2DF('%s\\zonalstats_RipBuf100_%s.dbf' % (mask_dir, zone))
-        tbl2 = pd.merge(tbl2[['FEATUREID', 'COUNT']], nhdtbl, how='right', on='FEATUREID').fillna(0)
-        result = pd.merge(tbl2, tbl, left_on='GRIDCODE', right_on='VALUE', how='left')
+            tbl = chkColumnLength(tbl, LandscapeLayer)               
+        tbl2 = dbf2DF('%s/%s.tif.vat.dbf' % (mask_dir, zone)) 
+        tbl2 = pd.merge(tbl2, nhdtbl, how='right', left_on='VALUE', right_on='GRIDCODE').fillna(0).drop('VALUE', axis=1)
+        result = pd.merge(tbl2, tbl, left_on='GRIDCODE', right_on='VALUE', how='left')             
         if accum_type == 'Continuous':
-            result['Rp100PctFull'] = ((result.COUNT_y / result.COUNT_x) * 100)
-            result['Rp100AreaSqKm'] = (result.COUNT_x * 900) * 1e-6
-            result.loc[(result['Rp100AreaSqKm'] > 0) & (result['SUM'].isnull()), "Rp100PctFull"] = 0  # identifies that there is a riparion zone, but no coverage
-            result = result[['FEATUREID', 'Rp100AreaSqKm', 'COUNT_y', 'SUM', 'Rp100PctFull']]
-            result.columns = ['COMID', 'Rp100AreaSqKm', 'Count', 'Sum', 'Rp100PctFull']
+            result['%sPctFull' % appendMetric] = ((result.COUNT_y / result.COUNT_x) * 100)
+            result['%sAreaSqKm' % appendMetric] = (result.COUNT_x * 900) * 1e-6
+            result.loc[(result['%sAreaSqKm' % appendMetric] > 0) & (result['SUM'].isnull()), '%sPctFull' % appendMetric] = 0  # identifies that there is a riparion zone, but no coverage
+            result = result[['FEATUREID', '%sAreaSqKm' % appendMetric, 'COUNT_y', 'SUM', '%sPctFull' % appendMetric]]
+            result.columns = ['COMID', '%sAreaSqKm' % appendMetric, 'Count', 'Sum', '%sPctFull' % appendMetric]
         if accum_type == 'Categorical':
             result['TotCount'] = result[tbl.columns.tolist()[1:]].sum(axis=1)
-            result['Rp100PctFull'] = ((result.TotCount/(result.COUNT * 900)) * 100)
-            result['Rp100AreaSqKm'] = (result.COUNT * 900) * 1e-6
-            result = result[['FEATUREID','Rp100AreaSqKm']+tbl.columns.tolist()[1:]+['Rp100PctFull']]
-            result.columns = ['COMID','Rp100AreaSqKm']+tbl.columns.tolist()[1:]+['Rp100PctFull']
+            result['%sPctFull' % appendMetric] = ((result.TotCount/(result.COUNT * 900)) * 100)
+            result['%sAreaSqKm' % appendMetric] = (result.COUNT * 900) * 1e-6
+            result = result[['FEATUREID','%sAreaSqKm' % appendMetric]+tbl.columns.tolist()[1:]+['%sPctFull' % appendMetric]]
+            result.columns = ['COMID','%sAreaSqKm' % appendMetric]+tbl.columns.tolist()[1:]+['%sPctFull' % appendMetric]
     else:
         if accum_type == 'Continuous':
             table = table[['VALUE', 'AREA', 'COUNT', 'SUM']]
-            table = table.rename(columns = {'COUNT':'Count', 'SUM':'Sum'})
+            table = table.rename(columns = {'COUNT':'Count', 'SUM':'Sum'})              
         if accum_type == 'Categorical':
             table = chkColumnLength(table,LandscapeLayer)
             table['AREA'] = table[table.columns.tolist()[1:]].sum(axis=1)
         nhdTable = dbf2DF(inZoneData[:-3] + 'Catchment.dbf').ix[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
         nhdTable = nhdTable.rename(columns = {'FEATUREID':'COMID', 'AREASQKM':'AreaSqKm'})
         result = pd.merge(nhdTable, table, how='left', left_on='GRIDCODE', right_on='VALUE')
+        if LandscapeLayer.split('/')[-1].split('.')[0] == 'rdstcrs':
+           slptbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf' % (NHD_dir, hydroregion, zone)).ix[:,['COMID', 'SLOPE']]
+           slptbl.loc[slptbl['SLOPE'] == -9998.0, 'SLOPE'] = 0           
+           result = pd.merge(result, slptbl, on='COMID', how='left')
+           result.SLOPE = result.SLOPE.fillna(0)
+           result['Wtd'] = result['Sum'] * result['SLOPE']
+           result = result.drop(['SLOPE'], axis=1)           
         result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm)*100).fillna(0)
         result = result.drop(['GRIDCODE', 'VALUE', 'AREA'], axis=1)
     cols = result.columns[1:]
@@ -789,7 +818,8 @@ def chkColumnLength(table, LandscapeLayer):
     AllCols = dbf2DF(LandscapeLayer + '.vat.dbf').VALUE.tolist()
     col_list = table.columns.tolist()
     col_list.sort()
-    col_list.sort(key=len)       
+
+    col_list.sort(key=len)         # table.columns
     table = table[col_list]
     if len(AllCols) != len(col_list[1:]):
         print 'column adjust'
@@ -822,6 +852,8 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
         if comidx in cat.COMID.values.astype(int):
             cat = cat.drop(cat[cat.COMID == comidx].index)
     con = con.ix[con.COMID.isin(np.append(interVPUtbl.ix[interVPUtbl.ToZone.values == zone].thruCOMIDs.values,interVPUtbl.ix[interVPUtbl.ToZone.values == zone].toCOMIDs.values[np.nonzero(interVPUtbl.ix[interVPUtbl.ToZone.values == zone].toCOMIDs.values)]))]
+
+    #con = con.ix[con.COMID.isin(np.append(np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].thruCOMIDs),np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].toCOMIDs)[np.nonzero(np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].toCOMIDs))]))]
     cat = cat.append(con)
     return cat
 ##############################################################################   
@@ -900,11 +932,12 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
             chkval += 1
         AllCOMs = AllCOMs[np.nonzero(AllCOMs)]
         np.save(directory + '/allCatCOMs.npy', AllCOMs)
+    #cat_dir = "L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/PhaseThree/npStreamCat/allCatCOMs.npy"
     cat = np.load(directory + '/allCatCOMs.npy')
     cats = set(cat)
     cats.discard(0)
     for zone in inputs:
-        if not os.path.exists(directory +'/bastards' + '/upStream' + zone + '.npy'):  
+        if not os.path.exists(directory +'/bastards' + '/upStream' + zone + '.npy'):  #directory = 'D:/Projects/CatCOMs'
             print zone
             hydroregion = inputs[zone]
             print 'Making UpStreamComs dictionary...'

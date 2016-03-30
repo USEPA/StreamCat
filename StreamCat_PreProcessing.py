@@ -16,6 +16,11 @@ import pandas as pd
 from datetime import datetime as dt
 import sys, os
 ControlTable  = pd.read_csv(sys.argv[1])
+
+from osgeo import ogr, gdal
+import fiona
+os.environ['GDAL_DATA'] = 'C:/Users/Rdebbout/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data'
+
 #ControlTable  = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/RasterControlTable_RD.csv')
 #ControlTable  = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/RasterControlTable_MW.csv')
 #sys.path.append(ControlTable.DirectoryLocations[3])  #'F:/Watershed Integrity Spatial Prediction/Scripts'
@@ -179,8 +184,8 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                         resamp_string = "gdalwarp --config GDAL_DATA " + '"C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data" ' +' -tr ' + str(ConvertRes) + ' -' + str(ConvertRes) + " -te " + bounds + " -srcnodata " + str(outNDV) +  " -dstnodata "  + str(outNDV) +  " -of GTiff -r near -t_srs " + dst_crs + " -co COMPRESS=DEFLATE -co TFW=YES -co TILED=YES -co TIFF_USE_OVR=TRUE -ot " + outDataType + " " + tempras + " " + resamp_ras
                         startTime = dt.now()
                         call(resamp_string)
-                        print "elapsed time " + str(dt.now()-startTime)
-                        
+                        print "elapsed time " + str(dt.now()-startTime)  
+                
         # Processes for vector features
         if FileType == 'ESRI Shapefile':
             Feat = gpd.GeoDataFrame.from_file(InDir + '/' + InFile + '.shp')
@@ -236,14 +241,16 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
             Feat.to_file(FinalDir + '/' + OutFile + '.shp', driver = 'ESRI Shapefile')       
             # Do we need to rasterize shapefile? (Right now only for census block groups)
             if Convert == 'Yes':
-                for item in ConvertFields.split(';'):    
-                    InShp = FinalDir + '/' + OutFile + '.shp'
+                for item in ConvertFields.split(';'):   
+                    print item
+                    InShp = FinalDir + '/' + InFile + '.shp'
         #            InShp = InDir + '/' + Rast + '.shp'
                     OutRas =  FinalDir + '/' + item + '.tif'
 #                    resamp_string = 'gdal_rasterize -a ' + item + ' -l ' + InFile +' -tr ' + str(ConvertRes) + ' -' + str(ConvertRes) + ' -co COMPRESS=DEFLATE ' +  InShp + ' ' + OutRas
-#                    startTime = dt.now()
+                    startTime = dt.now()
 #                    call(resamp_string)
                     ##  call() statement not working for me, use arcpy, rickD
-                    arcpy.PolygonToRaster_conversion(InShp, item, OutRas, 'MAXIMUM_AREA', "", str(ConvertRes))
+                    arcpy.PolygonToRaster_conversion(InShp, item, OutRas, 'CELL_CENTER', "", str(ConvertRes))
                     print "elapsed time " + str(dt.now()-startTime)
+                    
 

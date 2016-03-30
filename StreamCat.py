@@ -31,12 +31,13 @@ import os
 import pandas as pd
 # Load table used in function argument
 ctl = pd.read_csv(sys.argv[1])
+# ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv')
 
 # Import system modules
 from collections import OrderedDict
 from datetime import datetime as dt
 import geopandas as gpd
-sys.path.append(ctl.DirectoryLocations.values[6])
+sys.path.append(ctl.DirectoryLocations.values[6])  # sys.path.append('D:/Projects/Scipts')
 from StreamCat_functions import createAccumTable, appendConnectors, createCatStats, interVPU, dbf2DF, PointInPoly, makeNumpyVectors
 #####################################################################################################################
 # Populate variables from control table
@@ -65,15 +66,21 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
         accum_type = ctl.accum_type[line]             # Load metric specific variables
         RPU = int(ctl.by_RPU[line])
         mask = ctl.use_mask[line]
+        appendMetric = ctl.AppendMetric[line]
+        if appendMetric == 'none':
+            appendMetric = '' 
         if mask == 0:
             mask_dir = ''
-        LandscapeLayer = '%s/%s' % (ingrid_dir, ctl.LandscapeLayer[line])  
+        LandscapeLayer = '%s/%s' % (ingrid_dir, ctl.LandscapeLayer[line])  # ingrid = 'D:/Projects/lakesAnalysis/MetricData/' + 'mines_rpBuf100.shp'
+        if not os.path.exists(LandscapeLayer) and RPU == 1:  # this is currently a placeholder for scripting the select by location process to get masked point file
+            print "This shouldn't happen yet"
+            # make masked tables for points, Used QGIS 'point sampling tool' to make the rpBuf100 files
         FullTableName = ctl.FullTableName[line]
         summaryfield = None
         if type(ctl.summaryfield[line]) == str:
             summaryfield = ctl.summaryfield[line].split(';')
-        if accum_type == 'Point':  # Load in point geopandas table and Pct_Full table
-            pct_full = dbf2DF(pct_full_file)[['FEATUREID', 'PCT_FULL']]  
+        if accum_type == 'Point':  # Load in point geopandas table and Pct_Full table 
+            pct_full = dbf2DF(pct_full_file)[['FEATUREID', 'PCT_FULL']]  # pct_full_file ='L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/QA/BorderCatchmentPCT_FULL/catFINAL_Clip.dbf'
             pct_names = ['COMID', 'CatPctFull']
             pct_full['PCT_FULL'] = pct_full['PCT_FULL']*100
             pct_full.columns = pct_names
@@ -89,8 +96,8 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                     if len(mask_dir) > 1:
                         inZoneData = '%s/%s.tif' % (mask_dir, zone)
                     else:
-                        inZoneData = NHD_dir + '/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/cat' % (hydroregion, zone) 
-                    cat = createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, RPU, mask_dir, NHD_dir, hydroregion)
+                        inZoneData = NHD_dir + '/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/cat' % (hydroregion, zone)  # NHD_dir = 'C:/Users/Rdebbout/temp/NHDPlusV21' hydroregion = 'MS' zone = '10U' hydroregion = 'SR' zone = '09'
+                    cat = createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, RPU, mask_dir, NHD_dir, hydroregion, appendMetric)
                 if accum_type == 'Point':
                     inZoneData = NHD_dir + '/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.shp' % (hydroregion, zone)
                     cat = PointInPoly(points, inZoneData, pct_full, summaryfield)
@@ -114,3 +121,4 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                 final.to_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv', index=False)
         print 'Accumulation Results Complete in : ' + str(dt.now()-accumTime)
 print "total elapsed time " + str(dt.now()-totTime)
+
