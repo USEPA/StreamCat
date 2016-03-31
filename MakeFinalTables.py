@@ -58,15 +58,25 @@ for table in tables:
                     colname2 = metricName + 'Ws' + appendMetric
                     tbl[colname1] = ((tbl.CatSum/tbl.CatCount) * conversion)
                     tbl[colname2] = ((tbl.WsSum/tbl.WsCount) * conversion)
-#                    if table == 'RoadStreamCrossings':
-#                         addNameList = []
-#                         addName = 'Wtd'
-                         
-                         
+                    if table == 'RoadStreamCrossings':
+                        finalNameList = []
+                        addName = 'SlpWtd'
+                        fnlname1 = metricName + addName + 'Cat' + appendMetric
+                        fnlname2 = metricName + addName + 'Ws' + appendMetric                         
+                        tbl[fnlname1] = tbl['Cat' + addName] / (tbl[catArea] * (tbl[catPct]/100))
+                        tbl[fnlname2] = tbl['Ws' + addName] / (tbl[wsArea] * (tbl[wsPct]/100)) 
+                        finalNameList.append(fnlname1)
+                        finalNameList.append(fnlname2)                         
                     if var == 0:
-                        final = tbl[frontCols + [colname1] + [colname2]]
-                    else:
-                        final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID') 
+                        if table == 'RoadStreamCrossings':
+                            final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
+                        else: 
+                            final = tbl[frontCols + [colname1] + [colname2]]
+                    else: 
+                        if table == 'RoadStreamCrossings':
+                            final = pd.merge(final,tbl[["COMID"] + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]],on='COMID')
+                        else:
+                            final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')
                 if metricType == 'Density':
                     colname1 = metricName + 'DensCat' + appendMetric
                     colname2 = metricName + 'DensWs' + appendMetric                   

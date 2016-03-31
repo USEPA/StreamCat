@@ -81,9 +81,8 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
             summaryfield = ctl.summaryfield[line].split(';')
         if accum_type == 'Point':  # Load in point geopandas table and Pct_Full table 
             pct_full = dbf2DF(pct_full_file)[['FEATUREID', 'PCT_FULL']]  # pct_full_file ='L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/QA/BorderCatchmentPCT_FULL/catFINAL_Clip.dbf'
-            pct_names = ['COMID', 'CatPctFull']
             pct_full['PCT_FULL'] = pct_full['PCT_FULL']*100
-            pct_full.columns = pct_names
+            pct_full.columns = ['COMID', 'CatPctFull']
             points = gpd.GeoDataFrame.from_file(LandscapeLayer)
         if not os.path.exists(out_dir):
             os.mkdir(out_dir)

@@ -790,7 +790,7 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
            slptbl.loc[slptbl['SLOPE'] == -9998.0, 'SLOPE'] = 0           
            result = pd.merge(result, slptbl, on='COMID', how='left')
            result.SLOPE = result.SLOPE.fillna(0)
-           result['Wtd'] = result['Sum'] * result['SLOPE']
+           result['SlpWtd'] = result['Sum'] * result['SLOPE']
            result = result.drop(['SLOPE'], axis=1)           
         result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm)*100).fillna(0)
         result = result.drop(['GRIDCODE', 'VALUE', 'AREA'], axis=1)
