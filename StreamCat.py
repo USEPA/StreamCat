@@ -18,7 +18,7 @@
 #           Rick Debbout<debbout.rick@epa.gov>,
 #           and Tad Larsen<laresn.tad@epa.gov>
 #
-# Date: November 30, 2015
+# Date: November 29, 2015
 #
 # NOTE: run script from command line passing directory and name of this script
 # and then directory and name of the control table to use like:
