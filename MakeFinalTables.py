@@ -57,29 +57,14 @@ for table in tables:
                     colname1 = metricName + 'Cat' + appendMetric
                     colname2 = metricName + 'Ws' + appendMetric
                     tbl[colname1] = ((tbl.CatSum/tbl.CatCount) * conversion)
-                    tbl[colname2] = ((tbl.WsSum/tbl.WsCount) * conversion)
-                    if table == 'RoadStreamCrossings':
-                        finalNameList = []
-                        addName = 'SlpWtd'
-                        fnlname1 = metricName + addName + 'Cat' + appendMetric
-                        fnlname2 = metricName + addName + 'Ws' + appendMetric                         
-                        tbl[fnlname1] = tbl['Cat' + addName] / (tbl[catArea] * (tbl[catPct]/100))
-                        tbl[fnlname2] = tbl['Ws' + addName] / (tbl[wsArea] * (tbl[wsPct]/100)) 
-                        finalNameList.append(fnlname1)
-                        finalNameList.append(fnlname2)                         
+                    tbl[colname2] = ((tbl.WsSum/tbl.WsCount) * conversion)                        
                     if var == 0:
-                        if table == 'RoadStreamCrossings':
-                            final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
-                        else: 
-                            final = tbl[frontCols + [colname1] + [colname2]]
+                        final = tbl[frontCols + [colname1] + [colname2]]
                     else: 
-                        if table == 'RoadStreamCrossings':
-                            final = pd.merge(final,tbl[["COMID"] + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]],on='COMID')
-                        else:
-                            final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')
+                        final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')
                 if metricType == 'Density':
-                    colname1 = metricName + 'DensCat' + appendMetric
-                    colname2 = metricName + 'DensWs' + appendMetric                   
+                    colname1 = metricName + 'Cat' + appendMetric
+                    colname2 = metricName + 'Ws' + appendMetric                   
                     if summary:
                         finalNameList = []
                         for sname in summary: 
@@ -89,8 +74,12 @@ for table in tables:
                             tbl[fnlname2] = tbl['Ws' + sname] / (tbl[wsArea] * (tbl[wsPct]/100)) 
                             finalNameList.append(fnlname1)
                             finalNameList.append(fnlname2)
-                    tbl[colname1] = tbl.CatCount / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
-                    tbl[colname2] = tbl.WsCount / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
+                    if table == 'RoadStreamCrossings':
+                        tbl[colname1] = tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
+                    else:
+                        tbl[colname1] = tbl.CatCount / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = tbl.WsCount / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
                     if var == 0:
                         if summary:
                             final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
@@ -127,3 +116,13 @@ for table in tables:
             final = final[final.columns.tolist()[:5] + [x for x in final.columns[5:] if 'Cat' in x] + [x for x in final.columns[5:] if 'Ws' in x]].fillna('NA')                  
             final.to_csv(outDir  + '/%s_Region%s.csv'%(table,zone))
     print 'All Done.....'
+
+#                    if table == 'RoadStreamCrossings':
+#                        finalNameList = []
+#                        addName = 'SlpWtd'
+#                        fnlname1 = metricName + addName + 'Cat' + appendMetric
+#                        fnlname2 = metricName + addName + 'Ws' + appendMetric                         
+#                        tbl[fnlname1] = tbl['Cat' + addName] / (tbl[catArea] * (tbl[catPct]/100))
+#                        tbl[fnlname2] = tbl['Ws' + addName] / (tbl[wsArea] * (tbl[wsPct]/100)) 
+#                        finalNameList.append(fnlname1)
+#                        finalNameList.append(fnlname2) 
