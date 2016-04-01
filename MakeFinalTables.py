@@ -103,10 +103,6 @@ for table in tables:
                             final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')              
                 if metricType == 'Percent':
                     lookup = pd.read_csv(metricName)                    
-#                    if table == 'Lithology':                       
-#                        tbl['CatVALUE_12'] = tbl['CatVALUE_12'] + tbl['CatVALUE_14']
-#                        tbl['WsVALUE_12'] = tbl['WsVALUE_12'] + tbl['WsVALUE_14']
-#                        tbl = tbl.drop(['CatVALUE_14','WsVALUE_14'], axis=1)
                     catcols,wscols = [],[]
                     for col in tbl.columns:
                         if 'CatVALUE' in col and not 'Up' in col:
@@ -114,9 +110,16 @@ for table in tables:
                             catcols.append(col)
                         if 'WsVALUE' in col:
                             tbl[col] = ((tbl[col] * 1e-6)/(tbl[wsArea]*(tbl[wsPct]/100))*100)
-                            wscols.append(col) 
-                    final = tbl[frontCols+catcols + wscols] 
-                    final.columns = frontCols + ['Pct' + x + 'Cat' + appendMetric for x in lookup.final_val.values] + ['Pct' + y + 'Ws' + appendMetric for y in lookup.final_val.values]                         
+                            wscols.append(col)           
+                    if var == 0:
+                        final = tbl[frontCols+catcols + wscols]
+                        final.columns = frontCols + ['Pct' + x + 'Cat' + appendMetric for x in lookup.final_val.values] + ['Pct' + y + 'Ws' + appendMetric for y in lookup.final_val.values]
+                    else:
+                        final2 = tbl[['COMID'] + catcols + wscols]
+                        final2.columns = ['COMID'] + ['Pct' + x + 'Cat' + appendMetric for x in lookup.final_val.values] + ['Pct' + y + 'Ws' + appendMetric for y in lookup.final_val.values]
+                        final = pd.merge(final,final2,on='COMID')
+                        if table == 'AgMidHiSlopes':
+                            final = final.drop(['PctUnknown1Cat','PctUnknown2Cat','PctUnknown1Ws', 'PctUnknown2Ws'], axis=1)
             final = final.set_index('COMID').fillna('NA')
             if zone == '04':
                 rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
