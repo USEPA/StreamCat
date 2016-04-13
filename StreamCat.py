@@ -106,7 +106,7 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
         try:
             in2accum
         except NameError:
-            in2accum = len(pd.read_csv('%s/%s_%s.csv' % (out_dir, FullTableName, zone)))
+            in2accum = len(pd.read_csv('%s/%s_%s.csv' % (out_dir, FullTableName, zone)).columns)
         accumTime = dt.now()
         for zone in inputs:
             cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
