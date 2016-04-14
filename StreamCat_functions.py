@@ -975,7 +975,7 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
                 os.mkdir(directory + '/children')
             wdc = directory + '/children'
             np.save(wdc + '/upStream' + zone + '.npy', b)
-            np.save(wdc + '/comids '+ zone + '.npy', COMIDs)
+            np.save(wdc + '/comids'+ zone + '.npy', COMIDs)
             np.save(wdc + '/lengths' + zone + '.npy', lengths)
             print("--- %s seconds ---" % (dt.now() - start_time))
             print '___________________'
