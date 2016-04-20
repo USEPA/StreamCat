@@ -485,7 +485,7 @@ def ProjectResamp(inras, outras, out_proj, resamp_type, out_res):
 ##############################################################################
 
 
-def PointInPoly(points, inZoneData, pct_full, summaryfield=None):
+def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summaryfield=None):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
                   "Rick Debbout <debbout.rick@epa.gov>"
@@ -518,19 +518,32 @@ def PointInPoly(points, inZoneData, pct_full, summaryfield=None):
     point_poly_count = grouped[fld].count() # point_poly_count.head() next((x for x in points2.columns if x != 'geometry'),None)
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on='FEATUREID', lsuffix='_', how='left')
-    final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0) #  final.head()
-    cols = ['COMID', 'CatAreaSqKm', 'CatCount']
+    if len(mask_dir) > 1:
+        final = final.drop('AreaSqKM', axis=1)
+        tblRP = dbf2DF('%s/%s.tif.vat.dbf' % (mask_dir, zone))
+        tblRP['AreaSqKM'] = (tblRP.COUNT * 900) * 1e-6
+        tblRP['AreaSqKM'] = tblRP['AreaSqKM'].fillna(0)
+        final = pd.merge(final, tblRP, left_on='GRIDCODE', right_on='VALUE', how='left')
+        final = final[['FEATUREID', 'AreaSqKM', fld]]
+    if len(mask_dir) == 0:
+        final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0)       
+    cols = ['COMID', 'Cat%sAreaSqKm' % appendMetric, 'Cat%sCount' % appendMetric]
     if not summaryfield == None: # Summarize fields in list with gpd table including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby('FEATUREID')
         for x in summaryfield: # Sum the field in summary field list for each catchment
             point_poly_stats = grouped2[x].sum()
             final = final.join(point_poly_stats, on='FEATUREID', how='left').fillna(0)
-            cols.append('Cat' + x)
+            cols.append('Cat' + appendMetric + x)
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on='COMID', how='left')
-    final.CatPctFull = final.CatPctFull.fillna(100) # final.head() final.ix[final.CatCount == 0]
+    if len(mask_dir) > 0:
+        if not summaryfield == None:
+            final.columns = ['COMID','CatRp100AreaSqKm','CatRp100Count']+ ['Cat' + appendMetric + x for x in summaryfield] + ['CatRp100PctFull']
+        else:
+            final.columns = ['COMID','CatRp100AreaSqKm','CatRp100Count','CatRp100PctFull']
+    final['Cat%sPctFull' % appendMetric] = final['Cat%sPctFull' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
     #print "elapsed time " + str(dt.now()-startTime)
     return final
 ##############################################################################
