@@ -100,7 +100,11 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                     cat = PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summaryfield)
                 cat.to_csv('%s/%s_%s.csv' % (out_dir, FullTableName, zone), index=False)
                 in2accum = len(cat.columns)
-        print 'Cat Results Complete in : ' + str(dt.now()-catTime)
+        print 'Cat Results Complete in : ' + str(dt.now()-catTime)     
+        try:
+            in2accum
+        except NameError:
+            in2accum = len(pd.read_csv('%s/%s_%s.csv' % (out_dir, FullTableName, zone)).columns)
         accumTime = dt.now()
         for zone in inputs:
             cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
