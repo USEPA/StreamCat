@@ -502,6 +502,14 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     #startTime = dt.now()
     polys = gpd.GeoDataFrame.from_file(inZoneData)#.set_index('FEATUREID')
     points = points.to_crs(polys.crs)
+    if len(mask_dir) > 1:
+        polys = polys.drop('AreaSqKM', axis=1)
+        tblRP = dbf2DF('%s/%s.tif.vat.dbf' % (mask_dir, zone))
+        tblRP['AreaSqKM'] = (tblRP.COUNT * 900) * 1e-6
+        tblRP['AreaSqKM'] = tblRP['AreaSqKM'].fillna(0)
+        polys = pd.merge(polys, tblRP, left_on='GRIDCODE', right_on='VALUE', how='left')
+        polys.crs = {u'datum': u'NAD83', u'no_defs': True, u'proj': u'longlat'}
+        #polys = final[['FEATUREID', 'AreaSqKM', fld]]
     # Get list of lat/long fields in the table
     latlon = [s for s in points.columns if any(xs in s.upper() for xs in ['LONGIT','LATIT'])]
     # Remove duplicate points for 'Count'
@@ -518,15 +526,7 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     point_poly_count = grouped[fld].count() # point_poly_count.head() next((x for x in points2.columns if x != 'geometry'),None)
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on='FEATUREID', lsuffix='_', how='left')
-    if len(mask_dir) > 1:
-        final = final.drop('AreaSqKM', axis=1)
-        tblRP = dbf2DF('%s/%s.tif.vat.dbf' % (mask_dir, zone))
-        tblRP['AreaSqKM'] = (tblRP.COUNT * 900) * 1e-6
-        tblRP['AreaSqKM'] = tblRP['AreaSqKM'].fillna(0)
-        final = pd.merge(final, tblRP, left_on='GRIDCODE', right_on='VALUE', how='left')
-        final = final[['FEATUREID', 'AreaSqKM', fld]]
-    if len(mask_dir) == 0:
-        final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0)       
+    final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0)       
     cols = ['COMID', 'Cat%sAreaSqKm' % appendMetric, 'Cat%sCount' % appendMetric]
     if not summaryfield == None: # Summarize fields in list with gpd table including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
@@ -545,6 +545,10 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
             final.columns = ['COMID','CatRp100AreaSqKm','CatRp100Count','CatRp100PctFull']
     final['Cat%sPctFull' % appendMetric] = final['Cat%sPctFull' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
     #print "elapsed time " + str(dt.now()-startTime)
+    for name in final.columns:
+        if 'AreaSqKm' in name:
+            area = name
+    final.loc[(final[area] == 0), final.columns[2:]] = np.nan
     return final
 ##############################################################################
 
