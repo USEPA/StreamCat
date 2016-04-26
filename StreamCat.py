@@ -101,11 +101,11 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                     inZoneData = NHD_dir + '/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.shp' % (hydroregion, zone)
                     cat = PointInPoly(points, inZoneData, pct_full, summaryfield)
                 cat.to_csv('%s/%s_%s.csv' % (out_dir, FullTableName, zone), index=False)
-                in2accum = len(cat.columns)
         print 'Cat Results Complete in : ' + str(dt.now()-catTime)
         accumTime = dt.now()
         for zone in inputs:
             cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
+            in2accum = len(cat.columns)
             if len(cat.columns) == in2accum:
                 if zone in interVPUtbl.ToZone.values:
                     cat = appendConnectors(cat, Connector, zone, interVPUtbl)
