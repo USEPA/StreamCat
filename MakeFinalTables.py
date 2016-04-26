@@ -57,29 +57,14 @@ for table in tables:
                     colname1 = metricName + 'Cat' + appendMetric
                     colname2 = metricName + 'Ws' + appendMetric
                     tbl[colname1] = ((tbl.CatSum/tbl.CatCount) * conversion)
-                    tbl[colname2] = ((tbl.WsSum/tbl.WsCount) * conversion)
-                    if table == 'RoadStreamCrossings':
-                        finalNameList = []
-                        addName = 'SlpWtd'
-                        fnlname1 = metricName + addName + 'Cat' + appendMetric
-                        fnlname2 = metricName + addName + 'Ws' + appendMetric                         
-                        tbl[fnlname1] = tbl['Cat' + addName] / (tbl[catArea] * (tbl[catPct]/100))
-                        tbl[fnlname2] = tbl['Ws' + addName] / (tbl[wsArea] * (tbl[wsPct]/100)) 
-                        finalNameList.append(fnlname1)
-                        finalNameList.append(fnlname2)                         
+                    tbl[colname2] = ((tbl.WsSum/tbl.WsCount) * conversion)                        
                     if var == 0:
-                        if table == 'RoadStreamCrossings':
-                            final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
-                        else: 
-                            final = tbl[frontCols + [colname1] + [colname2]]
+                        final = tbl[frontCols + [colname1] + [colname2]]
                     else: 
-                        if table == 'RoadStreamCrossings':
-                            final = pd.merge(final,tbl[["COMID"] + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]],on='COMID')
-                        else:
-                            final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')
+                        final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')
                 if metricType == 'Density':
-                    colname1 = metricName + 'DensCat' + appendMetric
-                    colname2 = metricName + 'DensWs' + appendMetric                   
+                    colname1 = metricName + 'Cat' + appendMetric
+                    colname2 = metricName + 'Ws' + appendMetric                   
                     if summary:
                         finalNameList = []
                         for sname in summary: 
@@ -89,8 +74,12 @@ for table in tables:
                             tbl[fnlname2] = tbl['Ws' + sname] / (tbl[wsArea] * (tbl[wsPct]/100)) 
                             finalNameList.append(fnlname1)
                             finalNameList.append(fnlname2)
-                    tbl[colname1] = tbl.CatCount / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
-                    tbl[colname2] = tbl.WsCount / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
+                    if table == 'RoadStreamCrossings':
+                        tbl[colname1] = tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
+                    else:
+                        tbl[colname1] = tbl.CatCount / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = tbl.WsCount / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
                     if var == 0:
                         if summary:
                             final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
@@ -103,10 +92,6 @@ for table in tables:
                             final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')              
                 if metricType == 'Percent':
                     lookup = pd.read_csv(metricName)                    
-#                    if table == 'Lithology':                       
-#                        tbl['CatVALUE_12'] = tbl['CatVALUE_12'] + tbl['CatVALUE_14']
-#                        tbl['WsVALUE_12'] = tbl['WsVALUE_12'] + tbl['WsVALUE_14']
-#                        tbl = tbl.drop(['CatVALUE_14','WsVALUE_14'], axis=1)
                     catcols,wscols = [],[]
                     for col in tbl.columns:
                         if 'CatVALUE' in col and not 'Up' in col:
@@ -114,9 +99,16 @@ for table in tables:
                             catcols.append(col)
                         if 'WsVALUE' in col:
                             tbl[col] = ((tbl[col] * 1e-6)/(tbl[wsArea]*(tbl[wsPct]/100))*100)
-                            wscols.append(col) 
-                    final = tbl[frontCols+catcols + wscols] 
-                    final.columns = frontCols + ['Pct' + x + 'Cat' + appendMetric for x in lookup.final_val.values] + ['Pct' + y + 'Ws' + appendMetric for y in lookup.final_val.values]                         
+                            wscols.append(col)           
+                    if var == 0:
+                        final = tbl[frontCols+catcols + wscols]
+                        final.columns = frontCols + ['Pct' + x + 'Cat' + appendMetric for x in lookup.final_val.values] + ['Pct' + y + 'Ws' + appendMetric for y in lookup.final_val.values]
+                    else:
+                        final2 = tbl[['COMID'] + catcols + wscols]
+                        final2.columns = ['COMID'] + ['Pct' + x + 'Cat' + appendMetric for x in lookup.final_val.values] + ['Pct' + y + 'Ws' + appendMetric for y in lookup.final_val.values]
+                        final = pd.merge(final,final2,on='COMID')
+                        if table == 'AgMidHiSlopes':
+                            final = final.drop(['PctUnknown1Cat','PctUnknown2Cat','PctUnknown1Ws', 'PctUnknown2Ws'], axis=1)
             final = final.set_index('COMID').fillna('NA')
             if zone == '04':
                 rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
@@ -124,3 +116,13 @@ for table in tables:
             final = final[final.columns.tolist()[:5] + [x for x in final.columns[5:] if 'Cat' in x] + [x for x in final.columns[5:] if 'Ws' in x]].fillna('NA')                  
             final.to_csv(outDir  + '/%s_Region%s.csv'%(table,zone))
     print 'All Done.....'
+
+#                    if table == 'RoadStreamCrossings':
+#                        finalNameList = []
+#                        addName = 'SlpWtd'
+#                        fnlname1 = metricName + addName + 'Cat' + appendMetric
+#                        fnlname2 = metricName + addName + 'Ws' + appendMetric                         
+#                        tbl[fnlname1] = tbl['Cat' + addName] / (tbl[catArea] * (tbl[catPct]/100))
+#                        tbl[fnlname2] = tbl['Ws' + addName] / (tbl[wsArea] * (tbl[wsPct]/100)) 
+#                        finalNameList.append(fnlname1)
+#                        finalNameList.append(fnlname2) 

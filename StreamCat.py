@@ -80,9 +80,7 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
         if type(ctl.summaryfield[line]) == str:
             summaryfield = ctl.summaryfield[line].split(';')
         if accum_type == 'Point':  # Load in point geopandas table and Pct_Full table 
-            pct_full = dbf2DF(pct_full_file)[['FEATUREID', 'PCT_FULL']]  # pct_full_file ='L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/QA/BorderCatchmentPCT_FULL/catFINAL_Clip.dbf'
-            pct_full['PCT_FULL'] = pct_full['PCT_FULL']*100
-            pct_full.columns = ['COMID', 'CatPctFull']
+            pct_full = pd.read_csv(pct_full_file)
             points = gpd.GeoDataFrame.from_file(LandscapeLayer)
         if not os.path.exists(out_dir):
             os.mkdir(out_dir)
@@ -99,9 +97,14 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                     cat = createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, RPU, mask_dir, NHD_dir, hydroregion, appendMetric)
                 if accum_type == 'Point':
                     inZoneData = NHD_dir + '/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.shp' % (hydroregion, zone)
-                    cat = PointInPoly(points, inZoneData, pct_full, summaryfield)
+                    cat = PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summaryfield)
                 cat.to_csv('%s/%s_%s.csv' % (out_dir, FullTableName, zone), index=False)
-        print 'Cat Results Complete in : ' + str(dt.now()-catTime)
+                in2accum = len(cat.columns)
+        print 'Cat Results Complete in : ' + str(dt.now()-catTime)     
+        try:
+            in2accum
+        except NameError:
+            in2accum = len(pd.read_csv('%s/%s_%s.csv' % (out_dir, FullTableName, zone)).columns)
         accumTime = dt.now()
         for zone in inputs:
             cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
