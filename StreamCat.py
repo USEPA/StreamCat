@@ -46,7 +46,6 @@ NHD_dir = ctl.DirectoryLocations.values[1]
 out_dir = ctl.DirectoryLocations.values[2]
 numpy_dir = ctl.DirectoryLocations.values[3]
 interVPU_dir = ctl.DirectoryLocations.values[4]
-pct_full_file = ctl.DirectoryLocations.values[5]
 mask_dir = ctl.DirectoryLocations.values[8]
 #####################################################################################################################
 inputs = OrderedDict([('10U', 'MS'), ('10L', 'MS'), ('07', 'MS'), ('11', 'MS'), ('06', 'MS'),
@@ -80,6 +79,10 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
         if type(ctl.summaryfield[line]) == str:
             summaryfield = ctl.summaryfield[line].split(';')
         if accum_type == 'Point':  # Load in point geopandas table and Pct_Full table 
+            if mask == 0:
+                pct_full_file = ctl.DirectoryLocations.values[5]
+            if mask == 1:
+                pct_full_file = ctl.DirectoryLocations.values[9]
             pct_full = pd.read_csv(pct_full_file)
             points = gpd.GeoDataFrame.from_file(LandscapeLayer)
         if not os.path.exists(out_dir):

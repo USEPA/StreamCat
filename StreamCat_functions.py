@@ -527,23 +527,23 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on='FEATUREID', lsuffix='_', how='left')
     final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0)       
-    cols = ['COMID', 'Cat%sAreaSqKm' % appendMetric, 'Cat%sCount' % appendMetric]
+    cols = ['COMID', 'CatAreaSqKm%s' % appendMetric, 'CatCount%s' % appendMetric]
     if not summaryfield == None: # Summarize fields in list with gpd table including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby('FEATUREID')
         for x in summaryfield: # Sum the field in summary field list for each catchment
             point_poly_stats = grouped2[x].sum()
             final = final.join(point_poly_stats, on='FEATUREID', how='left').fillna(0)
-            cols.append('Cat' + appendMetric + x)
+            cols.append('Cat' + x + appendMetric)
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on='COMID', how='left')
     if len(mask_dir) > 0:
         if not summaryfield == None:
-            final.columns = ['COMID','CatRp100AreaSqKm','CatRp100Count']+ ['Cat' + appendMetric + x for x in summaryfield] + ['CatRp100PctFull']
+            final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100']+ ['Cat'  + x + appendMetricfor x in summaryfield] + ['CatPctFullRp100']
         else:
-            final.columns = ['COMID','CatRp100AreaSqKm','CatRp100Count','CatRp100PctFull']
-    final['Cat%sPctFull' % appendMetric] = final['Cat%sPctFull' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
+            final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100','CatPctFullRp100']
+    final['CatPctFull%s' % appendMetric] = final['CatPctFull%s' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
     #print "elapsed time " + str(dt.now()-startTime)
     for name in final.columns:
         if 'AreaSqKm' in name:
