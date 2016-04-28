@@ -540,7 +540,7 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     final = pd.merge(final, pct_full, on='COMID', how='left')
     if len(mask_dir) > 0:
         if not summaryfield == None:
-            final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100']+ ['Cat'  + x + appendMetricfor x in summaryfield] + ['CatPctFullRp100']
+            final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100']+ ['Cat'  + x + appendMetric for x in summaryfield] + ['CatPctFullRp100']
         else:
             final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100','CatPctFullRp100']
     final['CatPctFull%s' % appendMetric] = final['CatPctFull%s' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
