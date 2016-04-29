@@ -56,8 +56,8 @@ for table in tables:
                 if metricType == 'Mean':   
                     colname1 = metricName + 'Cat' + appendMetric
                     colname2 = metricName + 'Ws' + appendMetric
-                    tbl[colname1] = ((tbl.CatSum/tbl.CatCount) * conversion)
-                    tbl[colname2] = ((tbl.WsSum/tbl.WsCount) * conversion)                        
+                    tbl[colname1] = ((tbl['CatSum%s' % appendMetric] / tbl['CatCount%s' % appendMetric]) * conversion)
+                    tbl[colname2] = ((tbl['WsSum%s' % appendMetric] / tbl['WsCount%s' % appendMetric]) * conversion)                        
                     if var == 0:
                         final = tbl[frontCols + [colname1] + [colname2]]
                     else: 
@@ -78,8 +78,8 @@ for table in tables:
                         tbl[colname1] = tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
                         tbl[colname2] = tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
                     else:
-                        tbl[colname1] = tbl['Cat%sCount' % appendMetric] / (tbl['Cat%sAreaSqKm' % appendMetric] * (tbl['Cat%sPctFull' % appendMetric]/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
-                        tbl[colname2] = tbl['Ws%sCount' % appendMetric] / (tbl['Ws%sAreaSqKm' % appendMetric] * (tbl['Ws%sPctFull' % appendMetric]/100))                      
+                        tbl[colname1] = tbl['CatCount%s' % appendMetric] / (tbl['CatAreaSqKm%s' % appendMetric] * (tbl['CatPctFull%s' % appendMetric]/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = tbl['WsCount%s' % appendMetric] / (tbl['WsAreaSqKm%s' % appendMetric] * (tbl['WsPctFull%s' % appendMetric]/100))                      
                     if var == 0:
                         if summary:
                             final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
