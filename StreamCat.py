@@ -31,7 +31,7 @@ import os
 import pandas as pd
 # Load table used in function argument
 ctl = pd.read_csv(sys.argv[1])
-# ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv')
+#ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_MW.csv')
 
 # Import system modules
 from collections import OrderedDict

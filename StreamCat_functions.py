@@ -52,7 +52,7 @@ def dbf2DF(dbfile, upper=True):
     db.close()  #Close dbf 
     pandasDF = pd.DataFrame(cols)
     if upper == True:
-        pandasDF.columns = map(str.upper, pandasDF.columns.values) 
+        pandasDF.columns = pandasDF.columns.str.upper() 
     return pandasDF
 ##############################################################################
 
