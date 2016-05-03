@@ -527,23 +527,23 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on='FEATUREID', lsuffix='_', how='left')
     final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0)       
-    cols = ['COMID', 'Cat%sAreaSqKm' % appendMetric, 'Cat%sCount' % appendMetric]
+    cols = ['COMID', 'CatAreaSqKm%s' % appendMetric, 'CatCount%s' % appendMetric]
     if not summaryfield == None: # Summarize fields in list with gpd table including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby('FEATUREID')
         for x in summaryfield: # Sum the field in summary field list for each catchment
             point_poly_stats = grouped2[x].sum()
             final = final.join(point_poly_stats, on='FEATUREID', how='left').fillna(0)
-            cols.append('Cat' + appendMetric + x)
+            cols.append('Cat' + x + appendMetric)
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on='COMID', how='left')
     if len(mask_dir) > 0:
         if not summaryfield == None:
-            final.columns = ['COMID','CatRp100AreaSqKm','CatRp100Count']+ ['Cat' + appendMetric + x for x in summaryfield] + ['CatRp100PctFull']
+            final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100']+ ['Cat'  + x + appendMetric for x in summaryfield] + ['CatPctFullRp100']
         else:
-            final.columns = ['COMID','CatRp100AreaSqKm','CatRp100Count','CatRp100PctFull']
-    final['Cat%sPctFull' % appendMetric] = final['Cat%sPctFull' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
+            final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100','CatPctFullRp100']
+    final['CatPctFull%s' % appendMetric] = final['CatPctFull%s' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
     #print "elapsed time " + str(dt.now()-startTime)
     for name in final.columns:
         if 'AreaSqKm' in name:
@@ -781,17 +781,17 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         tbl2 = pd.merge(tbl2, nhdtbl, how='right', left_on='VALUE', right_on='GRIDCODE').fillna(0).drop('VALUE', axis=1)
         result = pd.merge(tbl2, tbl, left_on='GRIDCODE', right_on='VALUE', how='left')             
         if accum_type == 'Continuous':
-            result['%sPctFull' % appendMetric] = ((result.COUNT_y / result.COUNT_x) * 100)
-            result['%sAreaSqKm' % appendMetric] = (result.COUNT_x * 900) * 1e-6
-            result.loc[(result['%sAreaSqKm' % appendMetric] > 0) & (result['SUM'].isnull()), '%sPctFull' % appendMetric] = 0  # identifies that there is a riparion zone, but no coverage
-            result = result[['FEATUREID', '%sAreaSqKm' % appendMetric, 'COUNT_y', 'SUM', '%sPctFull' % appendMetric]]
-            result.columns = ['COMID', '%sAreaSqKm' % appendMetric, 'Count', 'Sum', '%sPctFull' % appendMetric]
+            result['PctFull%s' % appendMetric] = ((result.COUNT_y / result.COUNT_x) * 100)
+            result['AreaSqKm%s' % appendMetric] = (result.COUNT_x * 900) * 1e-6
+            result.loc[(result['AreaSqKm%s' % appendMetric] > 0) & (result['SUM'].isnull()), 'PctFull%s' % appendMetric] = 0  # identifies that there is a riparion zone, but no coverage
+            result = result[['FEATUREID', 'AreaSqKm%s' % appendMetric, 'COUNT_y', 'SUM', 'PctFull%s' % appendMetric]]
+            result.columns = ['COMID', 'AreaSqKm%s' % appendMetric, 'Count%s' % appendMetric, 'Sum%s' % appendMetric, 'PctFull%s' % appendMetric]
         if accum_type == 'Categorical':
             result['TotCount'] = result[tbl.columns.tolist()[1:]].sum(axis=1)
-            result['%sPctFull' % appendMetric] = ((result.TotCount/(result.COUNT * 900)) * 100)
-            result['%sAreaSqKm' % appendMetric] = (result.COUNT * 900) * 1e-6
-            result = result[['FEATUREID','%sAreaSqKm' % appendMetric]+tbl.columns.tolist()[1:]+['%sPctFull' % appendMetric]]
-            result.columns = ['COMID','%sAreaSqKm' % appendMetric]+tbl.columns.tolist()[1:]+['%sPctFull' % appendMetric]
+            result['PctFull%s' % appendMetric] = ((result.TotCount/(result.COUNT * 900)) * 100)
+            result['AreaSqKm%s' % appendMetric] = (result.COUNT * 900) * 1e-6
+            result = result[['FEATUREID','AreaSqKm%s' % appendMetric] + tbl.columns.tolist()[1:] + ['PctFull%s' % appendMetric]]
+            result.columns = ['COMID','AreaSqKm%s' % appendMetric] + [lbl + appendMetric for lbl in tbl.columns.tolist()[1:]] + ['PctFull%s' % appendMetric]
     else:
         if accum_type == 'Continuous':
             table = table[['VALUE', 'AREA', 'COUNT', 'SUM']]
