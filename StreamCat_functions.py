@@ -706,8 +706,8 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
         outDF.columns = np.append('COMID', 'Up' + cols.values)
     for name in outDF.columns:
         if 'AreaSqKm' in name:
-            area = name
-    outDF.loc[(outDF[area] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table
+            areaName = name
+    outDF.loc[(outDF[areaName] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table
     return outDF
 ##############################################################################
 
