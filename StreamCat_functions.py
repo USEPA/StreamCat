@@ -1002,6 +1002,16 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
 def makeVPUdict(directory, order=['10U','10L','07','11','06','05','08','01',
                                   '02','03N','03S','03W','04','09','12','13',
                                   '14','15','16','17','18']):
+    '''
+    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
+    Creates an OrderdDict for looping through regions of the NHD to carry InterVPU 
+    connections across VPU zones
+
+    Arguments
+    ---------
+    directory             : the directory contining NHDPlus data at the top level
+    order                 : list to order the VPU zones 
+    '''
     B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
     B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
     inputs = OrderedDict()
@@ -1017,6 +1027,14 @@ def makeVPUdict(directory, order=['10U','10L','07','11','06','05','08','01',
 
 
 def makeRPUdict(directory):
+    '''
+    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
+    Creates an OrderdDict for looping through regions of the NHD RPU zones
+
+    Arguments
+    ---------
+    directory             : the directory contining NHDPlus data at the top level
+    '''
     B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
     B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)      
     rpuinputs = OrderedDict()
