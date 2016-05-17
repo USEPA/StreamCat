@@ -19,7 +19,7 @@ import pysal as ps
 import numpy as np
 import pandas as pd
 from datetime import datetime as dt
-from collections import deque, defaultdict
+from collections import deque, defaultdict, OrderedDict
 from osgeo import gdal, osr
 from gdalconst import *
 import rasterio
@@ -996,3 +996,38 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
             np.save(wdc + '/lengths' + zone + '.npy', lengths)
             print("--- %s seconds ---" % (dt.now() - start_time))
             print '___________________'
+##############################################################################
+
+
+def makeVPUdict(directory):
+    B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
+    B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
+    inputs = OrderedDict()
+    for idx, row in B.groupby('UNITID'):
+        if row.UNITTYPE.any() == 'VPU':
+            hr = row.DRAINAGEID.values[0]
+            zone = row.UNITID.values[0]
+            print 'HydroRegion (value): ' + hr + ' in VPU (key): ' + zone
+            inputs[zone] = hr
+    return inputs
+##############################################################################
+
+
+def makeRPUdict(directory):
+    B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
+    B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)      
+    rpuinputs = OrderedDict()
+    for idx, row in B.groupby('UNITID'):
+        if row.UNITTYPE.any() == 'RPU':
+            hr = row.DRAINAGEID.values[0]
+            rpu = row.UNITID.values[0]
+            for root, dirs, files in os.walk('%s/NHDPlus%s' % (directory, hr)):
+                for name in dirs:
+                    if rpu in os.path.join(root, name):
+                        zone = os.path.join(root, name).split('\\')[-3].replace('NHDPlus','')
+                        break
+            if not zone in rpuinputs.keys():
+                rpuinputs[zone] = []
+            print 'RPU: ' + rpu + ' in zone: ' + zone 
+            rpuinputs[zone].append(row.UNITID.values[0])
+    return rpuinputs
