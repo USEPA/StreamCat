@@ -999,7 +999,9 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
 ##############################################################################
 
 
-def makeVPUdict(directory):
+def makeVPUdict(directory, order=['10U','10L','07','11','06','05','08','01',
+                                  '02','03N','03S','03W','04','09','12','13',
+                                  '14','15','16','17','18']):
     B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
     B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
     inputs = OrderedDict()
@@ -1009,6 +1011,7 @@ def makeVPUdict(directory):
             zone = row.UNITID.values[0]
             print 'HydroRegion (value): ' + hr + ' in VPU (key): ' + zone
             inputs[zone] = hr
+    inputs = OrderedDict((k, inputs[k]) for k in order)
     return inputs
 ##############################################################################
 
