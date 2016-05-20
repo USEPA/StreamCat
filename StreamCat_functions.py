@@ -999,9 +999,7 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
 ##############################################################################
 
 
-def makeVPUdict(directory, order=['10U','10L','07','11','06','05','08','01',
-                                  '02','03N','03S','03W','04','09','12','13',
-                                  '14','15','16','17','18']):
+def makeVPUdict(directory):
     '''
     __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
     Creates an OrderdDict for looping through regions of the NHD to carry InterVPU 
@@ -1010,19 +1008,15 @@ def makeVPUdict(directory, order=['10U','10L','07','11','06','05','08','01',
     Arguments
     ---------
     directory             : the directory contining NHDPlus data at the top level
-    order                 : list to order the VPU zones 
     '''
     B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
     B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
-    inputs = OrderedDict()
-    for idx, row in B.groupby('UNITID'):
-        if row.UNITTYPE.any() == 'VPU':
-            hr = row.DRAINAGEID.values[0]
-            zone = row.UNITID.values[0]
-            print 'HydroRegion (value): ' + hr + ' in VPU (key): ' + zone
-            inputs[zone] = hr
-    inputs = OrderedDict((k, inputs[k]) for k in order)
-    return inputs
+    B = B.ix[B.UNITTYPE == 'VPU'].sort_values('HYDROSEQ',ascending=False)
+    inputs = OrderedDict()  # inputs = OrderedDict((k, inputs[k]) for k in order)
+    for idx, row in B.iterrows():
+        inputs[row.UNITID] = row.DRAINAGEID
+        print 'HydroRegion (value): ' + row.DRAINAGEID + ' in VPU (key): ' + row.UNITID
+    return inputs 
 ##############################################################################
 
 
@@ -1052,3 +1046,24 @@ def makeRPUdict(directory):
             print 'RPU: ' + rpu + ' in zone: ' + zone 
             rpuinputs[zone].append(row.UNITID.values[0])
     return rpuinputs
+##############################################################################
+
+    
+def findUpstreamNpy(zone, com, numpy_dir):
+    '''
+    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
+    Creates an OrderdDict for looping through regions of the NHD RPU zones
+
+    Arguments
+    ---------
+    zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
+    com                   : COMID of NHD Catchment
+    numpy_dir             : directory where .npy files are stored
+    '''
+    comids = np.load(numpy_dir + '/comids' + zone + '.npy')
+    lengths= np.load(numpy_dir + '/lengths' + zone + '.npy')
+    upStream = np.load(numpy_dir + '/upStream' + zone + '.npy')
+    itemindex = int(np.where(comids == com)[0])
+    n = lengths[:itemindex].sum()
+    arrlen = lengths[itemindex]
+    return upStream[n:n+arrlen]
