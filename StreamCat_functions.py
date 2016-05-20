@@ -1016,7 +1016,8 @@ def makeVPUdict(directory):
     for idx, row in B.iterrows():
         inputs[row.UNITID] = row.DRAINAGEID
         print 'HydroRegion (value): ' + row.DRAINAGEID + ' in VPU (key): ' + row.UNITID
-    return inputs 
+    np.save('%s/StreamCat_npy/zoneInputs.npy' % directory, inputs)
+    return inputs
 ##############################################################################
 
 
@@ -1045,6 +1046,7 @@ def makeRPUdict(directory):
                 rpuinputs[zone] = []
             print 'RPU: ' + rpu + ' in zone: ' + zone 
             rpuinputs[zone].append(row.UNITID.values[0])
+    np.save('%s/StreamCat_npy/rpuInputs.npy' % directory, rpuinputs)
     return rpuinputs
 ##############################################################################
 
