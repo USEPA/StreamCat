@@ -1059,7 +1059,7 @@ def findUpstreamNpy(zone, com, numpy_dir):
     Arguments
     ---------
     zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
-    com                   : COMID of NHD Catchment
+    com                   : COMID of NHD Catchment, integer
     numpy_dir             : directory where .npy files are stored
     '''
     comids = np.load(numpy_dir + '/comids' + zone + '.npy')
