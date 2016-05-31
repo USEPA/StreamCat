@@ -29,6 +29,7 @@
 import sys
 import os
 import pandas as pd
+import numpy as np
 # Load table used in function argument
 ctl = pd.read_csv(sys.argv[1])
 #ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_MW.csv')
@@ -37,27 +38,29 @@ ctl = pd.read_csv(sys.argv[1])
 from collections import OrderedDict
 from datetime import datetime as dt
 import geopandas as gpd
-sys.path.append(ctl.DirectoryLocations.values[6])  # sys.path.append('D:/Projects/Scipts')
-from StreamCat_functions import createAccumTable, appendConnectors, createCatStats, interVPU, dbf2DF, PointInPoly, makeNumpyVectors
+sys.path.append(ctl.DirectoryLocations.values[5])  # sys.path.append('D:/Projects/Scipts')
+from StreamCat_functions import createAccumTable, appendConnectors, createCatStats, interVPU, PointInPoly, makeNumpyVectors, makeVPUdict
 #####################################################################################################################
 # Populate variables from control table
 ingrid_dir = ctl.DirectoryLocations.values[0]
 NHD_dir = ctl.DirectoryLocations.values[1]
 out_dir = ctl.DirectoryLocations.values[2]
-numpy_dir = ctl.DirectoryLocations.values[3]
-interVPU_dir = ctl.DirectoryLocations.values[4]
-mask_dir = ctl.DirectoryLocations.values[8]
+numpy_dir = '%s/StreamCat_npy' % NHD_dir
+interVPU_dir = ctl.DirectoryLocations.values[3]
+mask_dir = ctl.DirectoryLocations.values[7]
 #####################################################################################################################
-inputs = OrderedDict([('10U', 'MS'), ('10L', 'MS'), ('07', 'MS'), ('11', 'MS'), ('06', 'MS'),
-                      ('05', 'MS'), ('08', 'MS'), ('01', 'NE'), ('02', 'MA'), ('03N', 'SA'),
-                      ('03S', 'SA'), ('03W', 'SA'), ('04', 'GL'), ('09', 'SR'), ('12', 'TX'),
-                      ('13', 'RG'), ('14', 'CO'), ('15', 'CO'), ('16', 'GB'), ('17', 'PN'),
-                      ('18', 'CA')])
 totTime = dt.now()
 interVPUtbl = pd.read_csv(interVPU_dir)  # Load Inter_VPU table
 if not os.path.exists(numpy_dir):
     os.mkdir(numpy_dir)
     makeNumpyVectors(numpy_dir, interVPUtbl, inputs, NHD_dir)
+if not os.path.exists('%s/StreamCat_npy/zoneInputs.npy' % NHD_dir):
+    inputs = makeVPUdict(NHD_dir)
+else:
+    inputs = np.load('%s/StreamCat_npy/zoneInputs.npy' % NHD_dir).item()
+    
+    
+    
 for line in range(len(ctl.values)):  # loop through each FullTableName in control table
     if ctl.run[line] == 1:   # check 'run' field from the table, if 1 run, if not, skip
         # break
@@ -80,9 +83,9 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
             summaryfield = ctl.summaryfield[line].split(';')
         if accum_type == 'Point':  # Load in point geopandas table and Pct_Full table 
             if mask == 0:
-                pct_full_file = ctl.DirectoryLocations.values[5]
+                pct_full_file = ctl.DirectoryLocations.values[4]
             if mask == 1:
-                pct_full_file = ctl.DirectoryLocations.values[9]
+                pct_full_file = ctl.DirectoryLocations.values[8]
             pct_full = pd.read_csv(pct_full_file)
             points = gpd.GeoDataFrame.from_file(LandscapeLayer)
         if not os.path.exists(out_dir):

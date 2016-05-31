@@ -215,21 +215,20 @@ def Reclass(inras, outras, reclass_dict, dtype=None):
             #Set dtype and nodata values
             if dtype is None: #If no dtype defined, use input dtype
                 nd = src.meta['nodata']
-                dt = src.meta['dtype']
+                dtype = src.meta['dtype']
             else:
                 try:
                     nd = eval('np.iinfo(np.' + dtype + ').max')
                 except:
                     nd = eval('np.finfo(np.' + dtype + ').max')
                 #exec 'nd = np.iinfo(np.'+out_dtype+').max'
-                dt = dtype
             kwargs = src.meta.copy()
             kwargs.update(
                 driver='GTiff',
                 count=1,
                 compress='lzw',
                 nodata=nd,
-                dtype = dt,
+                dtype = dtype,
                 bigtiff='YES'  # Output will be larger than 4GB
             )
 
@@ -239,13 +238,13 @@ def Reclass(inras, outras, reclass_dict, dtype=None):
                 for idx, window in windows:
                     src_data = src.read(1, window=window)
                     # Convert values
-#                    src_data = np.where(src_data == in_nodata, nd, src_data).astype(dt)
+#                    src_data = np.where(src_data == in_nodata, nd, src_data).astype(dtype)
                     for inval,outval in reclass_dict.iteritems():
                         if np.isnan(outval).any():
-    #                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dt)
-                            src_data = np.where(src_data == inval, nd, src_data).astype(dt)
+    #                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
+                            src_data = np.where(src_data == inval, nd, src_data).astype(dtype)
                         else:
-                            src_data = np.where(src_data == inval, outval, src_data).astype(dt)
+                            src_data = np.where(src_data == inval, outval, src_data).astype(dtype)
 #                    src_data = np.where(src_data == inval, outval, src_data)
                     dst_data = src_data
                     dst.write_band(1, dst_data, window=window)
@@ -1033,10 +1032,10 @@ def makeRPUdict(directory):
     B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
     B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)      
     rpuinputs = OrderedDict()
-    for idx, row in B.groupby('UNITID'):
-        if row.UNITTYPE.any() == 'RPU':
-            hr = row.DRAINAGEID.values[0]
-            rpu = row.UNITID.values[0]
+    for idx, row in B.iterrows():
+        if row.UNITTYPE == 'RPU':
+            hr = row.DRAINAGEID
+            rpu = row.UNITID
             for root, dirs, files in os.walk('%s/NHDPlus%s' % (directory, hr)):
                 for name in dirs:
                     if rpu in os.path.join(root, name):
@@ -1045,7 +1044,7 @@ def makeRPUdict(directory):
             if not zone in rpuinputs.keys():
                 rpuinputs[zone] = []
             print 'RPU: ' + rpu + ' in zone: ' + zone 
-            rpuinputs[zone].append(row.UNITID.values[0])
+            rpuinputs[zone].append(row.UNITID)
     np.save('%s/StreamCat_npy/rpuInputs.npy' % directory, rpuinputs)
     return rpuinputs
 ##############################################################################
