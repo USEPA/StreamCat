@@ -19,7 +19,7 @@ import pysal as ps
 import numpy as np
 import pandas as pd
 from datetime import datetime as dt
-from collections import deque, defaultdict
+from collections import deque, defaultdict, OrderedDict
 from osgeo import gdal, osr, ogr
 from gdalconst import *
 import rasterio
@@ -253,21 +253,20 @@ def Reclass(inras, outras, reclass_dict, dtype=None):
             #Set dtype and nodata values
             if dtype is None: #If no dtype defined, use input dtype
                 nd = src.meta['nodata']
-                dt = src.meta['dtype']
+                dtype = src.meta['dtype']
             else:
                 try:
                     nd = eval('np.iinfo(np.' + dtype + ').max')
                 except:
                     nd = eval('np.finfo(np.' + dtype + ').max')
                 #exec 'nd = np.iinfo(np.'+out_dtype+').max'
-                dt = dtype
             kwargs = src.meta.copy()
             kwargs.update(
                 driver='GTiff',
                 count=1,
                 compress='lzw',
                 nodata=nd,
-                dtype = dt,
+                dtype = dtype,
                 bigtiff='YES'  # Output will be larger than 4GB
             )
 
@@ -277,13 +276,13 @@ def Reclass(inras, outras, reclass_dict, dtype=None):
                 for idx, window in windows:
                     src_data = src.read(1, window=window)
                     # Convert values
-#                    src_data = np.where(src_data == in_nodata, nd, src_data).astype(dt)
+#                    src_data = np.where(src_data == in_nodata, nd, src_data).astype(dtype)
                     for inval,outval in reclass_dict.iteritems():
                         if np.isnan(outval).any():
-    #                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dt)
-                            src_data = np.where(src_data == inval, nd, src_data).astype(dt)
+    #                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
+                            src_data = np.where(src_data == inval, nd, src_data).astype(dtype)
                         else:
-                            src_data = np.where(src_data == inval, outval, src_data).astype(dt)
+                            src_data = np.where(src_data == inval, outval, src_data).astype(dtype)
 #                    src_data = np.where(src_data == inval, outval, src_data)
                     dst_data = src_data
                     dst.write_band(1, dst_data, window=window)
@@ -744,8 +743,8 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
         outDF.columns = np.append('COMID', 'Up' + cols.values)
     for name in outDF.columns:
         if 'AreaSqKm' in name:
-            area = name
-    outDF.loc[(outDF[area] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table
+            areaName = name
+    outDF.loc[(outDF[areaName] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table
     return outDF
 ##############################################################################
 
@@ -991,10 +990,10 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
     cat = np.load(directory + '/allCatCOMs.npy')
     cats = set(cat)
     cats.discard(0)
+    os.mkdir(directory + '/bastards')
+    os.mkdir(directory + '/children')            
     for zone in inputs:
         if not os.path.exists(directory +'/bastards' + '/upStream' + zone + '.npy'):  #directory = 'D:/Projects/CatCOMs'
-            os.mkdir(directory + '/bastards')
-            os.mkdir(directory + '/children')            
             print zone
             hydroregion = inputs[zone]
             print 'Making UpStreamComs dictionary...'
@@ -1034,3 +1033,76 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
             np.save(wdc + '/lengths' + zone + '.npy', lengths)
             print("--- %s seconds ---" % (dt.now() - start_time))
             print '___________________'
+##############################################################################
+
+
+def makeVPUdict(directory):
+    '''
+    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
+    Creates an OrderdDict for looping through regions of the NHD to carry InterVPU 
+    connections across VPU zones
+
+    Arguments
+    ---------
+    directory             : the directory contining NHDPlus data at the top level
+    '''
+    B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
+    B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
+    B = B.ix[B.UNITTYPE == 'VPU'].sort_values('HYDROSEQ',ascending=False)
+    inputs = OrderedDict()  # inputs = OrderedDict((k, inputs[k]) for k in order)
+    for idx, row in B.iterrows():
+        inputs[row.UNITID] = row.DRAINAGEID
+        print 'HydroRegion (value): ' + row.DRAINAGEID + ' in VPU (key): ' + row.UNITID
+    np.save('%s/StreamCat_npy/zoneInputs.npy' % directory, inputs)
+    return inputs
+##############################################################################
+
+
+def makeRPUdict(directory):
+    '''
+    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
+    Creates an OrderdDict for looping through regions of the NHD RPU zones
+
+    Arguments
+    ---------
+    directory             : the directory contining NHDPlus data at the top level
+    '''
+    B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
+    B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)      
+    rpuinputs = OrderedDict()
+    for idx, row in B.iterrows():
+        if row.UNITTYPE == 'RPU':
+            hr = row.DRAINAGEID
+            rpu = row.UNITID
+            for root, dirs, files in os.walk('%s/NHDPlus%s' % (directory, hr)):
+                for name in dirs:
+                    if rpu in os.path.join(root, name):
+                        zone = os.path.join(root, name).split('\\')[-3].replace('NHDPlus','')
+                        break
+            if not zone in rpuinputs.keys():
+                rpuinputs[zone] = []
+            print 'RPU: ' + rpu + ' in zone: ' + zone 
+            rpuinputs[zone].append(row.UNITID)
+    np.save('%s/StreamCat_npy/rpuInputs.npy' % directory, rpuinputs)
+    return rpuinputs
+##############################################################################
+
+    
+def findUpstreamNpy(zone, com, numpy_dir):
+    '''
+    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
+    Creates an OrderdDict for looping through regions of the NHD RPU zones
+
+    Arguments
+    ---------
+    zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
+    com                   : COMID of NHD Catchment, integer
+    numpy_dir             : directory where .npy files are stored
+    '''
+    comids = np.load(numpy_dir + '/comids' + zone + '.npy')
+    lengths= np.load(numpy_dir + '/lengths' + zone + '.npy')
+    upStream = np.load(numpy_dir + '/upStream' + zone + '.npy')
+    itemindex = int(np.where(comids == com)[0])
+    n = lengths[:itemindex].sum()
+    arrlen = lengths[itemindex]
+    return upStream[n:n+arrlen]

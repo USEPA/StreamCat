@@ -1,4 +1,6 @@
-.Rproj.user
-.Rhistory
-.RData
-StreamCat.Rproj
+/*.Rproj
+/*.Rproj.user
+/*.Rhistory
+/*.RData
+/*.pyc
+
