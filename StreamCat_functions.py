@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime as dt
 from collections import deque, defaultdict
-from osgeo import gdal, osr
+from osgeo import gdal, osr, ogr
 from gdalconst import *
 import rasterio
 from rasterio import transform
@@ -29,6 +29,7 @@ from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
 import geopandas as gpd
 from geopandas.tools import sjoin
 import fiona
+import struct
 ##############################################################################
 
 
@@ -195,6 +196,43 @@ def getRasterInfo(FileName):
     return (NDV, stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType)
 ##############################################################################
 
+
+def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
+        '''
+    __author__ =   "Marc Weber <weber.marc@epa.gov>"
+    returns raster values at points in a point shapefile
+    assumes same projection in shapefile and raster file
+    Arguments
+    ---------
+    rasterfile        : a raster file with full pathname and extension
+    shapefile         : a shapefile with full pathname and extension
+    fieldname         : field name in the shapefile to identify values
+    '''
+    src_ds=gdal.Open(rasterfile) 
+    gt=src_ds.GetGeoTransform()
+    rb=src_ds.GetRasterBand(1)
+    df = pd.DataFrame(columns=(fieldname, "RasterVal"))
+    i = 0
+    ds=ogr.Open(shapefile)
+    lyr=ds.GetLayer()
+    for feat in lyr:
+        geom = feat.GetGeometryRef()
+        name = feat.GetField(fieldname)
+        mx,my=geom.GetX(), geom.GetY()  #coord in map units
+    
+        #Convert from map to pixel coordinates.
+        #Only works for geotransforms with no rotation.
+        px = int((mx - gt[0]) / gt[1]) #x pixel
+        py = int((my - gt[3]) / gt[5]) #y pixel
+    
+        intval=rb.ReadAsArray(px,py,1,1)
+        df.set_value(i,fieldname,name) 
+        df.set_value(i,"RasterVal",float(intval)) 
+        i+=1
+#        print name
+#        print intval[0] #intval is a numpy array, length=1 as we only asked for 1 pixel value
+    return df
+##############################################################################    
 
 def Reclass(inras, outras, reclass_dict, dtype=None):
     '''
