@@ -198,7 +198,7 @@ def getRasterInfo(FileName):
 
 
 def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
-        '''
+    '''
     __author__ =   "Marc Weber <weber.marc@epa.gov>"
     returns raster values at points in a point shapefile
     assumes same projection in shapefile and raster file

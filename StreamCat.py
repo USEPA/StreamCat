@@ -35,7 +35,6 @@ ctl = pd.read_csv(sys.argv[1])
 #ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_MW.csv')
 
 # Import system modules
-from collections import OrderedDict
 from datetime import datetime as dt
 import geopandas as gpd
 sys.path.append(ctl.DirectoryLocations.values[5])  # sys.path.append('D:/Projects/Scipts')
@@ -51,15 +50,14 @@ mask_dir = ctl.DirectoryLocations.values[7]
 #####################################################################################################################
 totTime = dt.now()
 interVPUtbl = pd.read_csv(interVPU_dir)  # Load Inter_VPU table
-if not os.path.exists(numpy_dir):
-    os.mkdir(numpy_dir)
-    makeNumpyVectors(numpy_dir, interVPUtbl, inputs, NHD_dir)
+
 if not os.path.exists('%s/StreamCat_npy/zoneInputs.npy' % NHD_dir):
     inputs = makeVPUdict(NHD_dir)
 else:
     inputs = np.load('%s/StreamCat_npy/zoneInputs.npy' % NHD_dir).item()
-    
-    
+if not os.path.exists(numpy_dir):
+    os.mkdir(numpy_dir)
+    makeNumpyVectors(numpy_dir, interVPUtbl, inputs, NHD_dir)
     
 for line in range(len(ctl.values)):  # loop through each FullTableName in control table
     if ctl.run[line] == 1:   # check 'run' field from the table, if 1 run, if not, skip
