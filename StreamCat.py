@@ -56,8 +56,7 @@ if not os.path.exists('%s/StreamCat_npy/zoneInputs.npy' % NHD_dir):
     inputs = makeVPUdict(NHD_dir)
 else:
     inputs = np.load('%s/StreamCat_npy/zoneInputs.npy' % NHD_dir).item()
-if not os.path.exists(numpy_dir):
-    os.mkdir(numpy_dir)
+if not os.path.exists('%s/children' % numpy_dir):
     makeNumpyVectors(numpy_dir, interVPUtbl, inputs, NHD_dir)
     
 for line in range(len(ctl.values)):  # loop through each FullTableName in control table
