@@ -225,7 +225,7 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
         px = int((mx - gt[0]) / gt[1]) #x pixel
         py = int((my - gt[3]) / gt[5]) #y pixel
     
-        intval=rb.ReadAsArray(px,py,1,1)
+        intval = rb.ReadAsArray(px,py,1,1)
         df.set_value(i,fieldname,name) 
         df.set_value(i,"RasterVal",float(intval)) 
         i+=1
