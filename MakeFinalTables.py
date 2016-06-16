@@ -14,7 +14,7 @@ inputs = OrderedDict([('10U','MS'),('10L','MS'),('07','MS'),('11','MS'),('06','M
                       ('01','NE'),('02','MA'),('03N','SA'),('03S','SA'),('03W','SA'),('04','GL'),('09','SR'),\
                       ('12','TX'),('13','RG'),('14','CO'),('15','CO'),('16','GB'),('17','PN'),('18','CA')])                      
 inDir = ctl.DirectoryLocations.values[2]
-outDir = ctl.DirectoryLocations.values[7]
+outDir = ctl.DirectoryLocations.values[6]
 tables = dict()
 for row in range(len(ctl.Final_Table_Name)):
     if ctl.run[row] == 1 and  len(ctl.Final_Table_Name[row]):
