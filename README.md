@@ -8,18 +8,26 @@ The scripts for StreamCat rely on several python modules a user will need to ins
 
 | Package       | Version       | 
 | ------------- |--------------:|
-| fiona         | 1.6.0         | 
-| gdal          | 1.11.2        | 
-| geopandas     | 0.1.0.dev     |  
+| fiona         | 1.6.3         | 
+| gdal          | 1.11.4        | 
+| geopandas     | 0.2.0.dev     |  
 | geos          | 3.4.2         |
 | libgdal       | 2.0.0         |
 | numpy         | 1.10.1        |
-| pandas        | 0.17.1        |
-| pyproj        | 1.9.4         |
+| pandas        | 0.18.1        |
+| pyproj        | 1.9.5         |
 | pysal         | 1.10.0        |
-| pyshp         | 1.2.3         |
-| rasterio      | 0.24.0        |
-| shapely       | 1.5.13        |
+| rasterio      | 0.34.0        |
+| shapely       | 1.5.15        |
+
+If you are using Anaconda, creating a new, clean 'streamcat' environment with these needed packages can be done easily and simply one of two ways:
+
+* In your conda shell, add one necessary channel and then download the streamcat environment from the Anaconda cloud:
+  + conda config --add channels ioos
+  + conda env create mweber36/streamcat
+  
+* Alternatively, using the streamcat.txt file in this repository, in your conda shell run:
+  + conda create --<streamcat or name you want> --file streamcat.txt
 
 ##How to Run Scripts
 ###The scripts make use of 'control tables' to pass all the particular parameters to the three primary scripts: 
