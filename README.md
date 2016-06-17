@@ -26,7 +26,7 @@ If you are using Anaconda, creating a new, clean 'streamcat' environment with th
   + conda config --add channels ioos
   + conda env create mweber36/streamcat
   
-* Alternatively, using the streamcat.txt file in this repository, in your conda shell run:
+* Alternatively, using the streamcat.txt file in this repository, in your conda shell cd to the directory where your streamcat.txt file is located and run:
   + conda create --name streamcat --file streamcat.txt
 
 ##How to Run Scripts
