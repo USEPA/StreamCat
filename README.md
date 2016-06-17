@@ -27,7 +27,7 @@ If you are using Anaconda, creating a new, clean 'streamcat' environment with th
   + conda env create mweber36/streamcat
   
 * Alternatively, using the streamcat.txt file in this repository, in your conda shell run:
-  + conda create --<streamcat or name you want> --file streamcat.txt
+  + conda create --streamcat --file streamcat.txt
 
 ##How to Run Scripts
 ###The scripts make use of 'control tables' to pass all the particular parameters to the three primary scripts: 
