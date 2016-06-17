@@ -56,6 +56,19 @@ Examples of control tables used in scripts are:
 + [ControlTable_StreamCat](https://github.com/USEPA/StreamCat/blob/master/ControlTable_StreamCat.csv)
 + [MakeFinalTables](https://github.com/USEPA/StreamCat/blob/master/MakeFinalTables.csv)
 
+###Running StreamCat.py to generate new StreamCat metrics
+
+After editing the control tables to provide necessary information, such as directory paths, the following stesps will excecute processes to generate new watershed metrics for the conterminous US. All examples in the control table are for layers (e.g., STATSGO % clay content of soils) that were processed as part of the StreamCat Dataset. This example assumes run in Anaconda within Conda shell.
+
+1. Edit [RasterControlTable](https://github.com/USEPA/StreamCat/blob/master/RasterControlTable.csv) and set desired layer's "run" column to 1. All other columns should be set to 0
+2. Open a Conda shell and type "activate StreamCat" 
+3. At the Conda shell type: "Python<space>"
+4. Drag and drop "StreamCat.py" to the Conda shell from a file manager followed by another space
+5. Drag and drop the control table to the Conda shell
+
+Final text in Conda shell should resemble this: python C:\some_path\StreamCat.py  C:\some_other_path\ControlTable.csv
+
+
 ## EPA Disclaimer
 The United States Environmental Protection Agency (EPA) GitHub project code is provided on an "as is" basis and the user assumes responsibility for its use.  EPA has relinquished control of the information and no longer has responsibility to protect the integrity , confidentiality, or availability of the information.  Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA.  The EPA seal and logo shall not be used in any manner to imply endorsement of any commercial product or activity by EPA or the United States Government.
 
