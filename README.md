@@ -29,6 +29,14 @@ If you are using Anaconda, creating a new, clean 'streamcat' environment with th
 * Alternatively, using the streamcat.txt file in this repository, in your conda shell cd to the directory where your streamcat.txt file is located and run:
   + conda create --name streamcat --file streamcat.txt
 
+Finally, to use arcpy in this new environment, you will need to copy your Arc .pth file into your new environment.  Copy the .pth file for your install of ArcGIS located in a directory like:
+
++ C:\Python27\ArcGISx6410.3\Lib\site-packages\DTBGGP64.pth
+
+To your environment directory which should look something like:
+
++ C:\Anaconda\envs\streamcat\Lib\site-packages\DTBGGP64.pth
+
 ##How to Run Scripts
 ###The scripts make use of 'control tables' to pass all the particular parameters to the three primary scripts: 
 + [StreamCat_PreProcessing.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat_PreProcessing.py)
