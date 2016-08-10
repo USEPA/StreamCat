@@ -31,7 +31,9 @@ If you are using Anaconda, creating a new, clean 'streamcat' environment with th
 
 * To activate this new environment and open Spyder, type the following at the conda prompt
   + activate streamcat
+  
   Then
+
   + sypder
 
 Finally, to use arcpy in this new environment, you will need to copy your Arc .pth file into your new environment.  Copy the .pth file for your install of ArcGIS located in a directory like:
