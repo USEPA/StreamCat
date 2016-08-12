@@ -34,7 +34,7 @@ If you are using Anaconda, creating a new, clean 'streamcat' environment with th
   
   Then
 
-  + sypder
+  + spyder
 
 Finally, to use arcpy in this new environment, you will need to copy your Arc .pth file into your new environment.  Copy the .pth file for your install of ArcGIS located in a directory like:
 
@@ -43,6 +43,8 @@ Finally, to use arcpy in this new environment, you will need to copy your Arc .p
 To your environment directory which should look something like:
 
 + C:\Anaconda\envs\streamcat\Lib\site-packages\DTBGGP64.pth
+
+Note that the exact paths may vary depending on the version of ArcGIS and Anaconda you have installed and the configuration of your computer
 
 ##How to Run Scripts
 ###The scripts make use of 'control tables' to pass all the particular parameters to the three primary scripts: 
