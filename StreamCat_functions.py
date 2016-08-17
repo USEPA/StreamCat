@@ -876,7 +876,6 @@ def chkColumnLength(table, LandscapeLayer):
     col_list.sort(key=len)         # table.columns
     table = table[col_list]
     if len(AllCols) != len(col_list[1:]):
-        print 'column adjust'
         AllCols = ['VALUE_'+str(x) for x in AllCols]
         diff = list(set(AllCols) - set(col_list[1:]))
         diff.sort()
