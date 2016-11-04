@@ -46,7 +46,6 @@ NHD_dir = ctl.DirectoryLocations.values[1]
 out_dir = ctl.DirectoryLocations.values[2]
 numpy_dir = '%s/StreamCat_npy' % NHD_dir
 interVPU_dir = ctl.DirectoryLocations.values[3]
-mask_dir = ctl.DirectoryLocations.values[7]
 #####################################################################################################################
 totTime = dt.now()
 interVPUtbl = pd.read_csv(interVPU_dir)  # Load Inter_VPU table
@@ -69,7 +68,13 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
         appendMetric = ctl.AppendMetric[line]
         if appendMetric == 'none':
             appendMetric = '' 
-        if mask == 0:
+        if mask == 1:
+            mask_dir = ctl.DirectoryLocations.values[7]
+        elif mask == 2:
+            mask_dir = ctl.DirectoryLocations.values[9]
+        elif mask ==3:
+            mask_dir = ctl.DirectoryLocations.values[10]
+        else:
             mask_dir = ''
         LandscapeLayer = '%s/%s' % (ingrid_dir, ctl.LandscapeLayer[line])  # ingrid = 'D:/Projects/lakesAnalysis/MetricData/' + 'mines_rpBuf100.shp'
         if not os.path.exists(LandscapeLayer) and RPU == 1:  # this is currently a placeholder for scripting the select by location process to get masked point file

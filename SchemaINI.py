@@ -2,6 +2,9 @@
 """
 Created on Wed Dec 09 14:02:46 2015
 
+This script writes out a schema.ini file for the tables format found in the 
+csv's in StreamCat directories for reading into ArcMap.
+
 @author: Rdebbout
 """
 import os
