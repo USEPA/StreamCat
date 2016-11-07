@@ -32,7 +32,7 @@ import pandas as pd
 import numpy as np
 # Load table used in function argument
 ctl = pd.read_csv(sys.argv[1])
-#ctl = pd.read_csv('L:/Priv\CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_MW.csv')
+#ctl = pd.read_csv('D:/Projects/StreamCat/ControlTable_StreamCat.csv')
 
 # Import system modules
 from datetime import datetime as dt

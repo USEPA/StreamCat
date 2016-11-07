@@ -1051,7 +1051,7 @@ def makeVPUdict(directory):
     inputs = OrderedDict()  # inputs = OrderedDict((k, inputs[k]) for k in order)
     for idx, row in B.iterrows():
         inputs[row.UNITID] = row.DRAINAGEID
-        print 'HydroRegion (value): ' + row.DRAINAGEID + ' in VPU (key): ' + row.UNITID
+        #print 'HydroRegion (value): ' + row.DRAINAGEID + ' in VPU (key): ' + row.UNITID
     np.save('%s/StreamCat_npy/zoneInputs.npy' % directory, inputs)
     return inputs
 ##############################################################################
