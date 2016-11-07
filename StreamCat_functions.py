@@ -548,9 +548,9 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
         polys.crs = {u'datum': u'NAD83', u'no_defs': True, u'proj': u'longlat'}
         #polys = final[['FEATUREID', 'AreaSqKM', fld]]
     # Get list of lat/long fields in the table
-    latlon = [s for s in points.columns if any(xs in s.upper() for xs in ['LONGIT','LATIT'])]
+    points['latlon_tuple'] = zip(points.geometry.map(lambda point: point.x),points.geometry.map(lambda point: point.y))
     # Remove duplicate points for 'Count'
-    points2 = points.ix[~points.duplicated(latlon)] # points2.head() polys.head() point_poly_join.head()
+    points2 = points .drop_duplicates('latlon_tuple') # points2.head() polys.head() point_poly_join.head()
     try:
         point_poly_join = sjoin(points2, polys, how="left", op="within") # point_poly_join.ix[point_poly_join.FEATUREID > 1]
         fld = 'GRIDCODE'  #next(str(unicode(x)) for x in polys.columns if x != 'geometry')
