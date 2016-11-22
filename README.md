@@ -69,7 +69,7 @@ Examples of control tables used in scripts are:
 
 After editing the control tables to provide necessary information, such as directory paths, the following stesps will excecute processes to generate new watershed metrics for the conterminous US. All examples in the control table are for layers (e.g., STATSGO % clay content of soils) that were processed as part of the StreamCat Dataset. This example assumes run in Anaconda within Conda shell.
 
-1. Edit [RasterControlTable](https://github.com/USEPA/StreamCat/blob/master/RasterControlTable.csv) and set desired layer's "run" column to 1. All other columns should be set to 0
+1. Edit [ControlTable_StreamCat](https://github.com/USEPA/StreamCat/blob/master/ControlTable_StreamCat.csv) and set desired layer's "run" column to 1. All other columns should be set to 0
 2. Open a Conda shell and type "activate StreamCat" 
 3. At the Conda shell type: "Python<space>"
 4. Drag and drop "StreamCat.py" to the Conda shell from a file manager followed by another space
