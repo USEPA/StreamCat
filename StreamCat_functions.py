@@ -208,21 +208,13 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
     shapefile         : a shapefile with full pathname and extension
     fieldname         : field name in the shapefile to identify values
     '''
-    i = 0    
-    src_ds=gdal.Open(rasterfile)
-    sr_ras = osr.SpatialReference()
-    sr_ras.ImportFromWkt(src_ds.GetProjection())
+    src_ds=gdal.Open(rasterfile) 
     gt=src_ds.GetGeoTransform()
     rb=src_ds.GetRasterBand(1)
     df = pd.DataFrame(columns=(fieldname, "RasterVal"))
+    i = 0
     ds=ogr.Open(shapefile)
     lyr=ds.GetLayer()
-    sr_shp = lyr.GetSpatialRef()
-    no_data = src_ds.GetRasterBand(1).GetNoDataValue()
-    # check proj4 crs between raster and shapefile
-    if not sr_ras.ExportToProj4() == sr_shp.ExportToProj4():
-        print 'Coordinate Reference systems do not match!'
-        sys.exit()
     for feat in lyr:
         geom = feat.GetGeometryRef()
         name = feat.GetField(fieldname)
@@ -234,8 +226,6 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
         py = int((my - gt[3]) / gt[5]) #y pixel
     
         intval = rb.ReadAsArray(px,py,1,1)
-        if intval == no_data:
-            intval = -9999
         df.set_value(i,fieldname,name) 
         df.set_value(i,"RasterVal",float(intval)) 
         i+=1
