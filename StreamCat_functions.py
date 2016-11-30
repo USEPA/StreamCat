@@ -208,13 +208,15 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
     shapefile         : a shapefile with full pathname and extension
     fieldname         : field name in the shapefile to identify values
     '''
-    src_ds=gdal.Open(rasterfile) 
+    src_ds=gdal.Open(rasterfile)
+    no_data = src_ds.GetRasterBand(1).GetNoDataValue()
     gt=src_ds.GetGeoTransform()
     rb=src_ds.GetRasterBand(1)
     df = pd.DataFrame(columns=(fieldname, "RasterVal"))
     i = 0
     ds=ogr.Open(shapefile)
     lyr=ds.GetLayer()
+    
     for feat in lyr:
         geom = feat.GetGeometryRef()
         name = feat.GetField(fieldname)
@@ -226,6 +228,8 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
         py = int((my - gt[3]) / gt[5]) #y pixel
     
         intval = rb.ReadAsArray(px,py,1,1)
+        if intval == no_data:
+            intval = -9999
         df.set_value(i,fieldname,name) 
         df.set_value(i,"RasterVal",float(intval)) 
         i+=1
@@ -1084,6 +1088,33 @@ def makeRPUdict(directory):
             rpuinputs[zone].append(row.UNITID)
     np.save('%s/StreamCat_npy/rpuInputs.npy' % directory, rpuinputs)
     return rpuinputs
+##############################################################################
+    '''
+    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
+    Creates an OrderdDict for looping through regions of the NHD RPU zones
+
+    Arguments
+    ---------
+    directory             : the directory contining NHDPlus data at the top level
+    unit                  : Vector or Raster processing units 'VPU' or 'RPU'
+    '''  
+def NHD_Dict(directory, unit='VPU'):
+    if unit == 'VPU':
+        if not os.path.exists('%s/StreamCat_npy' % directory):
+            os.mkdir('%s/StreamCat_npy' % directory)    
+        if not os.path.exists('%s/StreamCat_npy/zoneInputs.npy' % directory):
+            inputs = makeVPUdict(directory)
+        else:
+            inputs = np.load('%s/StreamCat_npy/zoneInputs.npy' % directory).item() 
+    if unit == 'RPU':
+        if not os.path.exists('%s/StreamCat_npy' % directory):
+            os.mkdir('%s/StreamCat_npy' % directory)    
+        if not os.path.exists('%s/StreamCat_npy/rpuInputs.npy' % directory):
+            inputs = makeRPUdict(directory)
+        else:
+            inputs = np.load('%s/StreamCat_npy/rpuInputs.npy' % directory).item() 
+    return inputs
+          
 ##############################################################################
 
     
