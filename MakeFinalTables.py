@@ -68,6 +68,8 @@ for table in tables:
                     if summary:
                         finalNameList = []
                         for sname in summary: 
+                            if 'Dens' in  metricName:
+                                metricName = metricName[:-4]
                             fnlname1 = metricName + sname + 'Cat' + appendMetric
                             fnlname2 = metricName + sname + 'Ws' + appendMetric
                             tbl[fnlname1] = tbl['Cat' + sname] / (tbl[catArea] * (tbl[catPct]/100))
