@@ -554,7 +554,7 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     # Get list of lat/long fields in the table
     points['latlon_tuple'] = zip(points.geometry.map(lambda point: point.x),points.geometry.map(lambda point: point.y))
     # Remove duplicate points for 'Count'
-    points2 = points .drop_duplicates('latlon_tuple') # points2.head() polys.head() point_poly_join.head()
+    points2 = points.drop_duplicates('latlon_tuple') # points2.head() polys.head() point_poly_join.head()
     try:
         point_poly_join = sjoin(points2, polys, how="left", op="within") # point_poly_join.ix[point_poly_join.FEATUREID > 1]
         fld = 'GRIDCODE'  #next(str(unicode(x)) for x in polys.columns if x != 'geometry')
@@ -573,9 +573,13 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby('FEATUREID')
         for x in summaryfield: # Sum the field in summary field list for each catchment
+            st = ''
+            if 'StorM3' in x:   #  done for dams and NABD, the only summaries we do, but if others we need the else statement         
+                st = 'M3'               
             point_poly_stats = grouped2[x].sum()
+            point_poly_stats.name = x.strip(st)
             final = final.join(point_poly_stats, on='FEATUREID', how='left').fillna(0)
-            cols.append('Cat' + x + appendMetric)
+            cols.append('Cat' + x.strip(st) + appendMetric)
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on='COMID', how='left')
@@ -779,9 +783,9 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         arcpy.env.snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count('.tif') or LandscapeLayer.count('.img'):
-                outTable ="%s/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1].split(".")[0], appendMetric, zone)
+                outTable ="%s/DBF_stash/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1].split(".")[0], appendMetric, zone)
             else:
-                outTable ="%s/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1], appendMetric, zone)
+                outTable ="%s/DBF_stash/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1], appendMetric, zone)
             if not os.path.exists(outTable):
                 if accum_type == 'Categorical':
                     TabulateArea(inZoneData, 'VALUE', LandscapeLayer, "Value", outTable, "30")
@@ -1089,6 +1093,8 @@ def makeRPUdict(directory):
     np.save('%s/StreamCat_npy/rpuInputs.npy' % directory, rpuinputs)
     return rpuinputs
 ##############################################################################
+
+def NHD_Dict(directory, unit='VPU'):
     '''
     __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
     Creates an OrderdDict for looping through regions of the NHD RPU zones
@@ -1098,7 +1104,6 @@ def makeRPUdict(directory):
     directory             : the directory contining NHDPlus data at the top level
     unit                  : Vector or Raster processing units 'VPU' or 'RPU'
     '''  
-def NHD_Dict(directory, unit='VPU'):
     if unit == 'VPU':
         if not os.path.exists('%s/StreamCat_npy' % directory):
             os.mkdir('%s/StreamCat_npy' % directory)    
