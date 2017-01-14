@@ -42,16 +42,16 @@ sys.path.append(ctl.ix['StreamCat_repo'][dls])  # sys.path.append('D:/Projects/S
 from StreamCat_functions import createAccumTable, appendConnectors, createCatStats, interVPU, PointInPoly, makeNumpyVectors, NHD_Dict
 #####################################################################################################################
 # Populate variables from control table
-
 ingrid_dir = ctl.ix['ingrid_dir'][dls]
 NHD_dir = ctl.ix['NHD_dir'][dls]
 out_dir = ctl.ix['out_dir'][dls]
 numpy_dir = '%s/StreamCat_npy' % NHD_dir
-interVPU_dir = ctl.ix['interVPU_dir'][dls]
 #####################################################################################################################
 
 totTime = dt.now()
-interVPUtbl = pd.read_csv(interVPU_dir)  # Load Inter_VPU table
+# Load Inter_VPU table
+interVPUtbl = pd.read_csv("%s/InterVPU.csv" % ctl.ix['StreamCat_repo'][dls])
+    
 inputs = NHD_Dict(NHD_dir, 'VPU')
 
 if not os.path.exists('%s/children' % numpy_dir):
