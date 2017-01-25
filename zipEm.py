@@ -21,7 +21,7 @@ def main():
             if not os.path.exists('%s/zips/%s.zip' % (home,fn)):
                 print 'zipping......  %s' % fn
                 zf = zipfile.ZipFile('%s/zips/%s.zip' % (home,fn), mode='w')
-                zf.write(f, compress_type=zipfile.ZIP_DEFLATED)
+                zf.write('%s/%s'%(home,f), compress_type=zipfile.ZIP_DEFLATED)
                 zf.close()
 
 #############################################################################
