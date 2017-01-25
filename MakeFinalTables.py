@@ -7,7 +7,7 @@
 # L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv
 
 import sys, os
-import pandas as pd 
+import pandas as pd
 ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') #ctl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 dls = 'DirectoryLocations'
 sys.path.append(ctl.ix['StreamCat_repo'][dls])  # sys.path.append('D:/Projects/Scipts')
@@ -81,12 +81,12 @@ for table in tables:
                             tbl[fnlname2] = tbl['Ws' + sname] / (tbl[wsArea] * (tbl[wsPct]/100)) 
                             finalNameList.append(fnlname1)
                             finalNameList.append(fnlname2)
-                    if table == 'RoadStreamCrossings':
-                        tbl[colname1] = tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
-                        tbl[colname2] = tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
+                    if table == 'RoadStreamCrossings' or table == 'CanalsDitches':
+                        tbl[colname1] = (tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) * conversion) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = (tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100)) * conversion)                        
                     else:
-                        tbl[colname1] = tbl['CatCount%s' % appendMetric] / (tbl['CatAreaSqKm%s' % appendMetric] * (tbl['CatPctFull%s' % appendMetric]/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
-                        tbl[colname2] = tbl['WsCount%s' % appendMetric] / (tbl['WsAreaSqKm%s' % appendMetric] * (tbl['WsPctFull%s' % appendMetric]/100))                      
+                        tbl[colname1] = (tbl['CatCount%s' % appendMetric] / (tbl['CatAreaSqKm%s' % appendMetric] * (tbl['CatPctFull%s' % appendMetric]/100)) * conversion) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = (tbl['WsCount%s' % appendMetric] / (tbl['WsAreaSqKm%s' % appendMetric] * (tbl['WsPctFull%s' % appendMetric]/100)) * conversion)                      
                     if var == 0:
                         if summary:
                             final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
@@ -132,6 +132,8 @@ for table in tables:
                         stats[c]['max'] = final[c].max()
             final = final.fillna('NA')
             final = final[final.columns.tolist()[:5] + [x for x in final.columns[5:] if 'Cat' in x] + [x for x in final.columns[5:] if 'Ws' in x]].fillna('NA')
+            if 'ForestLossByYear0013' in table:
+                final.drop([col for col in final.columns if 'NoData' in col], axis=1, inplace=True)
             if not LENGTHS[zone] == len(final):
                 print "Table %s length zone %s incorrect!!!!...check Allocation\
                         and Accumulation results" % (table, zone)
