@@ -33,7 +33,7 @@ import numpy as np
 # Load table used in function argument
 ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
 #ctl = pd.read_csv(r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
-
+#ctl = pd.read_csv(r'D:\Projects\temp\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 # Import system modules
 from datetime import datetime as dt
 import geopandas as gpd
@@ -90,8 +90,8 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                 pct_full_file = ctl.ix['pct_full_file_RP100'][dls]
             pct_full = pd.read_csv(pct_full_file)
             points = gpd.GeoDataFrame.from_file(LandscapeLayer)
-        if not os.path.exists(out_dir):
-            os.mkdir(out_dir)
+        if not os.path.exists(out_dir + '/DBF_stash'):
+            os.mkdir(out_dir + '/DBF_stash')
         Connector = "%s/%s_connectors.csv" % (out_dir, FullTableName)  # File string to store InterVPUs needed for adjustments
         catTime = dt.now()
         for zone in inputs:
