@@ -18,6 +18,10 @@ from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 import pysal as ps
 import numpy as np
 import pandas as pd
+import itertools
+import decimal
+import struct
+import datetime
 from datetime import datetime as dt
 from collections import deque, defaultdict, OrderedDict
 from osgeo import gdal, osr, ogr
@@ -25,36 +29,107 @@ from gdalconst import *
 import rasterio
 from rasterio import transform
 #os.environ['GDAL_DATA'] = 'C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data'
-from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
+if rasterio.__version__[0] == '0':
+    from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
+if rasterio.__version__[0] == '1':
+    from rasterio.warp import calculate_default_transform, reproject, Resampling
 import geopandas as gpd
 from geopandas.tools import sjoin
 import fiona
-import struct
+
 ##############################################################################
 
 
 class LicenseError(Exception):
     pass
 ##############################################################################
-    
-    
-def dbf2DF(dbfile, upper=True):
-    '''
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
-    Reads and converts a dbf file to a pandas data frame using pysal.
 
-    Arguments
-    ---------
-    dbfile           : a dbase (.dbf) file
-    '''
-    db = ps.open(dbfile)
-    cols = {col: db.by_col(col) for col in db.header}
-    db.close()  #Close dbf 
-    pandasDF = pd.DataFrame(cols)
-    if upper == True:
-        pandasDF.columns = pandasDF.columns.str.upper() 
-    return pandasDF
+def dbfreader(f):
+    """Returns an iterator over records in a Xbase DBF file.
+
+    The first row returned contains the field names.
+    The second row contains field specs: (type, size, decimal places).
+    Subsequent rows contain the data records.
+    If a record is marked as deleted, it is skipped.
+
+    File should be opened for binary reads.
+
+    """
+    # See DBF format spec at:
+    #     http://www.pgts.com.au/download/public/xbase.htm#DBF_STRUCT
+
+    numrec, lenheader = struct.unpack('<xxxxLH22x', f.read(32))    
+    numfields = (lenheader - 33) // 32
+
+    fields = []
+    for fieldno in xrange(numfields):
+        name, typ, size, deci = struct.unpack('<11sc4xBB14x', f.read(32))
+        name = name.replace('\0', '')       # eliminate NULs from string   
+        fields.append((name, typ, size, deci))
+    yield [field[0] for field in fields]
+    yield [tuple(field[1:]) for field in fields]
+
+    terminator = f.read(1)
+    assert terminator == '\r'
+
+    fields.insert(0, ('DeletionFlag', 'C', 1, 0))
+    fmt = ''.join(['%ds' % fieldinfo[2] for fieldinfo in fields])
+    fmtsiz = struct.calcsize(fmt)
+    for i in xrange(numrec):
+        record = struct.unpack(fmt, f.read(fmtsiz))
+        if record[0] != ' ':
+            continue                        # deleted record
+        result = []
+        for (name, typ, size, deci), value in itertools.izip(fields, record):
+            if name == 'DeletionFlag':
+                continue
+            if typ == "N":
+                value = value.replace('\0', '').lstrip()
+                if value == '':
+                    value = 0
+                elif deci:
+                    value = decimal.Decimal(value)
+                else:
+                    value = int(value)
+            elif typ == 'C':
+                value = value.rstrip()                                   
+            elif typ == 'D':
+                try:
+                    y, m, d = int(value[:4]), int(value[4:6]), int(value[6:8])
+                    value = datetime.date(y, m, d)
+                except:
+                    value = None
+            elif typ == 'L':
+                value = (value in 'YyTt' and 'T') or (value in 'NnFf' and 'F') or '?'
+            elif typ == 'F':
+                value = float(value)
+            result.append(value)
+        yield result
+        
+def dbf2DF(f, upper=True):
+    data = list(dbfreader(open(f, 'rb')))
+    if upper == False:    
+        return pd.DataFrame(data[2:], columns=data[0])
+    else:
+        return pd.DataFrame(data[2:], columns=map(str.upper,data[0]))    
+    
+#def dbf2DF(dbfile, upper=True):
+#    '''
+#    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
+#                 "Marc Weber <weber.marc@epa.gov>"
+#    Reads and converts a dbf file to a pandas data frame using pysal.
+#
+#    Arguments
+#    ---------
+#    dbfile           : a dbase (.dbf) file
+#    '''
+#    db = ps.open(dbfile)
+#    cols = {col: db.by_col(col) for col in db.header}
+#    db.close()  #Close dbf 
+#    pandasDF = pd.DataFrame(cols)
+#    if upper == True:
+#        pandasDF.columns = pandasDF.columns.str.upper() 
+#    return pandasDF
 ##############################################################################
 
 
@@ -854,7 +929,7 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
            result.SLOPE = result.SLOPE.fillna(0)
            result['SlpWtd'] = result['Sum'] * result['SLOPE']
            result = result.drop(['SLOPE'], axis=1)           
-        result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm)*100).fillna(0)
+        result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm.astype('float'))*100).fillna(0)
         result = result.drop(['GRIDCODE', 'VALUE', 'AREA'], axis=1)
     cols = result.columns[1:]
     result.columns = np.append('COMID', 'Cat' + cols.values)
