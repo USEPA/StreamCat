@@ -12,7 +12,9 @@ from tkFileDialog import askdirectory
 Tk().withdraw()
 
 def main():
-    home = askdirectory(title='Select directory where CSVs are stored...\nA directory named \'zips\' will be created if not there\nOnly zips that don\'t exist yet will be made.',initialdir=os.getcwd())
+    home = askdirectory(title='Select directory where CSVs are stored...\n\
+    A directory named \'zips\' will be created if not there\n\
+    Only zips that\ don\'t exist yet will be made.',initialdir=os.getcwd())
     if not os.path.exists('%s/zips' % home):
         os.mkdir('%s/zips' % home)
     for f in os.listdir(home):
@@ -21,7 +23,8 @@ def main():
             if not os.path.exists('%s/zips/%s.zip' % (home,fn)):
                 print 'zipping......  %s' % fn
                 zf = zipfile.ZipFile('%s/zips/%s.zip' % (home,fn), mode='w')
-                zf.write('%s/zips/%s'%(home,f), compress_type=zipfile.ZIP_DEFLATED)
+                zf.write('%s/zips/%s'%(home,f), 
+                         compress_type=zipfile.ZIP_DEFLATED)
                 zf.close()
 
 #############################################################################
