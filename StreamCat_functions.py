@@ -133,7 +133,7 @@ def dbf2DF(f, upper=True):
 ##############################################################################
 
 
-def UpcomDict(hydroregion, zone, NHD_dir, interVPUtbl):
+def UpcomDict(nhd, interVPUtbl):
     '''
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
                  "Marc Weber <weber.marc@epa.gov>"
@@ -151,40 +151,41 @@ def UpcomDict(hydroregion, zone, NHD_dir, interVPUtbl):
     '''
     #Returns UpCOMs dictionary for accumulation process 
     #Provide either path to from-to tables or completed from-to table
-    flowtable= "%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/PlusFlow.dbf" % (NHD_dir, hydroregion, zone)
-    flow = dbf2DF(flowtable)[['TOCOMID', 'FROMCOMID']]
+    flow = dbf2DF("%s/NHDPlusAttributes/PlusFlow.dbf" % (nhd))[['TOCOMID',
+                                                                'FROMCOMID']]
     flow  = flow[flow.TOCOMID != 0]
     # check to see if out of zone values have FTYPE = 'Coastline'
-    flowlines =  "%s/NHDPlus%s/NHDPlus%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (NHD_dir, hydroregion, zone)
-    coast = dbf2DF(flowlines, upper=True)
-    coasties = coast.COMID[coast.FTYPE == 'Coastline']
-    flow = flow[~flow.FROMCOMID.isin(coasties.values)]
-    # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs here that won't get filtered out
-    remove = np.delete(np.array(interVPUtbl.removeCOMs), np.where(np.array(interVPUtbl.removeCOMs) == 0))
+    fls = dbf2DF("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (nhd))
+    coastfl = fls.COMID[fls.FTYPE == 'Coastline']
+    flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
+    # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs here
+    # that won't get filtered out
+    remove = interVPUtbl.removeCOMs.values[interVPUtbl.removeCOMs.values!=0]
     flow = flow[~flow.FROMCOMID.isin(remove)]
-    #find values that are coming from other zones and remove the ones that aren't in the interVPU table
-    others = []
-    for chk in np.array(flow.FROMCOMID):
-        if chk not in np.array(coast.COMID) and chk != 0:
-            others.append(chk)
-    for y in others:
-        if not y in np.array(interVPUtbl.thruCOMIDs):
-            flow = flow.drop(flow[flow.FROMCOMID == y].index)
-    # Now table is ready for processing and the UpCOMs dict can be created
-    fcom = np.array(flow.FROMCOMID)
-    tcom = np.array(flow.TOCOMID)
+    # find values that are coming from other zones and remove the ones that 
+    # aren't in the interVPU table
+    out = np.nonzero(np.setdiff1d(flow.FROMCOMID.values,fls.COMID.values))
+    flow = flow[~flow.FROMCOMID.isin(
+                np.setdiff1d(out, interVPUtbl.thruCOMIDs.values))]        
+    # Now table is ready for processing and the UpCOMs dict can be created             
+    fcom,tcom = flow.FROMCOMID.values,flow.TOCOMID.values
     UpCOMs = defaultdict(list)
     for i in range(0, len(flow), 1):
         FROMCOMID = fcom[i]
-        TOCOMID = tcom[i]
         if FROMCOMID == 0:
-            UpCOMs[TOCOMID] = []
+            UpCOMs[tcom[i]] = []
         else:
-            UpCOMs[TOCOMID].append(FROMCOMID)
+            UpCOMs[tcom[i]].append(FROMCOMID)
+    # add IDs from UpCOMadd column if working in ToZone
     for interLine in interVPUtbl.values:
         if interLine[6] > 0 and interLine[2] == zone:
-            UpCOMs[int(interLine[6])].append(int(interLine[0]))
+            UpCOMs[int(interLine[6])].append(int(interLine[0]))    
     return UpCOMs
+##############################################################################
+
+
+
+
 ##############################################################################
 
 
@@ -1080,7 +1081,8 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
             hydroregion = inputs[zone]
             print 'Making UpStreamComs dictionary...'
             start_time = dt.now()
-            UpStreamComs = UpcomDict(hydroregion, zone, NHD_dir, interVPUtbl)
+            NHD_pre = '%s/NHDPlus%s/NHDPlus%s' % (NHD_dir, hydroregion, zone)
+            UpStreamComs = UpcomDict(NHD_pre, interVPUtbl)
             print("--- %s seconds ---" % (dt.now() - start_time))
             print '....'
             print 'Making numpy bastard vectors...'
