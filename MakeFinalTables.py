@@ -7,14 +7,19 @@
 # L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv
 
 import sys, os
-import pandas as pd 
-from collections import  OrderedDict
-ctl = pd.read_csv(sys.argv[1]) #ctl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv')
-inputs = OrderedDict([('10U','MS'),('10L','MS'),('07','MS'),('11','MS'),('06','MS'),('05','MS'),('08','MS'),\
-                      ('01','NE'),('02','MA'),('03N','SA'),('03S','SA'),('03W','SA'),('04','GL'),('09','SR'),\
-                      ('12','TX'),('13','RG'),('14','CO'),('15','CO'),('16','GB'),('17','PN'),('18','CA')])                      
-inDir = ctl.DirectoryLocations.values[2]
-outDir = ctl.DirectoryLocations.values[6]
+import pandas as pd
+ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') #ctl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
+dls = 'DirectoryLocations'
+sys.path.append(ctl.ix['StreamCat_repo'][dls])  # sys.path.append('D:/Projects/Scipts')
+from StreamCat_functions import NHD_Dict
+inputs = NHD_Dict(ctl.ix['NHD_dir'][dls])
+inDir = ctl.ix['out_dir'][dls]
+outDir = ctl.ix['final_tables_dir'][dls]
+LENGTHS ={'11': 204120, '02': 126185, '13': 56220, '01': 65968, '06': 57642,
+          '07': 183667, '10L': 196552, '05': 170145, '18': 140835, '08': 151544,
+          '16': 95143, '04': 105452, '12': 68127, '03S': 55586, '17': 231698,
+          '14': 83084, '15': 100243, '09': 29776, '03N': 132903, '03W': 135522,
+          '10U': 256645}
 tables = dict()
 for row in range(len(ctl.Final_Table_Name)):
     if ctl.run[row] == 1 and  len(ctl.Final_Table_Name[row]):
@@ -32,9 +37,9 @@ if len(missing) > 0:
     print 'Check output from StreamCat.py'
     sys.exit()
 for table in tables:
-    print 'Running ' + table + ' .....' 
+    print 'Running ' + table + ' .....into ' + outDir 
     for zone in inputs:
-        if not os.path.exists(outDir +'/' + table + '_Region' + zone + '.csv'):         
+        if not os.path.exists(outDir +'/' + table + '_Region' + zone + '.csv'):
             for var in range(len(tables[table])):
                 accum = ctl.accum_type.ix[ctl.Final_Table_Name == table].any()
                 metricName = ctl.MetricName.ix[ctl.FullTableName == tables[table][var]].item()
@@ -76,12 +81,12 @@ for table in tables:
                             tbl[fnlname2] = tbl['Ws' + sname] / (tbl[wsArea] * (tbl[wsPct]/100)) 
                             finalNameList.append(fnlname1)
                             finalNameList.append(fnlname2)
-                    if table == 'RoadStreamCrossings':
-                        tbl[colname1] = tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
-                        tbl[colname2] = tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100))                        
+                    if table == 'RoadStreamCrossings' or table == 'CanalsDitches':
+                        tbl[colname1] = (tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) * conversion) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = (tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100)) * conversion)                        
                     else:
-                        tbl[colname1] = tbl['CatCount%s' % appendMetric] / (tbl['CatAreaSqKm%s' % appendMetric] * (tbl['CatPctFull%s' % appendMetric]/100)) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
-                        tbl[colname2] = tbl['WsCount%s' % appendMetric] / (tbl['WsAreaSqKm%s' % appendMetric] * (tbl['WsPctFull%s' % appendMetric]/100))                      
+                        tbl[colname1] = (tbl['CatCount%s' % appendMetric] / (tbl['CatAreaSqKm%s' % appendMetric] * (tbl['CatPctFull%s' % appendMetric]/100)) * conversion) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname2] = (tbl['WsCount%s' % appendMetric] / (tbl['WsAreaSqKm%s' % appendMetric] * (tbl['WsPctFull%s' % appendMetric]/100)) * conversion)                      
                     if var == 0:
                         if summary:
                             final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
@@ -111,12 +116,31 @@ for table in tables:
                         final = pd.merge(final,final2,on='COMID')
                         if table == 'AgMidHiSlopes':
                             final = final.drop(['PctUnknown1Cat','PctUnknown2Cat','PctUnknown1Ws', 'PctUnknown2Ws'], axis=1)
-            final = final.set_index('COMID').fillna('NA')
+            final = final.set_index('COMID')
             if zone == '04':
                 rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
                 final = final.drop(rmtbl.COMID.tolist(),axis=0)
-            final = final[final.columns.tolist()[:5] + [x for x in final.columns[5:] if 'Cat' in x] + [x for x in final.columns[5:] if 'Ws' in x]].fillna('NA')                  
+            if zone == '06':
+                stats = {}
+                for c in final.columns.tolist():
+                    stats[c] = {'min': final[c].min(), 'max':final[c].max()}
+            if zone != '06':
+                for c in final.columns.tolist():
+                    if final[c].min() < stats[c]['min']:
+                        stats[c]['min'] = final[c].min()
+                    if final[c].max() > stats[c]['max']:
+                        stats[c]['max'] = final[c].max()
+            final = final.fillna('NA')
+            final = final[final.columns.tolist()[:5] + [x for x in final.columns[5:] if 'Cat' in x] + [x for x in final.columns[5:] if 'Ws' in x]].fillna('NA')
+            if 'ForestLossByYear0013' in table:
+                final.drop([col for col in final.columns if 'NoData' in col], axis=1, inplace=True)
+            if not LENGTHS[zone] == len(final):
+                print "Table %s length zone %s incorrect!!!!...check Allocation\
+                        and Accumulation results" % (table, zone)
             final.to_csv(outDir  + '/%s_Region%s.csv'%(table,zone))
+    print table
+    for stat in stats:
+        print stat + ' ' + str(stats[stat])
     print 'All Done.....'
 
 #                    if table == 'RoadStreamCrossings':

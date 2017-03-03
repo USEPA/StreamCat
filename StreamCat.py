@@ -31,30 +31,29 @@ import os
 import pandas as pd
 import numpy as np
 # Load table used in function argument
-ctl = pd.read_csv(sys.argv[1])
-#ctl = pd.read_csv('D:/Projects/StreamCat/ControlTable_StreamCat.csv')
-
+ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
+#ctl = pd.read_csv(r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
+#ctl = pd.read_csv(r'D:\Projects\temp\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 # Import system modules
 from datetime import datetime as dt
 import geopandas as gpd
-sys.path.append(ctl.DirectoryLocations.values[5])  # sys.path.append('D:/Projects/Scipts')
-from StreamCat_functions import createAccumTable, appendConnectors, createCatStats, interVPU, PointInPoly, makeNumpyVectors, makeVPUdict
+dls = 'DirectoryLocations'
+sys.path.append(ctl.ix['StreamCat_repo'][dls])  # sys.path.append('D:/Projects/Scipts')
+from StreamCat_functions import createAccumTable, appendConnectors, createCatStats, interVPU, PointInPoly, makeNumpyVectors, NHD_Dict
 #####################################################################################################################
 # Populate variables from control table
-ingrid_dir = ctl.DirectoryLocations.values[0]
-NHD_dir = ctl.DirectoryLocations.values[1]
-out_dir = ctl.DirectoryLocations.values[2]
+ingrid_dir = ctl.ix['ingrid_dir'][dls]
+NHD_dir = ctl.ix['NHD_dir'][dls]
+out_dir = ctl.ix['out_dir'][dls]
 numpy_dir = '%s/StreamCat_npy' % NHD_dir
-interVPU_dir = ctl.DirectoryLocations.values[3]
 #####################################################################################################################
+
 totTime = dt.now()
-interVPUtbl = pd.read_csv(interVPU_dir)  # Load Inter_VPU table
-if not os.path.exists('%s/StreamCat_npy' % NHD_dir):
-    os.mkdir('%s/StreamCat_npy' % NHD_dir)    
-if not os.path.exists('%s/StreamCat_npy/zoneInputs.npy' % NHD_dir):
-    inputs = makeVPUdict(NHD_dir)
-else:
-    inputs = np.load('%s/StreamCat_npy/zoneInputs.npy' % NHD_dir).item()
+# Load Inter_VPU table
+interVPUtbl = pd.read_csv("%s/InterVPU.csv" % ctl.ix['StreamCat_repo'][dls])
+    
+inputs = NHD_Dict(NHD_dir, 'VPU')
+
 if not os.path.exists('%s/children' % numpy_dir):
     makeNumpyVectors(numpy_dir, interVPUtbl, inputs, NHD_dir)
     
@@ -69,11 +68,11 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
         if appendMetric == 'none':
             appendMetric = '' 
         if mask == 1:
-            mask_dir = ctl.DirectoryLocations.values[7]
+            mask_dir = ctl.ix['mask_dir_RP100'][dls]
         elif mask == 2:
-            mask_dir = ctl.DirectoryLocations.values[9]
+            mask_dir = ctl.ix['mask_dir_Slp20'][dls]
         elif mask ==3:
-            mask_dir = ctl.DirectoryLocations.values[10]
+            mask_dir = ctl.ix['mask_dir_Slp10'][dls]
         else:
             mask_dir = ''
         LandscapeLayer = '%s/%s' % (ingrid_dir, ctl.LandscapeLayer[line])  # ingrid = 'D:/Projects/lakesAnalysis/MetricData/' + 'mines_rpBuf100.shp'
@@ -86,13 +85,13 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
             summaryfield = ctl.summaryfield[line].split(';')
         if accum_type == 'Point':  # Load in point geopandas table and Pct_Full table 
             if mask == 0:
-                pct_full_file = ctl.DirectoryLocations.values[4]
+                pct_full_file = ctl.ix['pct_full_file'][dls]
             if mask == 1:
-                pct_full_file = ctl.DirectoryLocations.values[8]
+                pct_full_file = ctl.ix['pct_full_file_RP100'][dls]
             pct_full = pd.read_csv(pct_full_file)
             points = gpd.GeoDataFrame.from_file(LandscapeLayer)
-        if not os.path.exists(out_dir):
-            os.mkdir(out_dir)
+        if not os.path.exists(out_dir + '/DBF_stash'):
+            os.mkdir(out_dir + '/DBF_stash')
         Connector = "%s/%s_connectors.csv" % (out_dir, FullTableName)  # File string to store InterVPUs needed for adjustments
         catTime = dt.now()
         for zone in inputs:

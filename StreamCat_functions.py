@@ -12,12 +12,16 @@
 # Date: October 2015
 
 # load modules
-import os
+import os, sys
 import arcpy
 from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 import pysal as ps
 import numpy as np
 import pandas as pd
+import itertools
+import decimal
+import struct
+import datetime
 from datetime import datetime as dt
 from collections import deque, defaultdict, OrderedDict
 from osgeo import gdal, osr, ogr
@@ -25,36 +29,107 @@ from gdalconst import *
 import rasterio
 from rasterio import transform
 #os.environ['GDAL_DATA'] = 'C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data'
-from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
+if rasterio.__version__[0] == '0':
+    from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
+if rasterio.__version__[0] == '1':
+    from rasterio.warp import calculate_default_transform, reproject, Resampling
 import geopandas as gpd
 from geopandas.tools import sjoin
 import fiona
-import struct
+
 ##############################################################################
 
 
 class LicenseError(Exception):
     pass
 ##############################################################################
-    
-    
-def dbf2DF(dbfile, upper=True):
-    '''
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
-    Reads and converts a dbf file to a pandas data frame using pysal.
 
-    Arguments
-    ---------
-    dbfile           : a dbase (.dbf) file
-    '''
-    db = ps.open(dbfile)
-    cols = {col: db.by_col(col) for col in db.header}
-    db.close()  #Close dbf 
-    pandasDF = pd.DataFrame(cols)
-    if upper == True:
-        pandasDF.columns = pandasDF.columns.str.upper() 
-    return pandasDF
+def dbfreader(f):
+    """Returns an iterator over records in a Xbase DBF file.
+
+    The first row returned contains the field names.
+    The second row contains field specs: (type, size, decimal places).
+    Subsequent rows contain the data records.
+    If a record is marked as deleted, it is skipped.
+
+    File should be opened for binary reads.
+
+    """
+    # See DBF format spec at:
+    #     http://www.pgts.com.au/download/public/xbase.htm#DBF_STRUCT
+
+    numrec, lenheader = struct.unpack('<xxxxLH22x', f.read(32))    
+    numfields = (lenheader - 33) // 32
+
+    fields = []
+    for fieldno in xrange(numfields):
+        name, typ, size, deci = struct.unpack('<11sc4xBB14x', f.read(32))
+        name = name.replace('\0', '')       # eliminate NULs from string   
+        fields.append((name, typ, size, deci))
+    yield [field[0] for field in fields]
+    yield [tuple(field[1:]) for field in fields]
+
+    terminator = f.read(1)
+    assert terminator == '\r'
+
+    fields.insert(0, ('DeletionFlag', 'C', 1, 0))
+    fmt = ''.join(['%ds' % fieldinfo[2] for fieldinfo in fields])
+    fmtsiz = struct.calcsize(fmt)
+    for i in xrange(numrec):
+        record = struct.unpack(fmt, f.read(fmtsiz))
+        if record[0] != ' ':
+            continue                        # deleted record
+        result = []
+        for (name, typ, size, deci), value in itertools.izip(fields, record):
+            if name == 'DeletionFlag':
+                continue
+            if typ == "N":
+                value = value.replace('\0', '').lstrip()
+                if value == '':
+                    value = 0
+                elif deci:
+                    value = decimal.Decimal(value)
+                else:
+                    value = int(value)
+            elif typ == 'C':
+                value = value.rstrip()                                   
+            elif typ == 'D':
+                try:
+                    y, m, d = int(value[:4]), int(value[4:6]), int(value[6:8])
+                    value = datetime.date(y, m, d)
+                except:
+                    value = None
+            elif typ == 'L':
+                value = (value in 'YyTt' and 'T') or (value in 'NnFf' and 'F') or '?'
+            elif typ == 'F':
+                value = float(value)
+            result.append(value)
+        yield result
+        
+def dbf2DF(f, upper=True):
+    data = list(dbfreader(open(f, 'rb')))
+    if upper == False:    
+        return pd.DataFrame(data[2:], columns=data[0])
+    else:
+        return pd.DataFrame(data[2:], columns=map(str.upper,data[0]))    
+    
+#def dbf2DF(dbfile, upper=True):
+#    '''
+#    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
+#                 "Marc Weber <weber.marc@epa.gov>"
+#    Reads and converts a dbf file to a pandas data frame using pysal.
+#
+#    Arguments
+#    ---------
+#    dbfile           : a dbase (.dbf) file
+#    '''
+#    db = ps.open(dbfile)
+#    cols = {col: db.by_col(col) for col in db.header}
+#    db.close()  #Close dbf 
+#    pandasDF = pd.DataFrame(cols)
+#    if upper == True:
+#        pandasDF.columns = pandasDF.columns.str.upper() 
+#    return pandasDF
 ##############################################################################
 
 
@@ -208,13 +283,15 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
     shapefile         : a shapefile with full pathname and extension
     fieldname         : field name in the shapefile to identify values
     '''
-    src_ds=gdal.Open(rasterfile) 
+    src_ds=gdal.Open(rasterfile)
+    no_data = src_ds.GetRasterBand(1).GetNoDataValue()
     gt=src_ds.GetGeoTransform()
     rb=src_ds.GetRasterBand(1)
     df = pd.DataFrame(columns=(fieldname, "RasterVal"))
     i = 0
     ds=ogr.Open(shapefile)
     lyr=ds.GetLayer()
+    
     for feat in lyr:
         geom = feat.GetGeometryRef()
         name = feat.GetField(fieldname)
@@ -226,6 +303,8 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
         py = int((my - gt[3]) / gt[5]) #y pixel
     
         intval = rb.ReadAsArray(px,py,1,1)
+        if intval == no_data:
+            intval = -9999
         df.set_value(i,fieldname,name) 
         df.set_value(i,"RasterVal",float(intval)) 
         i+=1
@@ -550,7 +629,7 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     # Get list of lat/long fields in the table
     points['latlon_tuple'] = zip(points.geometry.map(lambda point: point.x),points.geometry.map(lambda point: point.y))
     # Remove duplicate points for 'Count'
-    points2 = points .drop_duplicates('latlon_tuple') # points2.head() polys.head() point_poly_join.head()
+    points2 = points.drop_duplicates('latlon_tuple') # points2.head() polys.head() point_poly_join.head()
     try:
         point_poly_join = sjoin(points2, polys, how="left", op="within") # point_poly_join.ix[point_poly_join.FEATUREID > 1]
         fld = 'GRIDCODE'  #next(str(unicode(x)) for x in polys.columns if x != 'geometry')
@@ -569,9 +648,13 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby('FEATUREID')
         for x in summaryfield: # Sum the field in summary field list for each catchment
+            st = ''
+            if 'StorM3' in x:   #  done for dams and NABD, the only summaries we do, but if others we need the else statement         
+                st = 'M3'               
             point_poly_stats = grouped2[x].sum()
+            point_poly_stats.name = x.strip(st)
             final = final.join(point_poly_stats, on='FEATUREID', how='left').fillna(0)
-            cols.append('Cat' + x + appendMetric)
+            cols.append('Cat' + x.strip(st) + appendMetric)
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on='COMID', how='left')
@@ -775,9 +858,9 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         arcpy.env.snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count('.tif') or LandscapeLayer.count('.img'):
-                outTable ="%s/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1].split(".")[0], appendMetric, zone)
+                outTable ="%s/DBF_stash/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1].split(".")[0], appendMetric, zone)
             else:
-                outTable ="%s/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1], appendMetric, zone)
+                outTable ="%s/DBF_stash/zonalstats_%s%s%s.dbf" % (out_dir,LandscapeLayer.split("/")[-1], appendMetric, zone)
             if not os.path.exists(outTable):
                 if accum_type == 'Categorical':
                     TabulateArea(inZoneData, 'VALUE', LandscapeLayer, "Value", outTable, "30")
@@ -846,7 +929,7 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
            result.SLOPE = result.SLOPE.fillna(0)
            result['SlpWtd'] = result['Sum'] * result['SLOPE']
            result = result.drop(['SLOPE'], axis=1)           
-        result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm)*100).fillna(0)
+        result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm.astype('float'))*100).fillna(0)
         result = result.drop(['GRIDCODE', 'VALUE', 'AREA'], axis=1)
     cols = result.columns[1:]
     result.columns = np.append('COMID', 'Cat' + cols.values)
@@ -1084,6 +1167,34 @@ def makeRPUdict(directory):
             rpuinputs[zone].append(row.UNITID)
     np.save('%s/StreamCat_npy/rpuInputs.npy' % directory, rpuinputs)
     return rpuinputs
+##############################################################################
+
+def NHD_Dict(directory, unit='VPU'):
+    '''
+    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
+    Creates an OrderdDict for looping through regions of the NHD RPU zones
+
+    Arguments
+    ---------
+    directory             : the directory contining NHDPlus data at the top level
+    unit                  : Vector or Raster processing units 'VPU' or 'RPU'
+    '''  
+    if unit == 'VPU':
+        if not os.path.exists('%s/StreamCat_npy' % directory):
+            os.mkdir('%s/StreamCat_npy' % directory)    
+        if not os.path.exists('%s/StreamCat_npy/zoneInputs.npy' % directory):
+            inputs = makeVPUdict(directory)
+        else:
+            inputs = np.load('%s/StreamCat_npy/zoneInputs.npy' % directory).item() 
+    if unit == 'RPU':
+        if not os.path.exists('%s/StreamCat_npy' % directory):
+            os.mkdir('%s/StreamCat_npy' % directory)    
+        if not os.path.exists('%s/StreamCat_npy/rpuInputs.npy' % directory):
+            inputs = makeRPUdict(directory)
+        else:
+            inputs = np.load('%s/StreamCat_npy/rpuInputs.npy' % directory).item() 
+    return inputs
+          
 ##############################################################################
 
     
