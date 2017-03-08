@@ -1,14 +1,18 @@
-# Script to build final StreamCat tables.
-# Date: Jan 22, 2016
-# Author: Rick Debbout
-# NOTE: run script from command line passing directory and name of this script 
-# and then directory and name of the control table to use like this:
-# > Python "F:\Watershed Integrity Spatial Prediction\Scripts\makeFinalTables.py" 
-# L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv
+# -*- coding: utf-8 -*-
+"""
+Created on Jan 22, 2016
+Script to build final StreamCat tables.
+Run script from command line passing directory and name of this script 
+and then directory and name of the control table to use like this:
+Python "F:\Watershed Integrity Spatial Prediction\Scripts\makeFinalTables.py" 
+or Python "L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv"
+@author: rdebbout, mweber
+"""
 
 import sys, os
 import pandas as pd
-ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') #ctl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
+#ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') 
+ctl = pd.read_csv('J:/GitProjects/StreamCat/ControlTable_StreamCat.csv').set_index('f_d_Title')
 dls = 'DirectoryLocations'
 sys.path.append(ctl.ix['StreamCat_repo'][dls])  # sys.path.append('D:/Projects/Scipts')
 from StreamCat_functions import NHD_Dict
@@ -38,7 +42,9 @@ if len(missing) > 0:
     sys.exit()
 for table in tables:
     print 'Running ' + table + ' .....into ' + outDir 
+    # Looop through NHD Hydro-regions
     for zone in inputs:
+        # Check if output tables exist before writing
         if not os.path.exists(outDir +'/' + table + '_Region' + zone + '.csv'):
             for var in range(len(tables[table])):
                 accum = ctl.accum_type.ix[ctl.Final_Table_Name == table].any()
