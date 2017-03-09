@@ -47,14 +47,20 @@ for table in tables:
         # Check if output tables exist before writing
         if not os.path.exists(outDir +'/' + table + '_Region' + zone + '.csv'):
             for var in range(len(tables[table])):
+                # Get accumulation type, i.e. point, continuous, categorical
                 accum = ctl.accum_type.ix[ctl.Final_Table_Name == table].any()
                 metricName = ctl.MetricName.ix[ctl.FullTableName == tables[table][var]].item()
+                # G3t metric type, i.e. mean, density, percent
                 metricType = ctl.MetricType.ix[ctl.FullTableName == tables[table][var]].item()
+                # appendMetric is simply whether to add Rp100 at end of file name
                 appendMetric = ctl.AppendMetric.ix[ctl.FullTableName == tables[table][var]].item()
                 if appendMetric == 'none':
-                    appendMetric = ''    
+                    appendMetric = ''
+                # Typically conversion is 1, but if values need converting apply conversion factor
                 conversion = float(ctl.Conversion.ix[ctl.FullTableName == tables[table][var]].values[0])
+                # Read in the StreamCat allocation and accumulation table for the zone and the particular metric
                 tbl = pd.read_csv(inDir + '/%s_%s.csv'%(tables[table][var],zone)) 
+                # Grab initial set of columns from allocation and accumulation table to start building final table
                 frontCols = [title for title in tbl.columns for x in ['COMID','AreaSqKm','PctFull'] if x in title and not 'Up' in title]            
                 catArea = frontCols[1]
                 catPct = frontCols[2]
