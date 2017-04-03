@@ -6,6 +6,7 @@ Created on Thu Jan 12 11:30:50 2017
 """
 
 import os
+from os.path import basename
 import zipfile
 from Tkinter import Tk
 from tkFileDialog import askdirectory
@@ -23,7 +24,9 @@ def main():
             if not os.path.exists('%s/zips/%s.zip' % (home,fn)):
                 print 'zipping......  %s' % fn
                 zf = zipfile.ZipFile('%s/zips/%s.zip' % (home,fn), mode='w')
-                zf.write('%s/%s'%(home,f), 
+#                zf.write('%s/%s'%(home,f), 
+#                         compress_type=zipfile.ZIP_DEFLATED)
+                zf.write('%s/%s'%(home,f), basename('%s/%s'%(home,f)),
                          compress_type=zipfile.ZIP_DEFLATED)
                 zf.close()
 

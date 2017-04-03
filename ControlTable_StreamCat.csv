@@ -5,7 +5,7 @@ out_dir,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Allocation_an
 pct_full_file,L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/QA/BorderCatchmentPCT_FULL/ALL_BORDER_CATS.csv,Al2O3,Continuous,Al2O3,none,al20mar14.tif,,GeoChemPhys1,Mean,1,0,0,0,
 StreamCat_repo,J:/GitProjects/StreamCat,AveSN_2008,Continuous,SN_2008,none,dep_splusn_2008.tif,,NADP,Mean,1,0,0,0,
 final_tables_dir,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/FTP_Staging/StreamCat/HydroRegions,bedrock_perm,Continuous,L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/bedrock_perm_lookup.csv,none,bedrock_perm.tif,,,Mean,1,0,0,0,
-mask_dir_RP100,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/LandscapeRasters/QAComplete/WaterMask\Mosaics,BFI,Continuous,BFI,none,bfi48grd.tif,,BFI,Mean,1,0,0,0,
+mask_dir_RP100,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/LandscapeRasters/QAComplete/WaterMask/Mosaics,BFI,Continuous,BFI,none,bfi48grd.tif,,BFI,Mean,1,0,0,0,
 pct_full_file_RP100,L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/QA/BorderCatchmentPCT_FULL/ALL_BORDER_CATS_Rp100.csv,CaO,Continuous,CaO,none,cao20mar14.tif,,GeoChemPhys1,Mean,1,0,0,0,
 mask_dir_Slp10,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/LandscapeRasters/QAComplete/Masks,CBNF,Continuous,CBNF,none,cbnf.tif,,AgriculturalNitrogen,Mean,1,0,1,0,
 mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/LandscapeRasters/QAComplete/Masks,Clay,Continuous,Clay,none,clay.tif,,STATSGO_Set1,Mean,0.01,0,0,0,
