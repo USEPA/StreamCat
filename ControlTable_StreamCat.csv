@@ -54,8 +54,6 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Landsc
 ,,NPDES_RipBuf100,Point,NPDESDens,Rp100,NPDES_RpBuf100.shp,,EPA_FRSRipBuf100,Density,1,0,1,0,
 ,,Om,Continuous,Om,none,om.tif,,STATSGO_Set2,Mean,0.01,0,0,0,
 ,,P2O5,Continuous,P2O5,none,p20mar14.tif,,GeoChemPhys1,Mean,1,0,0,0,
-,,PctFrstLoss,Continuous,PctFrstLoss,none,loss.tif,,ForestLoss,Mean,1,0,0,0,
-,,PctFrstLoss_RipBuf100,Continuous,PctFrstLoss_RipBuf100,Rp100,loss.tif,,ForestLossRipBuf100,Mean,1,0,1,0,
 ,,PctFrstLossByYear,Categorical,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/ControlTables/ForestLossByYear_lookup.csv,none,lossyr.tif,,ForestLossByYear0013,Percent,1,0,0,0,
 ,,PctFrstLossByYear_RipBuf100,Categorical,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/ControlTables/ForestLossByYear_lookup.csv,Rp100,lossyr.tif,,ForestLossByYear0013RipBuf100,Percent,1,0,1,0,
 ,,PctImp2006,Continuous,PctImp2006,none,imp2006.tif,,ImperviousSurfaces2006,Mean,1,0,0,0,
@@ -135,4 +133,6 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Landsc
 ,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,
-,,kfact,Continuous,,none,kfactgrid.tif,,,,1,0,0,0,! Not used!
+,,kfact,Continuous,,none,kfactgrid.tif,,,,1,0,0,0,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,! Not used!
