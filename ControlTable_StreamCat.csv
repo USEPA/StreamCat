@@ -124,7 +124,7 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Landsc
 ,,Fire2009_RipBuf100,Continuous,PctFire2009,Rp100,fire2009.tif,,FirePerimetersRipBuf100,Mean,100,0,1,0,
 ,,Fire2010_RipBuf100,Continuous,PctFire2010,Rp100,fire2010.tif,,FirePerimetersRipBuf100,Mean,100,0,1,0,
 ,,Pestic97,Continuous,Pestic97,none,pestic.tif,,,Mean,1,0,0,0,
-,,CanalDensity,Continuous,CanalDens,none,CanalsDitches.tif,,CanalsDitches,Density,0.03,0,0,0,
+,,CanalDensity,Continuous,CanalDens,none,CanalsDitches.tif,,CanalsDensity,Density,0.03,0,0,0,
 ,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,
