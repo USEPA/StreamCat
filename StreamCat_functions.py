@@ -144,9 +144,7 @@ def UpcomDict(nhd, interVPUtbl):
 
     Arguments
     ---------
-    hydroregion     : an NHDPlusV2 hydroregion acronnym, i.e. 'MS', 'PN', 'GB'
-    zone            : an NHDPlusV2 VPU number, i.e. 10, 16, 17
-    NHD_dir         : the directory contining NHDPlus data at the top level
+    nhd             : the directory contining NHDPlus data
     interVPUtbl     : the table that holds the inter-VPU connections to manage connections and anomalies in the NHD
     '''
     #Returns UpCOMs dictionary for accumulation process 
@@ -648,20 +646,17 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     if not summaryfield == None: # Summarize fields in list with gpd table including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby('FEATUREID')
-        for x in summaryfield: # Sum the field in summary field list for each catchment
-            st = ''
-            if 'StorM3' in x:   #  done for dams and NABD, the only summaries we do, but if others we need the else statement         
-                st = 'M3'               
+        for x in summaryfield: # Sum the field in summary field list for each catchment             
             point_poly_stats = grouped2[x].sum()
-            point_poly_stats.name = x.strip(st)
+            point_poly_stats.name = x
             final = final.join(point_poly_stats, on='FEATUREID', how='left').fillna(0)
-            cols.append('Cat' + x.strip(st) + appendMetric)
+            cols.append('Cat' + x + appendMetric)
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on='COMID', how='left')
     if len(mask_dir) > 0:
         if not summaryfield == None:
-            final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100']+ ['Cat'  + x + appendMetric for x in summaryfield] + ['CatPctFullRp100']
+            final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100']+ ['Cat'  + y + appendMetric for y in summaryfield] + ['CatPctFullRp100']
         else:
             final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100','CatPctFullRp100']
     final['CatPctFull%s' % appendMetric] = final['CatPctFull%s' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
@@ -778,7 +773,7 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2 = None):  #  ,accum, summaryfield=None
 
 
 
-def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
+def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol='COMID'):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
                   "Ryan Hill <hill.ryan@epa.gov>"
@@ -792,8 +787,9 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     lengths               : numpy array with lengths of upstream COMIDs
     upstream              : numpy array of all upstream arrays for each COMID
     tbl_type              : string value of table metrics to be returned
+    icol                  : column in arr object to index
     '''
-    coms = np.array(arr.COMID)  #Read in COMIDs
+    coms = np.array(arr[icol])  #Read in COMIDs
     indices = swapper(coms, upStream)  #Get indices that will be used to map values
     del upStream  # a and indices are big - clean up to minimize RAM
     cols = arr.columns[1:]  #Get column names that will be accumulated
@@ -822,9 +818,9 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type):
     outT = outT[np.in1d(outT[:,0], coms),:]  #Remove the extra COMIDs
     outDF = pd.DataFrame(outT)
     if tbl_type == 'Ws':
-        outDF.columns = np.append('COMID', map(lambda x : x.replace('Cat', 'Ws'),cols.values))
+        outDF.columns = np.append(icol, map(lambda x : x.replace('Cat', 'Ws'),cols.values))
     if tbl_type == 'UpCat':
-        outDF.columns = np.append('COMID', 'Up' + cols.values)
+        outDF.columns = np.append(icol, 'Up' + cols.values)
     for name in outDF.columns:
         if 'AreaSqKm' in name:
             areaName = name
@@ -993,10 +989,11 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
     #con = con.ix[con.COMID.isin(np.append(np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].thruCOMIDs),np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].toCOMIDs)[np.nonzero(np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].toCOMIDs))]))]
     cat = cat.append(con)
     return cat
+
 ##############################################################################   
 
 
-def createAccumTable(table, directory, zone, tbl_type):
+def createAccumTable(tbl, d, zone):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
                   "Ryan Hill <hill.ryan@epa.gov>"
@@ -1005,20 +1002,16 @@ def createAccumTable(table, directory, zone, tbl_type):
 
     Arguments
     ---------
-    table                 : table containing catchment values
-    directory             : location of numpy files
+    tbl                   : table containing catchment values
+    d                     : location of numpy files
     zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
     tbl_type              : string value of table metrics to be returned
     '''
-    if tbl_type == 'UpCat':
-        directory = directory + '/bastards'
-    if tbl_type == 'Ws':
-        directory = directory + '/children'
-    COMIDs = np.load(directory + '/comids' + zone + '.npy')
-    lengths= np.load(directory + '/lengths' + zone + '.npy')
-    upStream = np.load(directory + '/upStream' + zone + '.npy')
-    add = Accumulation(table, COMIDs, lengths, upStream, tbl_type)
+    tbl_type = 'Ws' if d.split('/')[-1] == 'children' else 'UpCat'
+    accum = np.load('%s/accum_%s.npz' % (d ,zone))
+    add = Accumulation(tbl, accum['comids'], accum['lengths'], accum['upstream'], tbl_type)
     return add
+
 ##############################################################################
 
 
@@ -1040,7 +1033,7 @@ def swapper(coms, upStream):
 ##############################################################################
 
 
-def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
+def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>" 
                   "Ryan Hill <hill.ryan@epa.gov>"
@@ -1048,12 +1041,12 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
 
     Arguments
     ---------
-    directory             : directory where .npy files will be stored
+    d             : directory where .npy files will be stored
     interVPUtbl           : table of inter-VPU connections
     inputs                : Ordered Dictionary of Hydroregions and zones from the NHD
     NHD_dir               : directory where NHD is stored
     '''
-    if not os.path.exists(directory + '/allCatCOMs.npy'):
+    if not os.path.exists(d + '/allCatCOMs.npy'):
         print 'Making allFLOWCOMs numpy file'
         chkval = 0
         for reg in inputs:
@@ -1068,15 +1061,14 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
                 AllCOMs = np.concatenate((AllCOMs, COMIDs))
             chkval += 1
         AllCOMs = AllCOMs[np.nonzero(AllCOMs)]
-        np.save(directory + '/allCatCOMs.npy', AllCOMs)
-    #cat_dir = "L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/PhaseThree/npStreamCat/allCatCOMs.npy"
-    cat = np.load(directory + '/allCatCOMs.npy')
+        np.save(d + '/allCatCOMs.npy', AllCOMs)
+    cat = np.load(d + '/allCatCOMs.npy')
     cats = set(cat)
     cats.discard(0)
-    os.mkdir(directory + '/bastards')
-    os.mkdir(directory + '/children')            
+    os.mkdir(d + '/bastards')
+    os.mkdir(d + '/children')            
     for zone in inputs:
-        if not os.path.exists(directory +'/bastards' + '/upStream' + zone + '.npy'):  #directory = 'D:/Projects/CatCOMs'
+        if not os.path.exists(d +'/bastards' + '/upStream' + zone + '.npy'):
             print zone
             hydroregion = inputs[zone]
             print 'Making UpStreamComs dictionary...'
@@ -1098,23 +1090,13 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
             a = map(lambda x: bastards(x, UpStreamComs, cats), COMIDs)
             lengths = np.array([len(v) for v in a])
             a = np.int32(np.hstack(np.array(a)))    #Convert to 1d vector
-            if not os.path.exists(directory + '/bastards'):
-                os.mkdir(directory + '/bastards')
-            wdb = directory + '/bastards' 
-            np.save(wdb+'/upStream'+zone+'.npy',a)
-            np.save(wdb+'/comids'+zone+'.npy',COMIDs)
-            np.save(wdb+'/lengths'+zone+'.npy',lengths)
+            np.savez_compressed('%s/bastards/accum_%s.npz' (d,zone), comids=COMIDs,lengths=lengths,upstream=a)
             del a, lengths
             print 'Making numpy children vectors...'
             b = map(lambda x: children(x, UpStreamComs, cats), COMIDs)
             lengths = np.array([len(v) for v in b])
             b = np.int32(np.hstack(np.array(b)))  #Convert to 1d vector
-            if not os.path.exists(directory + '/children'):
-                os.mkdir(directory + '/children')
-            wdc = directory + '/children'
-            np.save(wdc + '/upStream' + zone + '.npy', b)
-            np.save(wdc + '/comids'+ zone + '.npy', COMIDs)
-            np.save(wdc + '/lengths' + zone + '.npy', lengths)
+            np.savez_compressed('%s/children/accum_%s.npz' (d,zone), comids=COMIDs,lengths=lengths,upstream=b)
             print("--- %s seconds ---" % (dt.now() - start_time))
             print '___________________'
 ##############################################################################
@@ -1203,7 +1185,7 @@ def NHD_Dict(directory, unit='VPU'):
 def findUpstreamNpy(zone, com, numpy_dir):
     '''
     __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
-    Creates an OrderdDict for looping through regions of the NHD RPU zones
+    Finds upstream array of COMIDs for any given catchment COMID
 
     Arguments
     ---------

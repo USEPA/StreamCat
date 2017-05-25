@@ -120,8 +120,8 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
             if len(cat.columns) == in2accum:
                 if zone in interVPUtbl.ToZone.values:
                     cat = appendConnectors(cat, Connector, zone, interVPUtbl)
-                up = createAccumTable(cat, numpy_dir, zone, tbl_type='UpCat')
-                ws = createAccumTable(cat, numpy_dir, zone, tbl_type='Ws')
+                up = createAccumTable(cat, '%s/bastards' % numpy_dir, zone)
+                ws = createAccumTable(cat, '%s/children' % numpy_dir, zone)
                 if zone in interVPUtbl.ToZone.values:
                     cat = pd.read_csv(out_dir + '/' + FullTableName + '_' + zone + '.csv')
                 if zone in interVPUtbl.FromZone.values:

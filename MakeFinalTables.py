@@ -8,9 +8,10 @@
 
 import sys, os
 import pandas as pd
-ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') #ctl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
+ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') 
+#ctl = pd.read_csv('D:/Projects/ControlTables_SSWR1.1B/ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 dls = 'DirectoryLocations'
-sys.path.append(ctl.ix['StreamCat_repo'][dls])  # sys.path.append('D:/Projects/Scipts')
+sys.path.append(ctl.ix['StreamCat_repo'][dls])
 from StreamCat_functions import NHD_Dict
 inputs = NHD_Dict(ctl.ix['NHD_dir'][dls])
 inDir = ctl.ix['out_dir'][dls]
@@ -71,16 +72,16 @@ for table in tables:
                     colname1 = metricName + 'Cat' + appendMetric
                     colname2 = metricName + 'Ws' + appendMetric                   
                     if summary:
-                        finalNameList = []
+                        sumL = []
                         for sname in summary: 
                             if 'Dens' in  metricName:
                                 metricName = metricName[:-4]
-                            fnlname1 = metricName + sname + 'Cat' + appendMetric
-                            fnlname2 = metricName + sname + 'Ws' + appendMetric
+                            fnlname1 = (metricName + sname + 'Cat' + appendMetric).replace('M3','')
+                            fnlname2 = (metricName + sname + 'Ws' + appendMetric).replace('M3','')
                             tbl[fnlname1] = tbl['Cat' + sname] / (tbl[catArea] * (tbl[catPct]/100))
                             tbl[fnlname2] = tbl['Ws' + sname] / (tbl[wsArea] * (tbl[wsPct]/100)) 
-                            finalNameList.append(fnlname1)
-                            finalNameList.append(fnlname2)
+                            sumL.append(fnlname1)
+                            sumL.append(fnlname2)
                     if table == 'RoadStreamCrossings' or table == 'CanalsDitches':
                         tbl[colname1] = (tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) * conversion) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
                         tbl[colname2] = (tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100)) * conversion)                        
@@ -89,12 +90,12 @@ for table in tables:
                         tbl[colname2] = (tbl['WsCount%s' % appendMetric] / (tbl['WsAreaSqKm%s' % appendMetric] * (tbl['WsPctFull%s' % appendMetric]/100)) * conversion)                      
                     if var == 0:
                         if summary:
-                            final = tbl[frontCols + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]]  
+                            final = tbl[frontCols + [colname1] + [x for x in sumL if 'Cat' in x] + [colname2] + [x for x in sumL if 'Ws' in x]]  
                         else: 
                             final = tbl[frontCols + [colname1] + [colname2]]
                     else: 
                         if summary:
-                            final = pd.merge(final,tbl[["COMID"] + [colname1] + [x for x in finalNameList if 'Cat' in x] + [colname2] + [x for x in finalNameList if 'Ws' in x]],on='COMID')
+                            final = pd.merge(final,tbl[["COMID"] + [colname1] + [a.strip('M3') for a in sumL if 'Cat' in a] + [colname2] + [b.strip('M3') for b in sumL if 'Ws' in b]],on='COMID')
                         else:
                             final = pd.merge(final,tbl[["COMID",colname1,colname2]],on='COMID')              
                 if metricType == 'Percent':
@@ -118,7 +119,7 @@ for table in tables:
                             final = final.drop(['PctUnknown1Cat','PctUnknown2Cat','PctUnknown1Ws', 'PctUnknown2Ws'], axis=1)
             final = final.set_index('COMID')
             if zone == '04':
-                rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
+                rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
                 final = final.drop(rmtbl.COMID.tolist(),axis=0)
             if zone == '06':
                 stats = {}
@@ -144,11 +145,11 @@ for table in tables:
     print 'All Done.....'
 
 #                    if table == 'RoadStreamCrossings':
-#                        finalNameList = []
+#                        sumL = []
 #                        addName = 'SlpWtd'
 #                        fnlname1 = metricName + addName + 'Cat' + appendMetric
 #                        fnlname2 = metricName + addName + 'Ws' + appendMetric                         
 #                        tbl[fnlname1] = tbl['Cat' + addName] / (tbl[catArea] * (tbl[catPct]/100))
 #                        tbl[fnlname2] = tbl['Ws' + addName] / (tbl[wsArea] * (tbl[wsPct]/100)) 
-#                        finalNameList.append(fnlname1)
-#                        finalNameList.append(fnlname2) 
+#                        sumL.append(fnlname1)
+#                        sumL.append(fnlname2) 
