@@ -22,7 +22,7 @@
 #
 # NOTE: run script from command line passing directory and name of this script
 # and then directory and name of the control table to use like:
-# > Python "F:\Watershed Integrity Spatial Prediction\Scripts\StreamCat.py"
+# > Python "J:/GitProjects/StreamCat/StreamCat.py"
 # L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat.csv
 # --------------------------------------------------------
 

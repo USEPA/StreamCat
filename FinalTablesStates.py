@@ -7,7 +7,7 @@ FinalTablesStates
 import pandas as pd
 import os
 
-var = 'NLCD2006'
+var = 'RefStreamTempPred'
 # Read in a state / hydro-region lookup table
 lookupdir = 'L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/StateLookup'
 stateVPU = pd.read_csv(lookupdir + '/State_VPU.csv')

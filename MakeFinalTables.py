@@ -1,15 +1,18 @@
-# Script to build final StreamCat tables.
-# Date: Jan 22, 2016
-# Author: Rick Debbout
-# NOTE: run script from command line passing directory and name of this script 
-# and then directory and name of the control table to use like this:
-# > Python "F:\Watershed Integrity Spatial Prediction\Scripts\makeFinalTables.py" 
-# L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv
+# -*- coding: utf-8 -*-
+"""
+Created on Jan 22, 2016
+Script to build final StreamCat tables.
+Run script from command line passing directory and name of this script 
+and then directory and name of the control table to use like this:
+Python "F:\Watershed Integrity Spatial Prediction\Scripts\makeFinalTables.py" 
+or Python "L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv"
+@author: rdebbout, mweber
+"""
 
 import sys, os
 import pandas as pd
+
 ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') 
-#ctl = pd.read_csv('D:/Projects/ControlTables_SSWR1.1B/ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 dls = 'DirectoryLocations'
 sys.path.append(ctl.ix['StreamCat_repo'][dls])
 from StreamCat_functions import NHD_Dict
@@ -39,17 +42,25 @@ if len(missing) > 0:
     sys.exit()
 for table in tables:
     print 'Running ' + table + ' .....into ' + outDir 
+    # Looop through NHD Hydro-regions
     for zone in inputs:
+        # Check if output tables exist before writing
         if not os.path.exists(outDir +'/' + table + '_Region' + zone + '.csv'):
             for var in range(len(tables[table])):
+                # Get accumulation type, i.e. point, continuous, categorical
                 accum = ctl.accum_type.ix[ctl.Final_Table_Name == table].any()
                 metricName = ctl.MetricName.ix[ctl.FullTableName == tables[table][var]].item()
+                # G3t metric type, i.e. mean, density, percent
                 metricType = ctl.MetricType.ix[ctl.FullTableName == tables[table][var]].item()
+                # appendMetric is simply whether to add Rp100 at end of file name
                 appendMetric = ctl.AppendMetric.ix[ctl.FullTableName == tables[table][var]].item()
                 if appendMetric == 'none':
-                    appendMetric = ''    
+                    appendMetric = ''
+                # Typically conversion is 1, but if values need converting apply conversion factor
                 conversion = float(ctl.Conversion.ix[ctl.FullTableName == tables[table][var]].values[0])
+                # Read in the StreamCat allocation and accumulation table for the zone and the particular metric
                 tbl = pd.read_csv(inDir + '/%s_%s.csv'%(tables[table][var],zone)) 
+                # Grab initial set of columns from allocation and accumulation table to start building final table
                 frontCols = [title for title in tbl.columns for x in ['COMID','AreaSqKm','PctFull'] if x in title and not 'Up' in title]            
                 catArea = frontCols[1]
                 catPct = frontCols[2]
@@ -143,13 +154,3 @@ for table in tables:
     for stat in stats:
         print stat + ' ' + str(stats[stat])
     print 'All Done.....'
-
-#                    if table == 'RoadStreamCrossings':
-#                        sumL = []
-#                        addName = 'SlpWtd'
-#                        fnlname1 = metricName + addName + 'Cat' + appendMetric
-#                        fnlname2 = metricName + addName + 'Ws' + appendMetric                         
-#                        tbl[fnlname1] = tbl['Cat' + addName] / (tbl[catArea] * (tbl[catPct]/100))
-#                        tbl[fnlname2] = tbl['Ws' + addName] / (tbl[wsArea] * (tbl[wsPct]/100)) 
-#                        sumL.append(fnlname1)
-#                        sumL.append(fnlname2) 
