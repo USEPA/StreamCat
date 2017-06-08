@@ -8,33 +8,37 @@ The scripts for StreamCat rely on several python modules a user will need to ins
 
 | Package       | Version       | 
 | ------------- |--------------:|
-| fiona         | 1.6.3         | 
-| gdal          | 1.11.4        | 
-| geopandas     | 0.2.0.dev     |  
-| geos          | 3.4.2         |
+| fiona         | 1.7.7         | 
+| gdal          | 2.2.0         | 
+| geopandas     | 0.2.1         |  
+| geos          | 3.5.1         |
 | libgdal       | 2.0.0         |
-| numpy         | 1.10.1        |
-| pandas        | 0.18.1        |
-| pyproj        | 1.9.5         |
-| pysal         | 1.10.0        |
-| rasterio      | 0.34.0        |
-| shapely       | 1.5.15        |
+| numpy         | 1.12.1        |
+| pandas        | 0.20.2        |
+| pyproj        | 1.9.5.1       |
+| pysal         | 1.13.0        |
+| rasterio      | 1.0a9         |
+| shapely       | 1.5.17        |
 
-If you are using Anaconda, creating a new, clean 'streamcat' environment with these needed packages can be done easily and simply one of two ways:
+If you are using Anaconda, creating a new, clean 'StreamCat' environment with these needed packages can be done easily and simply one of several ways:
 
 * In your conda shell, add one necessary channel and then download the streamcat environment from the Anaconda cloud:
-  + conda config --add channels ioos
+  + conda config --add channels conda-forge
   + conda env create mweber36/streamcat
   
-* Alternatively, using the streamcat.txt file in this repository, in your conda shell cd to the directory where your streamcat.txt file is located and run:
-  + conda create --name streamcat --file streamcat.txt
+* Alternatively, using the streamcat.yml file in this repository, in your conda shell cd to the directory where your streamcat.yml file is located and run:
+  + conda env create -f StreamCat.yml
+  
+* To build environment yourself, do:
+  + conda env create -n StreamCat rasterio geopandas
+  + pip install georasters
 
 * To activate this new environment and open Spyder, type the following at the conda prompt
-  + activate streamcat
+  + activate Streamcat
   
   Then
 
-  + spyder
+  + Spyder
 
 Finally, to use arcpy in this new environment, you will need to copy your Arc .pth file into your new environment.  Copy the .pth file for your install of ArcGIS located in a directory like:
 
