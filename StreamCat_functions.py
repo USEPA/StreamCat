@@ -1092,7 +1092,7 @@ def makeNumpyVectors(directory, interVPUtbl, inputs, NHD_dir): #IMPROVE!
             if 0 in COMIDs:
                 COMIDs = np.delete(COMIDs,np.where(COMIDs == 0))
             if zone == '14':
-                cats.remove(17029298)
+                cats.remove(17029298) # this problem has been cleaned out of NHDPlus
             a = map(lambda x: bastards(x, UpStreamComs, cats), COMIDs)
             lengths = np.array([len(v) for v in a])
             a = np.int32(np.hstack(np.array(a)))    #Convert to 1d vector
