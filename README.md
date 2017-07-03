@@ -60,6 +60,8 @@ In turn, these scripts rely on a generic functions in [StreamCat_functions.py](h
 
 To generate the riparian buffers we used in [StreamCat](ftp://newftp.epa.gov/EPADataCommons/ORD/NHDPlusLandscapeAttributes/StreamCat/Documentation/ReadMe.html) we used the code in [RiparianBuffers.py](https://github.com/USEPA/StreamCat/blob/master/RiparianBuffer.py) 
 
+To generate percent full for catchments on the US border for point features, we used the code in [border.py](https://github.com/USEPA/StreamCat/blob/master/border.py)
+
 Examples of control tables used in scripts are:
 + [RasterControlTable](https://github.com/USEPA/StreamCat/blob/master/RasterControlTable.csv)
 + [ReclassTable](https://github.com/USEPA/StreamCat/blob/master/ReclassTable.csv)
