@@ -1,28 +1,32 @@
-,DirectoryLocations,FileName,File Type,"Data Type (continuous, point, polygon,  categorical, etc.)",Modify By,FinalRasterType,Reclass Conversion Table,Use Raster Attribute Table,ShapefileFieldCalc,Convert To Raster,Convert_Fields,Convert_Resolution,Use_ArcPy?,Use_States_Mask?,Notes,Run
-Input Directory,<Supply Directory Location>/NeedsQA,dams,ESRI Shapefile,point,0,point,No,No,Yes,No,,,Yes,No,,0
-Temp Directory,<Supply Directory Location>/Temp,imp2006,ESRI raster,continuous,0,uint8,Yes,No,No,No,,30,Yes,No,,0
-Final Directory,<Supply Directory Location>/QAComplete,mines,ESRI Shapefile,point,0,point,No,No,No,No,,,Yes,No,,0
-,,nlcd2006,ESRI raster,categorical,0,uint8,Yes,No,No,No,,30,Yes,No,,0
-,,clay,ESRI raster,continuous,100,uint16,No,No,No,No,,30,Yes,No,Modify by 100 to integerize raster,0
-,,wtdep,ESRI raster,continuous,3048,uint16,No,No,No,No,,30,Yes,No,multiply by 30.48 for units and 100 to integerize raster,0
-,,perm,ESRI raster,continuous,254,uint16,No,No,No,No,,30,Yes,No,multiply by 2.54 for units and 100 to integerize raster,0
-,,rckdep,ESRI raster,continuous,254,uint16,No,No,No,No,,30,Yes,No,multiply by 2.54 for units and 100 to integerize raster,0
-,,om,ESRI raster,continuous,100,uint16,No,No,No,No,,30,Yes,No,multiply by 100 to integerize raster,0
-,,sand,ESRI raster,continuous,100,uint16,No,No,No,No,,30,Yes,No,multiply by 100 to integerize raster,0
-,,runoff,ESRI raster,continuous,0,uint16,No,No,No,No,,30,Yes,No,,0
-,,roadden,Geotiff,continuous,0,Float32,No,No,No,No,,1000,Yes,Yes,,0
-,,rdstcrs,ESRI raster,continuous,0,uint8,No,No,No,No,,30,Yes,No,Called raster continuous even though binary for processing purposes,0
-,,us_lithology_1km_dd83,Image file,categorical,0,uint8,Yes,No,No,No,,30,Yes,No,,0
-,,NPDES_Major,ESRI Shapefile,point,0,point,No,No,No,No,,,Yes,No,,0
-,,pestic,ESRI raster,continuous,0,,No,No,No,No,,30,Yes,No,,0
-,,Superfund,ESRI Shapefile,point,0,point,No,No,No,No,,,Yes,No,,0
-,,TRI,ESRI Shapefile,point,0,point,No,No,No,No,,,Yes,No,,0
-,,tl_2010_US_bg10,ESRI Shapefile,polygon,0,uint32,No,No,Yes,Yes,HU_SQKM;POP_SQKM,90,Yes,No,,0
-,,cbnf,ESRI raster,continuous,0,uint16,Yes,No,No,No,,30,Yes,No,,1
-,,manure,ESRI raster,continuous,0,uint16,Yes,No,No,No,,30,Yes,No,,1
-,,fert,ESRI raster,continuous,0,uint16,Yes,No,No,No,,30,Yes,No,,1
-,,dep_nh4_2008,Geotiff,continuous,0,Float32,No,No,No,No,,2000,Yes,No,,0
-,,dep_no3_2008,Geotiff,continuous,0,Float32,No,No,No,No,,2000,Yes,No,,0
-,,dep_totalN_2008,Geotiff,continuous,0,Float32,No,No,No,No,,2000,Yes,No,,0
-,,dep_splusn_2008,Geotiff,continuous,0,Float32,No,No,No,No,,2000,Yes,No,,0
-,,kfactgrid,ESRI raster,continuous,0,uint16,Yes,VALUE;KFFACT_INT,No,No,,1000,Yes,No,Raster uses integerized kffact - needs to be multiplied by .01 in final tables,0
+,DirectoryLocations,InputFileName,OutputFileName,File Type,"Data Type (continuous, point, polygon,  categorical, etc.)",Modify By,FinalRasterType,Reclass Conversion Table,Use Raster Attribute Table,ShapefileFieldCalc,Convert To Raster,Convert_Fields,Convert_Resolution,Use_ArcPy?,Use_States_Mask?,Notes,Run
+Input Directory,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/LandscapeRasters/NeedsQA,dams,dams,ESRI Shapefile,point,0,point,No,No,Yes,No,,0,No,No,,0
+Temp Directory,C:/Users/mweber/Temp,imp2006,imp2006,ESRI raster,continuous,0,uint8,Yes,No,No,No,,30,Yes,No,,0
+Final Directory,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/LandscapeRasters/QAComplete,mines,mines,ESRI Shapefile,point,0,point,No,No,No,No,,0,Yes,Yes,,0
+Scripts Directory,F:/Watershed Integrity Spatial Prediction/Scripts,nlcd2006,nlcd2006,ESRI raster,categorical,0,uint8,Yes,No,No,No,,30,Yes,No,,0
+ReClassTable,L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/ReclassTable.csv,nlcd2011,nlcd2011,Image file,categorical,0,uint8,No,No,No,No,,30,Yes,No,,1
+FieldCalcTable,L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/FieldCalcTable.csv,clay,clay,ESRI raster,continuous,100,uint16,No,No,No,No,,30,Yes,No,Modify by 100 to integerize raster,0
+,,wtdep,wtdep,ESRI raster,continuous,3048,uint16,No,No,No,No,,30,Yes,No,multiply by 30.48 for units and 100 to integerize raster,0
+,,perm,perm,ESRI raster,continuous,254,uint16,No,No,No,No,,30,Yes,No,multiply by 2.54 for units and 100 to integerize raster,0
+,,rckdep,rckdep,ESRI raster,continuous,254,uint16,No,No,No,No,,30,Yes,No,multiply by 2.54 for units and 100 to integerize raster,0
+,,om,om,ESRI raster,continuous,100,uint16,No,No,No,No,,30,Yes,No,multiply by 100 to integerize raster,0
+,,sand,sand,ESRI raster,continuous,100,uint16,No,No,No,No,,30,Yes,No,multiply by 100 to integerize raster,0
+,,runoff,runoff,ESRI raster,continuous,0,uint16,No,No,No,No,,30,Yes,No,,0
+,,roadden,roadden,Geotiff,continuous,0,Float32,No,No,No,No,,1000,Yes,Yes,,0
+,,rdstcrs,rdstcrs,ESRI raster,continuous,0,uint8,No,No,No,No,,30,Yes,No,Called raster continuous even though binary for processing purposes,0
+,,us_lithology_1km_dd83,us_lithology_1km_dd83,Image file,categorical,0,uint8,Yes,No,No,No,,30,Yes,No,,0
+,,NPDES_Major,NPDES_Major,ESRI Shapefile,point,0,point,No,No,No,No,,0,Yes,No,,0
+,,pestic,pestic,ESRI raster,continuous,0,,No,No,No,No,,30,Yes,No,,0
+,,Superfund,Superfund,ESRI Shapefile,point,0,point,No,No,No,No,,0,Yes,No,,0
+,,TRI,TRI,ESRI Shapefile,point,0,point,No,No,No,No,,0,Yes,No,,0
+,,tl_2010_US_bg10,tl_2010_US_bg11,ESRI Shapefile,polygon,0,uint32,No,No,Yes,Yes,HU_SQKM;POP_SQKM,90,Yes,No,,0
+,,cbnf,cbnf,ESRI raster,continuous,0,uint16,No,No,No,No,,30,Yes,Yes,,0
+,,manure,manure,ESRI raster,continuous,0,uint16,No,No,No,No,,30,Yes,No,,0
+,,fert,fert,ESRI raster,continuous,0,uint16,No,No,No,No,,30,Yes,No,,0
+,,dep_nh4_2008,NH4,Geotiff,continuous,0,Float32,No,No,No,No,,2000,Yes,No,,0
+,,dep_no3_2008,NO3,Geotiff,continuous,0,Float32,No,No,No,No,,2000,Yes,No,,0
+,,dep_totalN_2008,InorgNWetDep,Geotiff,continuous,0,Float32,No,No,No,No,,2000,Yes,No,,0
+,,dep_splusn_2008,SplusN,Geotiff,continuous,0,Float32,No,No,No,No,,2000,Yes,No,,0
+,,kffactgrid,Kffact,ESRI raster,continuous,0,uint16,Yes,VALUE;KFFACT_INT,No,No,,1000,Yes,No,Raster uses integerized kffact - needs to be multiplied by .01 in final tables,0
+,,bfi48grd,bfi,ESRI raster,continuous,1,uint8,No,No,No,No,,1000,Yes,Yes,,0
+,,us_130evt,nonnative,ESRI raster,categorical,0,uint8,Yes,VALUE;EVT_GP,No,No,,30,Yes,Yes,,0
+,,us_130evt,IntrodManagVeg,ESRI raster,categorical,0,uint8,Yes,VALUE;EVT_GP,No,No,,30,Yes,Yes,,0
