@@ -10,6 +10,7 @@ or Python "L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTabl
 """
 
 import sys, os
+import numpy as np
 import pandas as pd
 
 ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') 
@@ -97,7 +98,7 @@ for table in tables:
                         tbl[colname1] = (tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) * conversion) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
                         tbl[colname2] = (tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100)) * conversion)                        
                     else:
-                        tbl[colname1] = (tbl['CatCount%s' % appendMetric] / (tbl['CatAreaSqKm%s' % appendMetric] * (tbl['CatPctFull%s' % appendMetric]/100)) * conversion) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
+                        tbl[colname1] = (tbl['CatCount%s' % appendMetric] / (tbl['CatAreaSqKm%s' % appendMetric] * (tbl['CatPctFull%s' % appendMetric]/100)) * conversion)
                         tbl[colname2] = (tbl['WsCount%s' % appendMetric] / (tbl['WsAreaSqKm%s' % appendMetric] * (tbl['WsPctFull%s' % appendMetric]/100)) * conversion)                      
                     if var == 0:
                         if summary:
@@ -129,6 +130,8 @@ for table in tables:
                         if table == 'AgMidHiSlopes':
                             final = final.drop(['PctUnknown1Cat','PctUnknown2Cat','PctUnknown1Ws', 'PctUnknown2Ws'], axis=1)
             final = final.set_index('COMID')
+            if len(final[np.isinf(final)].stack().dropna()) > 0:  # inf values in dams layer - zone 01 remove
+                final = final.replace([np.inf, -np.inf], np.nan) 
             if zone == '04':
                 rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
                 final = final.drop(rmtbl.COMID.tolist(),axis=0)

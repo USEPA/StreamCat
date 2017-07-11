@@ -133,7 +133,7 @@ def dbf2DF(f, upper=True):
 ##############################################################################
 
 
-def UpcomDict(nhd, interVPUtbl):
+def UpcomDict(nhd, interVPUtbl, zone):
     '''
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
                  "Marc Weber <weber.marc@epa.gov>"
@@ -728,14 +728,14 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
            interAlloc = '%s_%s.csv' % (Connector[:Connector.find('_connectors')], interVPUtbl.ToZone.values[0])
            tbl = pd.read_csv(interAlloc).set_index('COMID')
            toVPUs = tbl[tbl.index.isin([x for x in interVPUtbl.toCOMIDs if x > 0])].copy()
-    for interLine in interVPUtbl.values:
+    for _,row in interVPUtbl.iterrows():
     # Loop through sub-setted interVPUtbl to make adjustments to COMIDS listed in the table
-        if interLine[4] > 0:
-            AdjustCOMs(toVPUs,int(interLine[4]), int(interLine[0]), throughVPUs)
-        if interLine[3] > 0:
-            AdjustCOMs(throughVPUs,int(interLine[3]), int(interLine[0]),None)
-        if interLine[5] > 0:
-            throughVPUs = throughVPUs.drop(int(interLine[5]))
+        if row.toCOMIDs > 0:
+            AdjustCOMs(toVPUs,int(row.toCOMIDs), int(row.thruCOMIDs), throughVPUs)
+        if row.AdjustComs > 0:
+            AdjustCOMs(throughVPUs,int(row.AdjustComs), int(row.thruCOMIDs),None)
+        if row.DropCOMID > 0:
+            throughVPUs = throughVPUs.drop(int(row.DropCOMID))
     if any(interVPUtbl.toCOMIDs.values > 0): # if COMIDs came from other zone append to Connector table
 
     #!!!! This format assumes that the Connector table has already been made by the time it gets to these COMIDs!!!!!
@@ -824,8 +824,9 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol='COMID'):
     for name in outDF.columns:
         if 'AreaSqKm' in name:
             areaName = name
-    outDF.loc[(outDF[areaName] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table
+    outDF.loc[(outDF[areaName] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table   
     return outDF
+
 ##############################################################################
 
 
@@ -993,28 +994,6 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
 ##############################################################################   
 
 
-def createAccumTable(tbl, d, zone):
-    '''
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Ryan Hill <hill.ryan@epa.gov>"
-    Accesses either children or bastards directory to pass in to Accumulation
-    function for either UpCat metrics or Ws metrics.
-
-    Arguments
-    ---------
-    tbl                   : table containing catchment values
-    d                     : location of numpy files
-    zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
-    tbl_type              : string value of table metrics to be returned
-    '''
-    tbl_type = 'Ws' if d.split('/')[-1] == 'children' else 'UpCat'
-    accum = np.load('%s/accum_%s.npz' % (d ,zone))
-    add = Accumulation(tbl, accum['comids'], accum['lengths'], accum['upstream'], tbl_type)
-    return add
-
-##############################################################################
-
-
 def swapper(coms, upStream):
     '''
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
@@ -1068,13 +1047,13 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
     os.mkdir(d + '/bastards')
     os.mkdir(d + '/children')            
     for zone in inputs:
-        if not os.path.exists(d +'/bastards' + '/upStream' + zone + '.npy'):
+        if not os.path.exists('%s/bastards/accum_%s.npz' % (d,zone)):
             print zone
             hydroregion = inputs[zone]
             print 'Making UpStreamComs dictionary...'
             start_time = dt.now()
             NHD_pre = '%s/NHDPlus%s/NHDPlus%s' % (NHD_dir, hydroregion, zone)
-            UpStreamComs = UpcomDict(NHD_pre, interVPUtbl)
+            UpStreamComs = UpcomDict(NHD_pre, interVPUtbl, zone)
             print("--- %s seconds ---" % (dt.now() - start_time))
             print '....'
             print 'Making numpy bastard vectors...'
@@ -1090,13 +1069,52 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
             a = map(lambda x: bastards(x, UpStreamComs, cats), COMIDs)
             lengths = np.array([len(v) for v in a])
             a = np.int32(np.hstack(np.array(a)))    #Convert to 1d vector
-            np.savez_compressed('%s/bastards/accum_%s.npz' (d,zone), comids=COMIDs,lengths=lengths,upstream=a)
+            np.savez_compressed('%s/bastards/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=a)
             del a, lengths
             print 'Making numpy children vectors...'
             b = map(lambda x: children(x, UpStreamComs, cats), COMIDs)
             lengths = np.array([len(v) for v in b])
             b = np.int32(np.hstack(np.array(b)))  #Convert to 1d vector
-            np.savez_compressed('%s/children/accum_%s.npz' (d,zone), comids=COMIDs,lengths=lengths,upstream=b)
+            np.savez_compressed('%s/children/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=b)
+            print("--- %s seconds ---" % (dt.now() - start_time))
+            print '___________________'
+##############################################################################
+def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
+    '''
+    __author__ =  "Marc Weber <weber.marc@epa.gov>" 
+                  "Ryan Hill <hill.ryan@epa.gov>"
+    Uses the NHD tables to create arrays of upstream catchments which are used in the Accumulation function
+
+    Arguments
+    ---------
+    d             : directory where .npy files will be stored
+    interVPUtbl           : table of inter-VPU connections
+    inputs                : Ordered Dictionary of Hydroregions and zones from the NHD
+    NHD_dir               : directory where NHD is stored
+    '''
+    os.mkdir(d + '/bastards')         
+    for zone in inputs:
+        if not os.path.exists('%s/bastards/accum_%s.npz' % (d,zone)):
+            print zone
+            hydroregion = inputs[zone]
+            print 'Making UpStreamComs dictionary...'
+            start_time = dt.now()
+            NHD_pre = '%s/NHDPlus%s/NHDPlus%s' % (NHD_dir, hydroregion, zone)
+            UpStreamComs = UpcomDict(NHD_pre, interVPUtbl, zone)
+            print("--- %s seconds ---" % (dt.now() - start_time))
+            print '....'
+            print 'Making numpy bastard vectors...'
+            start_time = dt.now()
+            tbl_dir = NHD_dir + "/NHDPlus%s/NHDPlus%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (hydroregion, zone)
+            catch = dbf2DF(tbl_dir).set_index('COMID')   
+            COMIDs = np.append(np.array(catch.index),np.array(interVPUtbl.ix[np.logical_and((np.array(interVPUtbl.ToZone) == zone),(np.array(interVPUtbl.DropCOMID) == 0))].thruCOMIDs))
+            del catch
+            if 0 in COMIDs:
+                COMIDs = np.delete(COMIDs,np.where(COMIDs == 0))
+            a = map(lambda x: bastards(x, UpStreamComs), COMIDs)
+            lengths = np.array([len(v) for v in a])
+            a = np.int32(np.hstack(np.array(a)))    #Convert to 1d vector
+            np.savez_compressed('%s/bastards/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=a)
             print("--- %s seconds ---" % (dt.now() - start_time))
             print '___________________'
 ##############################################################################
