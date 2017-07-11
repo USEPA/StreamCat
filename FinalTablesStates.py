@@ -7,9 +7,9 @@ FinalTablesStates
 import pandas as pd
 import os
 
-var = 'RefStreamTempPred'
+var = 'NonAgIntrodManagVegRipBuf100'
 # Read in a state / hydro-region lookup table
-lookupdir = 'L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/StateLookup'
+lookupdir = 'L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/StateLookup'
 stateVPU = pd.read_csv(lookupdir + '/State_VPU.csv')
 stateVPU.head()
 # let's convert thet states / VPUs in pandas data frame to a dictionary

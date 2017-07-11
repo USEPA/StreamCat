@@ -326,44 +326,44 @@ def Reclass(inras, outras, reclass_dict, dtype=None):
     in_nodata       : Returned no data values from
     out_dtype       : the data type of the raster, i.e. 'float32', 'uint8' (string)
     '''
-    with rasterio.drivers():
-        with rasterio.open(inras) as src:
-            #Set dtype and nodata values
-            if dtype is None: #If no dtype defined, use input dtype
-                nd = src.meta['nodata']
-                dtype = src.meta['dtype']
-            else:
-                try:
-                    nd = eval('np.iinfo(np.' + dtype + ').max')
-                except:
-                    nd = eval('np.finfo(np.' + dtype + ').max')
-                #exec 'nd = np.iinfo(np.'+out_dtype+').max'
-            kwargs = src.meta.copy()
-            kwargs.update(
-                driver='GTiff',
-                count=1,
-                compress='lzw',
-                nodata=nd,
-                dtype = dtype,
-                bigtiff='YES'  # Output will be larger than 4GB
-            )
+    
+    with rasterio.open(inras) as src:
+        #Set dtype and nodata values
+        if dtype is None: #If no dtype defined, use input dtype
+            nd = src.meta['nodata']
+            dtype = src.meta['dtype']
+        else:
+            try:
+                nd = eval('np.iinfo(np.' + dtype + ').max')
+            except:
+                nd = eval('np.finfo(np.' + dtype + ').max')
+            #exec 'nd = np.iinfo(np.'+out_dtype+').max'
+        kwargs = src.meta.copy()
+        kwargs.update(
+            driver='GTiff',
+            count=1,
+            compress='lzw',
+            nodata=nd,
+            dtype = dtype,
+            bigtiff='YES'  # Output will be larger than 4GB
+        )
 
-            windows = src.block_windows(1)
+        windows = src.block_windows(1)
 
-            with rasterio.open(outras, 'w', **kwargs) as dst:
-                for idx, window in windows:
-                    src_data = src.read(1, window=window)
-                    # Convert values
+        with rasterio.open(outras, 'w', **kwargs) as dst:
+            for idx, window in windows:
+                src_data = src.read(1, window=window)
+                # Convert values
 #                    src_data = np.where(src_data == in_nodata, nd, src_data).astype(dtype)
-                    for inval,outval in reclass_dict.iteritems():
-                        if np.isnan(outval).any():
-    #                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
-                            src_data = np.where(src_data == inval, nd, src_data).astype(dtype)
-                        else:
-                            src_data = np.where(src_data == inval, outval, src_data).astype(dtype)
+                for inval,outval in reclass_dict.iteritems():
+                    if np.isnan(outval).any():
+#                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
+                        src_data = np.where(src_data == inval, nd, src_data).astype(dtype)
+                    else:
+                        src_data = np.where(src_data == inval, outval, src_data).astype(dtype)
 #                    src_data = np.where(src_data == inval, outval, src_data)
-                    dst_data = src_data
-                    dst.write_band(1, dst_data, window=window)
+                dst_data = src_data
+                dst.write_band(1, dst_data, window=window)
 ##############################################################################
 
 
