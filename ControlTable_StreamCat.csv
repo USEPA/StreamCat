@@ -126,7 +126,7 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Landsc
 ,,nlcd2001,Categorical,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/ControlTables/NLCD2001_lookup.csv,none,nlcd2001.tif,,NLCD2001,Percent,1,0,0,1,
 ,,nlcd2001_RipBuf100,Categorical,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/ControlTables/NLCD2001_lookup.csv,Rp100,nlcd2001.tif,,NLCD2001RipBuf100,Percent,1,0,1,1,
 ,,PctImp2001,Continuous,PctImp2001,none,imp2001.tif,,ImperviousSurfaces2001,Mean,1,0,0,1,
-,,,,,,,,,,,,,,
+,,PctImp2001_RipBuf100,Continuous,PctImp2001,Rp100,imp2001.tif,,ImperviousSurfaces2001RipBuf100,Mean,1,0,1,1,
 ,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,
