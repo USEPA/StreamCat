@@ -162,9 +162,10 @@ def UpcomDict(nhd, interVPUtbl, zone):
     flow = flow[~flow.FROMCOMID.isin(remove)]
     # find values that are coming from other zones and remove the ones that 
     # aren't in the interVPU table
-    out = np.nonzero(np.setdiff1d(flow.FROMCOMID.values,fls.COMID.values))
+    out = np.setdiff1d(flow.FROMCOMID.values,fls.COMID.values)
+    out = out[np.nonzero(out)]
     flow = flow[~flow.FROMCOMID.isin(
-                np.setdiff1d(out, interVPUtbl.thruCOMIDs.values))]        
+                np.setdiff1d(out, interVPUtbl.thruCOMIDs.values))]
     # Now table is ready for processing and the UpCOMs dict can be created             
     fcom,tcom = flow.FROMCOMID.values,flow.TOCOMID.values
     UpCOMs = defaultdict(list)
@@ -180,7 +181,7 @@ def UpcomDict(nhd, interVPUtbl, zone):
             UpCOMs[int(interLine[6])].append(int(interLine[0]))    
     return UpCOMs
 ##############################################################################
-
+    
 
 
 
