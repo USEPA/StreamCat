@@ -34,6 +34,7 @@ import numpy as np
 ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
 #ctl = pd.read_csv(r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 #ctl = pd.read_csv(r'D:\Projects\ControlTables_SSWR1.1B\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
+#ctl = pd.read_csv(r'J:/GitProjects/StreamCat/ControlTable_StreamCat.csv').set_index('f_d_Title')
 # Import system modules
 from datetime import datetime as dt
 import geopandas as gpd
@@ -93,6 +94,7 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
         Connector = "%s/%s_connectors.csv" % (out, ftn)  # File string to store InterVPUs needed for adjustments
         catTime = dt.now()
         for zone in inputs:
+            print 'running catchment processing for ' + zone
             if not os.path.exists('%s/%s_%s.csv' % (out, ftn, zone)):
                 hydroregion = inputs[zone]
                 pre = '%s/NHDPlus%s/NHDPlus%s' % (nhd, hydroregion, zone)
@@ -124,6 +126,7 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
             cat = pd.read_csv('%s/%s_%s.csv' % (out, ftn, zone))
             in2accum = len(cat.columns)
             if len(cat.columns) == in2accum:
+                print 'running accumulation for ' + zone
                 if zone in interVPUtbl.ToZone.values:
                     cat = appendConnectors(cat, Connector, zone, interVPUtbl)    
                 accum = np.load('%s/bastards/accum_%s.npz' % (npy ,zone))
