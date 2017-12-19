@@ -1,15 +1,21 @@
-# Functions for standardizing landscape rasters, allocating landscape metrics to NHDPlusV2
-# catchments, accumulating metrics for upstream catchments, and writing final landscape metric tables
-# Authors: Marc Weber<weber.marc@epa.gov>, Ryan Hill<hill.ryan@epa.gov>,
-#          Darren Thornbrugh<thornbrugh.darren@epa.gov>, Rick Debbout<debbout.rick@epa.gov>,
-#          and Tad Larsen<laresn.tad@epa.gov>
-#          __                                       __
-#    _____/ /_________  ____  ____ ___  _________ _/ /_ 
-#   / ___/ __/ ___/ _ \/ __ `/ __ `__ \/ ___/ __ `/ __/
-#  (__  ) /_/ /  /  __/ /_/ / / / / / / /__/ /_/ / /_ 
-# /____/\__/_/   \___/\__,_/_/ /_/ /_/\___/\__,_/\__/ 
-#
-# Date: October 2015
+'''       __                                       __
+    _____/ /_________  ____  ____ ___  _________ _/ /_ 
+   / ___/ __/ ___/ _ \/ __ `/ __ `__ \/ ___/ __ `/ __/
+  (__  ) /_/ /  /  __/ /_/ / / / / / / /__/ /_/ / /_ 
+ /____/\__/_/   \___/\__,_/_/ /_/ /_/\___/\__,_/\__/ 
+
+ Functions for standardizing landscape rasters, allocating landscape metrics 
+ to NHDPlusV2 catchments, accumulating metrics for upstream catchments, and 
+ writing final landscape metric tables
+
+ Authors: Marc Weber<weber.marc@epa.gov>
+          Ryan Hill<hill.ryan@epa.gov>
+          Darren Thornbrugh<thornbrugh.darren@epa.gov>
+          Rick Debbout<debbout.rick@epa.gov>
+          Tad Larsen<laresn.tad@epa.gov>
+
+ Date: October 2015
+'''
 
 # load modules
 import os, sys
@@ -56,7 +62,7 @@ def dbfreader(f):
 
     """
     # See DBF format spec at:
-    #     http://www.pgts.com.au/download/public/xbase.htm#DBF_STRUCT
+    # http://www.pgts.com.au/download/public/xbase.htm#DBF_STRUCT
 
     numrec, lenheader = struct.unpack('<xxxxLH22x', f.read(32))    
     numfields = (lenheader - 33) // 32
@@ -1021,7 +1027,7 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
 
     Arguments
     ---------
-    d             : directory where .npy files will be stored
+    d                     : directory where .npy files will be stored
     interVPUtbl           : table of inter-VPU connections
     inputs                : Ordered Dictionary of Hydroregions and zones from the NHD
     NHD_dir               : directory where NHD is stored
@@ -1030,7 +1036,6 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
         print 'Making allFLOWCOMs numpy file'
         chkval = 0
         for reg in inputs:
-            print 'All ' + reg
             hydroregion = inputs[reg]
             catchment = "%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf" % (NHD_dir, hydroregion, reg)
             cats = dbf2DF(catchment).set_index('FEATUREID')
@@ -1121,83 +1126,48 @@ def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
 ##############################################################################
 
 
-def makeVPUdict(directory):
+def nhd_dict(nhd, unit='VPU'):
     '''
     __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
-    Creates an OrderdDict for looping through regions of the NHD to carry InterVPU 
-    connections across VPU zones
+    Creates an OrderdDict for looping through regions of the NHD to carry 
+    InterVPU connections across VPU/RPU zones
+    
+    Defaults to VPU
+    
+    Note: Hawaii and the Carribean Island zones are removed
 
     Arguments
     ---------
-    directory             : the directory contining NHDPlus data at the top level
+    nhd             : the directory contining NHDPlus data
+    unit            : Vector or Raster processing units 'VPU' or 'RPU'
     '''
-    B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
-    B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
-    B = B.ix[B.UNITTYPE == 'VPU'].sort_values('HYDROSEQ',ascending=False)
-    inputs = OrderedDict()  # inputs = OrderedDict((k, inputs[k]) for k in order)
-    for idx, row in B.iterrows():
-        inputs[row.UNITID] = row.DRAINAGEID
-        #print 'HydroRegion (value): ' + row.DRAINAGEID + ' in VPU (key): ' + row.UNITID
-    np.save('%s/StreamCat_npy/zoneInputs.npy' % directory, inputs)
-    return inputs
-##############################################################################
 
-
-def makeRPUdict(directory):
-    '''
-    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
-    Creates an OrderdDict for looping through regions of the NHD RPU zones
-
-    Arguments
-    ---------
-    directory             : the directory contining NHDPlus data at the top level
-    '''
-    B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
-    B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)      
-    rpuinputs = OrderedDict()
-    for idx, row in B.iterrows():
-        if row.UNITTYPE == 'RPU':
+    inputs = OrderedDict()
+    bounds = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % nhd)
+    remove = bounds.ix[bounds.DRAINAGEID.isin(['HI','CI'])].index
+    bounds = bounds.drop(remove, axis=0)
+    
+    if unit == 'VPU':
+        vpu_bounds = bounds.ix[bounds.UNITTYPE == 'VPU'].sort_values('HYDROSEQ',
+                                                                ascending=False)
+        for idx, row in vpu_bounds.iterrows():
+            inputs[row.UNITID] = row.DRAINAGEID
+        
+        return inputs
+    
+    if unit == 'RPU':
+        rpu_bounds = bounds.ix[bounds.UNITTYPE == 'RPU']
+        for _, row in rpu_bounds.iterrows():
             hr = row.DRAINAGEID
             rpu = row.UNITID
-            for root, dirs, files in os.walk('%s/NHDPlus%s' % (directory, hr)):
-                for name in dirs:
-                    if rpu in os.path.join(root, name):
-                        zone = os.path.join(root, name).split('\\')[-3].replace('NHDPlus','')
-                        break
-            if not zone in rpuinputs.keys():
-                rpuinputs[zone] = []
-            print 'RPU: ' + rpu + ' in zone: ' + zone 
-            rpuinputs[zone].append(row.UNITID)
-    np.save('%s/StreamCat_npy/rpuInputs.npy' % directory, rpuinputs)
-    return rpuinputs
-##############################################################################
+            for root, _, _ in os.walk('%s/NHDPlus%s' % (nhd, hr)):
+                if rpu in root:           
+                    zone = os.path.split(os.path.split(root)[0])[0][-2:]
+            if not zone in inputs.keys():
+                inputs[zone] = []
+            inputs[zone].append(row.UNITID)
+        return inputs
 
-def NHD_Dict(directory, unit='VPU'):
-    '''
-    __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
-    Creates an OrderdDict for looping through regions of the NHD RPU zones
-
-    Arguments
-    ---------
-    directory             : the directory contining NHDPlus data at the top level
-    unit                  : Vector or Raster processing units 'VPU' or 'RPU'
-    '''  
-    if unit == 'VPU':
-        if not os.path.exists('%s/StreamCat_npy' % directory):
-            os.mkdir('%s/StreamCat_npy' % directory)    
-        if not os.path.exists('%s/StreamCat_npy/zoneInputs.npy' % directory):
-            inputs = makeVPUdict(directory)
-        else:
-            inputs = np.load('%s/StreamCat_npy/zoneInputs.npy' % directory).item() 
-    if unit == 'RPU':
-        if not os.path.exists('%s/StreamCat_npy' % directory):
-            os.mkdir('%s/StreamCat_npy' % directory)    
-        if not os.path.exists('%s/StreamCat_npy/rpuInputs.npy' % directory):
-            inputs = makeRPUdict(directory)
-        else:
-            inputs = np.load('%s/StreamCat_npy/rpuInputs.npy' % directory).item() 
-    return inputs
-          
 ##############################################################################
 
     
@@ -1212,9 +1182,10 @@ def findUpstreamNpy(zone, com, numpy_dir):
     com                   : COMID of NHD Catchment, integer
     numpy_dir             : directory where .npy files are stored
     '''
-    comids = np.load(numpy_dir + '/comids' + zone + '.npy')
-    lengths= np.load(numpy_dir + '/lengths' + zone + '.npy')
-    upStream = np.load(numpy_dir + '/upStream' + zone + '.npy')
+    accum = np.load(numpy_dir + '/accum_' + zone + '.npz')
+    comids = accum['comids']
+    lengths = accum['lengths']
+    upStream = accum['upstream']
     itemindex = int(np.where(comids == com)[0])
     n = lengths[:itemindex].sum()
     arrlen = lengths[itemindex]
