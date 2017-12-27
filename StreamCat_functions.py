@@ -831,6 +831,9 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol='COMID'):
     for name in outDF.columns:
         if 'AreaSqKm' in name:
             areaName = name
+            
+    #also, probably do this outside of this function
+    areaName = [name for name in outDF.columns if 'AreaSqKm' in name][0]
     outDF.loc[(outDF[areaName] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table   
     return outDF
 
@@ -934,11 +937,11 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
            result.SLOPE = result.SLOPE.fillna(0)
            result['SlpWtd'] = result['Sum'] * result['SLOPE']
            result = result.drop(['SLOPE'], axis=1)           
-        result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm.astype('float'))*100).fillna(0)
+        result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm.astype('float'))*100).fillna(0)  
         result = result.drop(['GRIDCODE', 'VALUE', 'AREA'], axis=1)
     cols = result.columns[1:]
     result.columns = np.append('COMID', 'Cat' + cols.values)
-    return result
+    return result # ALL NAs need to be filled w/ zero here for Accumulation!!
 ##############################################################################
 
 

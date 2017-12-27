@@ -24,6 +24,12 @@
  > Python StreamCat.py 
  --------------------------------------------------------
 '''
+#TODO: remake npz files for bastards only, don't retain comids w/o upstream!
+#TODO: calculate WS metrics by table math, not in numpy accumulation process
+#TODO: create function like findUpstreamNPY for up and ws
+#TODO:
+#TODO:
+#TODO:
 
 import os
 import numpy as np
@@ -144,3 +150,218 @@ print "total elapsed time " + str(dt.now()-totTime)
 #ctl = pd.read_csv(r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 #ctl = pd.read_csv(r'D:\Projects\ControlTables_SSWR1.1B\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 #####################################################################################################################
+
+import numpy as np
+import pandas as pd
+
+
+def swapper(coms, upstream):
+
+    bsort = np.argsort(coms)
+    apos = np.searchsorted(coms[bsort], upstream)
+    indices = bsort[apos]
+    return indices
+
+
+def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol='COMID'):
+
+    coms = tbl[icol].values  # get array of comids
+
+    indices = swapper(coms, upstream)  #Get indices that will be used to map values
+    del upstream  # a and indices are big - clean up to minimize RAM
+    cols = tbl.columns[1:]  #Get column names that will be accumulated
+    z = np.zeros(comids.shape)  #Make empty vector for placing values
+    #TODO: Do we need to use np.arrays??
+    outT = np.zeros((len(comids), len(tbl.columns)))  #Make empty array for placing final values
+    outT[:,0] = comids  #Define first column as comids
+    #Loop and accumulate values
+    for k in range(0,len(cols)):
+        # TODO: col in cols???
+        
+        col = cols[k]
+        c = np.array(tbl[col]) # tbl[col].fillna(0) keep out zeros where no data!
+        d = c[indices] #Make final vector from desired data (c)
+        if 'PctFull' in col:
+            area = np.array(tbl.ix[:, 1])
+            ar = area[indices]
+            x = 0
+            for i in range(0, len(lengths)):
+                # using nan_to_num in average function to treat NA's as zeros when summing
+                z[i] = np.ma.average(np.nan_to_num(d[x:x + lengths[i]]), weights=ar[x:x + lengths[i]])
+                x = x + lengths[i]
+        else:
+            x = 0
+            for i in range(0, len(lengths)):
+                z[i] = np.nansum(d[x:x + lengths[i]])
+                x = x + lengths[i]
+                
+                
+                
+        outT[:,k+1] = z  #TODO: add to DF here, outDF[col] = z 
+    outT = outT[np.in1d(outT[:,0], coms),:]  #TODO: retains appended COMIDs from InterVPU 
+                                            # clearer to do with pandas here
+    outDF = pd.DataFrame(outT)
+    
+    
+    # below can be moved outside of this function except the nan line below
+    if tbl_type == 'Ws':
+        outDF.columns = np.append(icol, map(lambda x : x.replace('Cat', 'Ws'),cols.values))
+    if tbl_type == 'UpCat':
+        outDF.columns = np.append(icol, 'Up' + cols.values)
+    for name in outDF.columns:
+        if 'AreaSqKm' in name:
+            areaName = name
+    outDF.loc[(outDF[areaName] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table   
+    return outDF
+
+
+npy = 'D:/NHDPlusV21/StreamCat_npy/bastards'
+accum = np.load('%s/accum_06.npz' % npy)
+accum.files
+comids = accum['comids']
+lengths = accum['lengths']
+upstream = accum['upstream']
+
+h = 'L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Allocation_and_Accumulation'
+
+tbl = pd.read_csv('%s/Clay_06.csv' % h)[['COMID',
+                                         'CatAreaSqKm',
+                                         'CatCount',
+                                         'CatSum',
+                                         'CatPctFull']]
+tbl.columns.tolist()
+
+
+check = pd.read_csv('%s/Clay_06.csv' % h)
+
+inputs = np.load('D:/NHDPlusV21/StreamCat_npy/zoneInputs.npy').item()
+for zone in inputs:
+    t = pd.read_csv('%s/Clay_%s.csv' % (h,zone))
+    accum = np.load('%s/accum_%s.npz' % (npy,zone))
+    print len(accum['comids']), len(t.COMID.values)
+    assert len(accum['comids']) == len(t.COMID.values)
+    
+   ##############################################
+   # TESTING #
+   #coming into this func  
+   [col.replace('Cat','') for col in tbl.columns]
+   
+def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol='COMID'):    
+    coms = tbl[icol].values  # get array of comids
+    indices = swapper(coms, upstream)  # Get indices that will be used to map values
+    del upstream
+    out = pd.DataFrame(index=comids)
+    for col in tbl.columns[1:]:    
+        cat = tbl[col].values[indices] # catchment values
+        accumulated = np.zeros(comids.shape) # array to calculate th3e accumulated values
+        x = 0
+        area = tbl.ix[:, 1].values
+        ar = area[indices]
+        for i in range(len(lengths)):
+            length = lengths[i]
+            if 'PctFull' in col:
+                # using nan_to_num in average function to treat NA's as zeros when summing            
+                accumulated[i] = np.ma.average(np.nan_to_num(cat[x:x + length]),
+                                               weights=ar[x:x + length])
+            else:
+                accumulated[i] = np.nansum(cat[x:x + length])
+            x = x + length
+        out[col] = accumulated       
+            
+            
+
+outT = outT[np.in1d(outT[:,0], coms),:]  #TODO: retains appended COMIDs from InterVPU 
+                                        # clearer to do with pandas here
+
+    
+check[['COMID','UpCatAreaSqKm', 'UpCatCount', 'UpCatSum', 'UpCatPctFull']].head(10)
+out.head(10)
+
+
+################################################################################
+    ## V2  ##### iterate indices for idxs, and use zip to iterate all rows
+def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol='COMID'):   
+    #TODO: Only hold on to comids that have an upstream array for math, 
+    coms = tbl[icol].values  # get array of comids
+    indices = swapper(coms, upstream)  # Get indices that will be used to map values
+    #del upstream
+    out = pd.DataFrame(index=comids)
+    for col in tbl.columns[1:]:    
+        col_data = tbl[col].values
+        x = 0
+        for comid, length in zip(comids, lengths):
+            break
+            x = x + length
+            if length == 0:
+                break
+            upstream_idxs = indices[x: x + length]
+            if tbl_type == 'Ws': #add idx of comid to arry of idxs
+                upstream_idxs = np.append(upstream_idxs, np.flatnonzero(comids == comid)[0])
+            if 'PctFull' in col:
+                area = tbl.ix[:, 1].values # is index the best way to get thie area column???
+                # using nan_to_num in weighted average function to treat NA's as zeros when summing            
+                accum_val = np.ma.average(col_data[upstream_idxs],
+                                          weights=area[upstream_idxs])
+            else:
+                accum_val = col_data[upstream_idxs].sum()
+            out.loc[comid,col] = accum_val
+            x = x + length
+
+
+len(lengths[lengths==0]) # proof that we should remove upstream COMIDs from the npz files!!
+tot, zeroes = 0,0 
+for zone in inputs:
+    print zone
+    accum = np.load('%s/accum_%s.npz' % (npy,zone))
+    lengths = accum['lengths']
+    tot += len(accum['comids'])
+    zeroes += len(lengths[lengths==0])
+    print len(accum['comids']), len(lengths[lengths==0])
+    
+    
+    
+# comids, lengths, upstream
+
+col_data = tbl[col]
+
+upstream_idxs = indices[x: x + length]
+col_data[upstream_idxs]
+
+for q in tbl.columns:
+    break
+    tbl.loc[(tbl[q] == np.nan)]
+
+outDF.loc[(outDF[areaName] == 0), outDF.columns[2:]]
+
+
+ps.Se
+
+
+zeroes / float(tot)
+
+a,b,c = accum['comids'], accum['lengths'], accum['upstream']
+
+
+type(accum.files[0])
+
+57641 in upstream_idxs
+np.where(comids==comid)[0]
+57641 in np.concatenate(upstream_idxs, np.where(comids==comid)[0])
+
+np.nonzero(comids == comid)
+
+np.insert(upstream_idxs,0, np.where(comids==comid)[0][0])
+np.append(upstream_idxs,np.where(comids==comid)[0][0])
+np.append(upstream_idxs,8)
+
+upstream_idxs.shape
+
+type(np.where(comids==comid)[0][0])
+
+a, = np.where(comids==comid)
+
+a, = np.ix_(comids==comid)
+
+np.flatnonzero(comids == comid)[0]
+
+comids.index

@@ -4,3 +4,7 @@
 /*.RData
 /*.pyc
 .Rproj.user
+lookup/
+accum_npy/
+scripts/
+.spyproject/
