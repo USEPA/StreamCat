@@ -36,8 +36,8 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 from datetime import datetime as dt
-from settings import LYR_DIR, NHD_DIR, OUT_DIR, INPUTS
-from StreamCat_functions import (Accumulation, appendConnectors, cat_stats,
+from stream_cat_config import LYR_DIR, NHD_DIR, OUT_DIR, INPUTS
+from StreamCat_functions import (Accumulation, appendConnectors, #cat_stats,
                                  interVPU, PointInPoly, makeNumpyVectors)
 
 # Load table of layers to be run...
@@ -53,7 +53,7 @@ inter_vpu = pd.read_csv("InterVPU.csv")
     
 
 if not os.path.exists('accum_npy'): # TODO: work out children OR bastards only
-    makeNumpyVectors('accum_npy', inter_vpu, INPUTS, NHD_DIR)
+    makeNumpyVectors(inter_vpu, INPUTS, NHD_DIR)
     
 for line in range(len(ctl.values)):  # loop through each FullTableName in control table
     if ctl.run[line] == 1:   # check 'run' field from the table, if 1 run, if not, skip
@@ -153,7 +153,7 @@ print "total elapsed time " + str(dt.now()-totTime)
 
 import numpy as np
 import pandas as pd
-
+from StreamCat_functions import dbf2DF
 
 def swapper(coms, upstream):
 
@@ -217,14 +217,17 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol='COMID'):
 
 npy = 'D:/NHDPlusV21/StreamCat_npy/bastards'
 accum = np.load('%s/accum_06.npz' % npy)
+accum = np.load('./accum_npy/accum_18.npz')
 accum.files
 comids = accum['comids']
 lengths = accum['lengths']
 upstream = accum['upstream']
 
+print len(comids), len(upstream)
+
 h = 'L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Allocation_and_Accumulation'
 
-tbl = pd.read_csv('%s/Clay_06.csv' % h)[['COMID',
+tbl = pd.read_csv('%s/Clay_18.csv' % h)[['COMID',
                                          'CatAreaSqKm',
                                          'CatCount',
                                          'CatSum',
@@ -232,7 +235,7 @@ tbl = pd.read_csv('%s/Clay_06.csv' % h)[['COMID',
 tbl.columns.tolist()
 
 
-check = pd.read_csv('%s/Clay_06.csv' % h)
+check = pd.read_csv('%s/Clay_18.csv' % h)
 
 inputs = np.load('D:/NHDPlusV21/StreamCat_npy/zoneInputs.npy').item()
 for zone in inputs:
@@ -272,42 +275,53 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol='COMID'):
 
 outT = outT[np.in1d(outT[:,0], coms),:]  #TODO: retains appended COMIDs from InterVPU 
                                         # clearer to do with pandas here
-
-    
-check[['COMID','UpCatAreaSqKm', 'UpCatCount', 'UpCatSum', 'UpCatPctFull']].head(10)
+check2 = check.ix[check.COMID.isin(out.index)]
+check2.sort_values('COMID', inplace=True)   
+out.sort_index(inplace=True)
+check2[['COMID','UpCatAreaSqKm', 'UpCatCount', 'UpCatSum', 'UpCatPctFull']].head(10)
+check[['COMID','WsAreaSqKm', 'WsCount', 'WsSum', 'WsPctFull']].tail(10)
 out.head(10)
-
+uppy = out.copy()
 
 ################################################################################
     ## V2  ##### iterate indices for idxs, and use zip to iterate all rows
-def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol='COMID'):   
-    #TODO: Only hold on to comids that have an upstream array for math, 
+def Accumulation_new(tbl, comids, lengths, upstream, tbl_type, icol='COMID'):   
     coms = tbl[icol].values  # get array of comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
     #del upstream
     out = pd.DataFrame(index=comids)
-    for col in tbl.columns[1:]:    
+    for col in tbl.columns[1:]:
+        print col
         col_data = tbl[col].values
         x = 0
         for comid, length in zip(comids, lengths):
-            break
-            x = x + length
-            if length == 0:
-                break
             upstream_idxs = indices[x: x + length]
-            if tbl_type == 'Ws': #add idx of comid to arry of idxs
-                upstream_idxs = np.append(upstream_idxs, np.flatnonzero(comids == comid)[0])
             if 'PctFull' in col:
                 area = tbl.ix[:, 1].values # is index the best way to get thie area column???
                 # using nan_to_num in weighted average function to treat NA's as zeros when summing            
                 accum_val = np.ma.average(col_data[upstream_idxs],
                                           weights=area[upstream_idxs])
             else:
-                accum_val = col_data[upstream_idxs].sum()
+                accum_val = np.nansum(col_data[upstream_idxs])
             out.loc[comid,col] = accum_val
             x = x + length
+    return out
 
+#C:\Users\Rdebbout\AppData\Local\Continuum\Anaconda2\envs\nusc\lib\site-packages\numpy\ma\extras.py:553: RuntimeWarning: invalid value encountered in double_scalars
+#  avg = np.multiply(a, wgt, dtype=result_dtype).sum(axis)/scl
+lengths[0]
+comids[0]
+out.ix[out.CatCount.isnull()]
+rmn = add.index.difference(out.index)
+no_up = pd.DataFrame({'CatAreaSqKm':[0]*len(rmn),
+                      'CatCount':[np.nan]*len(rmn),
+                      'CatSum':[np.nan]*len(rmn),
+                      'CatPctFull':[np.nan]*len(rmn)},
+                        index=rmn)
+for i in tet.index:
+    final.ix[i] == tet.ix[i]
 
+tbl['CatCount'].values[indices[1000880 : 1004325]].sum()
 len(lengths[lengths==0]) # proof that we should remove upstream COMIDs from the npz files!!
 tot, zeroes = 0,0 
 for zone in inputs:
@@ -318,8 +332,12 @@ for zone in inputs:
     zeroes += len(lengths[lengths==0])
     print len(accum['comids']), len(lengths[lengths==0])
     
-    
-    
+count = 0    
+for i in y:
+    if not i > 0:
+        print i, count
+    count+=1
+        
 # comids, lengths, upstream
 
 col_data = tbl[col]
@@ -365,3 +383,46 @@ a, = np.ix_(comids==comid)
 np.flatnonzero(comids == comid)[0]
 
 comids.index
+
+for comid, idx, length in zip(comids,range(len(comids)), lengths):
+    print idx, comid, length
+    break
+
+inter_tbl = pd.read_csv('InterVPU.csv')
+interVPUtbl = pd.read_csv('InterVPU.csv')
+
+for zone in INPUTS:
+    print zone
+    hydroregion = INPUTS[zone]
+    pre = '%s/NHDPlus%s/NHDPlus%s' % (NHD_DIR, hydroregion, zone)
+        
+        
+UpStreamComs = UpCOMs        
+        
+     0:00:00.284000
+     
+count = 0
+f = defaultdict(list)
+
+j = []
+for k,v in UpStreamComs.iteritems():
+    if len(v) == 0 :
+        j.append(k)
+        break
+        f[k].append([x for x in v if x in all_comids])
+
+flow.ix[flow.TOCOMID == k]  
+      
+cats = dbf2DF('%s/NHDPlusCatchment/Catchment.dbf' % pre)        
+        
+keep = tbl.ix[~tbl.COMID.isin(out.index)].set_index('COMID')
+        
+52943 + 89332       
+140835 - 89332      
+52289 + 89332
+out.ix[out.CatCount.isnull()]
+
+
+len(tbl.ix[tbl.COMID.isin(comids)].COMID.values)
+#filter out keys!!
+87892

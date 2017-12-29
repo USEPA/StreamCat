@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import numpy as np
 from StreamCat_functions import nhd_dict
 
 # location of the landscape layers to perform statistics on
@@ -15,7 +16,7 @@ OUT_DIR = ('L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat'
 
 # ordered dict of NHD VPUs using the 'Hydroseq' attribute from BoundaryUnit.dbf
 # for presribing the order of accumulations
-INPUTS = nhd_dict(NHD_DIR)
+INPUTS = np.load('./accum_npy/vpus.npy').item() if os.path.exists('./accum_npyvpu_inputs.npy') else nhd_dict(NHD_DIR)
 
 
 
@@ -31,8 +32,3 @@ INPUTS = nhd_dict(NHD_DIR)
 #mask_dir_Slp10	D:/Projects/Masks/midslope
 #mask_dir_Slp20	D:/Projects/Masks/highslope
 
-def testes():
-    print os.getcwd()
-    if os.path.exists('accum_npy'):
-        print 'TRUE'
-        os.mkdir('dick')

@@ -157,7 +157,7 @@ def UpcomDict(nhd, interVPUtbl, zone):
     #Provide either path to from-to tables or completed from-to table
     flow = dbf2DF("%s/NHDPlusAttributes/PlusFlow.dbf" % (nhd))[['TOCOMID',
                                                                 'FROMCOMID']]
-    flow  = flow[flow.TOCOMID != 0]
+    flow  = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
     # check to see if out of zone values have FTYPE = 'Coastline'
     fls = dbf2DF("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (nhd))
     coastfl = fls.COMID[fls.FTYPE == 'Coastline']
@@ -176,21 +176,38 @@ def UpcomDict(nhd, interVPUtbl, zone):
     fcom,tcom = flow.FROMCOMID.values,flow.TOCOMID.values
     UpCOMs = defaultdict(list)
     for i in range(0, len(flow), 1):
-        FROMCOMID = fcom[i]
-        if FROMCOMID == 0:
-            UpCOMs[tcom[i]] = []
+        from_comid = fcom[i]
+        if from_comid == 0:
+            continue
         else:
-            UpCOMs[tcom[i]].append(FROMCOMID)
-    # add IDs from UpCOMadd column if working in ToZone
+            UpCOMs[tcom[i]].append(from_comid)
+    # add IDs from UpCOMadd column if working in ToZone, forces the flowtable connection though not there
     for interLine in interVPUtbl.values:
         if interLine[6] > 0 and interLine[2] == zone:
             UpCOMs[int(interLine[6])].append(int(interLine[0]))    
     return UpCOMs
 ##############################################################################
     
+a = defaultdict(list)
+a['b'].append(47)
 
+flow2  = flow[flow.FROMCOMID != 0]
 
+chx = defaultdict(list)
+fcom,tcom = flow.FROMCOMID.values,flow.TOCOMID.values
 
+for i in range(0, len(flow), 1):
+    from_comid = fcom[i]
+    if from_comid == 0:
+        continue
+    else:
+        chx[tcom[i]].append(from_comid)
+        
+ 
+for k,v in UpCOMs.iteritems():
+    if not chx[k] == v:
+        print k
+0 in fcom
 ##############################################################################
 
 
@@ -222,7 +239,7 @@ def children(token, tree, chkset=None):
 ##############################################################################
 
 
-def bastards(token, tree, chkset=None):
+def bastards(token, tree):
     '''
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
                  "Marc Weber <weber.marc@epa.gov>"
@@ -244,8 +261,6 @@ def bastards(token, tree, chkset=None):
         node_children = set(tree[current])
         to_crawl.extendleft(node_children - visited)
     visited.remove(token)
-    if chkset != None:
-        visited = visited.intersection(chkset)
     return list(visited)
 ##############################################################################
 
@@ -1020,12 +1035,20 @@ def swapper(coms, upStream):
     indices = bsort[apos]
     return indices
 ##############################################################################
+def make_all_cat_comids(nhd, inputs):
+    all_comids = np.array([],dtype=np.int32)
+    for zone in inputs:
+        print zone
+        hydroregion = inputs[zone]
+        pre = '%s/NHDPlus%s/NHDPlus%s' % (nhd, hydroregion, zone)
+        catchment = "%s/NHDPlusCatchment/Catchment.dbf" % pre
+        cats = dbf2DF(catchment)
+        all_comids = np.append(all_comids, cats.FEATUREID.values.astype(int))
+        np.savez_compressed('./accum_npy/allCatCOMs.npz', all_comids=all_comids)
+        return set(all_comids) #RETURN A SET!
 
-
-def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
+def makeNumpyVectors(inter_tbl, inputs, nhd):
     '''
-    __author__ =  "Marc Weber <weber.marc@epa.gov>" 
-                  "Ryan Hill <hill.ryan@epa.gov>"
     Uses the NHD tables to create arrays of upstream catchments which are used in the Accumulation function
 
     Arguments
@@ -1035,58 +1058,140 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
     inputs                : Ordered Dictionary of Hydroregions and zones from the NHD
     NHD_dir               : directory where NHD is stored
     '''
-    if not os.path.exists(d + '/allCatCOMs.npy'):
-        print 'Making allFLOWCOMs numpy file'
-        chkval = 0
-        for reg in inputs:
-            hydroregion = inputs[reg]
-            catchment = "%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf" % (NHD_dir, hydroregion, reg)
-            cats = dbf2DF(catchment).set_index('FEATUREID')
-            if chkval == 0:
-                AllCOMs = np.array(cats.index)
-            else:
-                COMIDs = np.array(cats.index)
-                AllCOMs = np.concatenate((AllCOMs, COMIDs))
-            chkval += 1
-        AllCOMs = AllCOMs[np.nonzero(AllCOMs)]
-        np.save(d + '/allCatCOMs.npy', AllCOMs)
-    cat = np.load(d + '/allCatCOMs.npy')
-    cats = set(cat)
-    cats.discard(0)
-    os.mkdir(d + '/bastards')
-    os.mkdir(d + '/children')            
+    os.mkdir('accum_npy')
+    print 'Making allFLOWCOMs numpy file'
+    all_comids = make_all_cat_comids(nhd, inputs) 
+    #all_comids = set(np.load('./accum_npy/allCatCOMs.npz')['all_comids'])
     for zone in inputs:
-        if not os.path.exists('%s/bastards/accum_%s.npz' % (d,zone)):
-            print zone
-            hydroregion = inputs[zone]
-            print 'Making UpStreamComs dictionary...'
-            start_time = dt.now()
-            NHD_pre = '%s/NHDPlus%s/NHDPlus%s' % (NHD_dir, hydroregion, zone)
-            UpStreamComs = UpcomDict(NHD_pre, interVPUtbl, zone)
-            print("--- %s seconds ---" % (dt.now() - start_time))
-            print '....'
-            print 'Making numpy bastard vectors...'
-            start_time = dt.now()
-            tbl_dir = NHD_dir + "/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf" % (hydroregion, zone)
-            catch = dbf2DF(tbl_dir).set_index('FEATUREID')   
-            COMIDs = np.append(np.array(catch.index),np.array(interVPUtbl.ix[np.logical_and((np.array(interVPUtbl.ToZone) == zone),(np.array(interVPUtbl.DropCOMID) == 0))].thruCOMIDs))
-            del catch
-            if 0 in COMIDs:
-                COMIDs = np.delete(COMIDs,np.where(COMIDs == 0))
-            if zone == '14':
-                cats.remove(17029298) # this problem has been cleaned out of NHDPlus
-            a = map(lambda x: bastards(x, UpStreamComs, cats), COMIDs)
-            lengths = np.array([len(v) for v in a])
-            a = np.int32(np.hstack(np.array(a)))    #Convert to 1d vector
-            np.savez_compressed('%s/bastards/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=a)
-            del a, lengths
-            print 'Making numpy children vectors...'
-            b = map(lambda x: children(x, UpStreamComs, cats), COMIDs)
-            lengths = np.array([len(v) for v in b])
-            b = np.int32(np.hstack(np.array(b)))  #Convert to 1d vector
-            np.savez_compressed('%s/children/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=b)
-            print("--- %s seconds ---" % (dt.now() - start_time))
-            print '___________________'
+        hydroregion = inputs[zone]
+        pre = '%s/NHDPlus%s/NHDPlus%s' % (nhd, hydroregion, zone)
+        flow = dbf2DF(("%s/NHDPlusAttributes/"
+                       "PlusFlow.dbf") % (pre))[['TOCOMID','FROMCOMID']]
+        flow  = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
+        fls = dbf2DF("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (pre))
+        coastfl = fls.COMID[fls.FTYPE == 'Coastline']
+        flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
+        # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs 
+        # here that won't get filtered out any other way
+        flow = flow[~flow.FROMCOMID.isin(inter_tbl.removeCOMs)]
+        # find values that are coming from other zones and remove the ones that 
+        # aren't in the interVPU table
+        
+        
+        out = np.setdiff1d(flow.FROMCOMID.values,fls.COMID.values)
+        out = out[np.nonzero(out)] # this should be what combines zones and above^, but we force connections with inter_tbl
+        flow = flow[~flow.FROMCOMID.isin(
+                    np.setdiff1d(out, inter_tbl.thruCOMIDs.values))]
+
+
+
+        # Table is ready for processing and flow connection dict can be created             
+        fcom,tcom = flow.FROMCOMID.values,flow.TOCOMID.values
+        flow_dict = defaultdict(list)
+        for i in range(0, len(flow), 1):
+            from_comid = fcom[i]
+            if from_comid == 0:
+                continue
+            else:
+                flow_dict[tcom[i]].append(from_comid)
+        # add IDs from UpCOMadd column if working in ToZone, forces the flowtable connection though not there
+        for interLine in inter_tbl.values:
+            if interLine[6] > 0 and interLine[2] == zone:
+                flow_dict[int(interLine[6])].append(int(interLine[0]))            
+      
+        out_of_vpus = inter_tbl.loc[(inter_tbl.ToZone == zone) &
+                                    (inter_tbl.DropCOMID == 0)
+                                    ].thruCOMIDs.values
+        comids = list(all_comids.intersection(set(flow_dict.keys())))
+        comids = np.append(comids, out_of_vpus) # TODO: check this out!   
+        a = map(lambda x: bastards(x, flow_dict), comids) # list of upstream lists
+        b = []
+        for i in range(len(a)):
+            if len(a[i]) == 0:
+                comids = np.delete(comids,1)
+                continue
+            b.append(list(all_comids.intersection(a[i])))
+        lengths = np.array([len(v) for v in b])
+        upstream = np.int32(np.hstack(np.array(b)))    #Convert to 1d vector
+        assert(len(b) == len(lengths) == len(comids))
+        np.savez_compressed('./accum_npy/accum_%s.npz' % zone, 
+                                                        comids   = comids, 
+                                                        lengths  = lengths, 
+                                                        upstream = upstream)
+
+
+
+
+
+
+len(a)  # 34611
+len(comids)
+
+for i in range(len(a)):
+    a[i].sort()
+    z[i].sort()    
+    if not a[i] == z[i]:
+        print a[i]
+        print z[i]
+        break
+len(a[i])
+for x in comids:
+    print x
+    v = findUpstreamNpy(zone, 362177, npy)
+    w = findUpstreamNpy(zone, x, './accum_npy')
+    v.sort()
+    w.sort()
+    if not (v==w).all():
+        print x
+        break
+    
+    
+list(up) == a[i]
+#a[i]
+#for i in range(len(a)):
+#    if len(a[i]) == 0:
+#        comids = np.delete(comids, i)
+#
+#0 in lengths  # COMID gets filtered out w/ wet intersection
+#
+#start = dt.now()
+#for x in comids:
+#    print x
+#    print bastards(x,UpStreamComs)
+#print dt.now() - start
+#
+#for k,v in UpStreamComs.iteritems():
+#    UpStreamComs[k] = [x for x in v if x in all_comids]
+#    
+#    type(a[0])
+#    
+#comi = set(all_comids)
+#    
+#b=[]
+#for arr in a:
+##    break
+#    f = list(comi.intersection(arr))
+#    b.append(f)
+#
+#start = dt.now()
+#c = [list(comi.intersection(arr)) for arr in a]
+#print dt.now() - start
+#
+#14942212 in comi    
+#    
+#%timeit np.int32(np.hstack(np.array(a)))
+#%timeit np.hstack(np.array(a, dtype=np.int32))
+#np.array(a).shape
+
+#from StreamCat_functions import dbf2DF
+#for zone in INPUTS:
+#    print zone
+#    hr = INPUTS[zone]
+#    pre = '%s/NHDPlus%s/NHDPlus%s' % (NHD_DIR, hr, zone)
+#    cat = dbf2DF("%s/NHDPlusCatchment/Catchment.dbf" % pre)
+#    print 0 in cat.FEATUREID.values
+#    
+#cat.ix[cat.FEATUREID == 0]
 ##############################################################################
 def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
     '''
@@ -1096,7 +1201,7 @@ def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
 
     Arguments
     ---------
-    d             : directory where .npy files will be stored
+    d                     : directory where .npy files will be stored
     interVPUtbl           : table of inter-VPU connections
     inputs                : Ordered Dictionary of Hydroregions and zones from the NHD
     NHD_dir               : directory where NHD is stored
@@ -1120,7 +1225,7 @@ def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
             del catch
             if 0 in COMIDs:
                 COMIDs = np.delete(COMIDs,np.where(COMIDs == 0))
-            a = map(lambda x: bastards(x, UpStreamComs), COMIDs)
+            a = map(lambda x: bastards(x, UpStreamComs), COMIDs) # NO CHKSET
             lengths = np.array([len(v) for v in a])
             a = np.int32(np.hstack(np.array(a)))    #Convert to 1d vector
             np.savez_compressed('%s/bastards/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=a)
@@ -1149,13 +1254,12 @@ def nhd_dict(nhd, unit='VPU'):
     bounds = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % nhd)
     remove = bounds.ix[bounds.DRAINAGEID.isin(['HI','CI'])].index
     bounds = bounds.drop(remove, axis=0)
-    
     if unit == 'VPU':
         vpu_bounds = bounds.ix[bounds.UNITTYPE == 'VPU'].sort_values('HYDROSEQ',
                                                                 ascending=False)
         for idx, row in vpu_bounds.iterrows():
             inputs[row.UNITID] = row.DRAINAGEID
-        
+        np.save('./accum_npy/vpu_inputs.npy', inputs)
         return inputs
     
     if unit == 'RPU':
@@ -1169,6 +1273,7 @@ def nhd_dict(nhd, unit='VPU'):
             if not zone in inputs.keys():
                 inputs[zone] = []
             inputs[zone].append(row.UNITID)
+        np.save('./accum_npy/rpu_inputs.npy', inputs)
         return inputs
 
 ##############################################################################
@@ -1192,4 +1297,5 @@ def findUpstreamNpy(zone, com, numpy_dir):
     itemindex = int(np.where(comids == com)[0])
     n = lengths[:itemindex].sum()
     arrlen = lengths[itemindex]
+    print 'indexes (%s : %s)' % (n, n+arrlen)
     return upStream[n:n+arrlen]
