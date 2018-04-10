@@ -158,3 +158,4 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Landsc
 ,,NRED_TW2010,Continuous,NRED_TW2010,none,nred_tw2010.tif,,TDEP,Mean,1,0,0,1,
 ,,NRED_TW2011,Continuous,NRED_TW2011,none,nred_tw2011.tif,,TDEP,Mean,1,0,0,1,
 ,,NRED_TW2012,Continuous,NRED_TW2012,none,nred_tw2012.tif,,TDEP,Mean,1,0,0,1,
+,,PointN,Point,PointNSum,none,PointN_usgs.shp,kgn_new,PointN,Density,1,0,0,1,
