@@ -12,6 +12,7 @@ import pandas as pd
 import csv
 #Location of tables to create schema.ini file for, either HydroRegions OR States
 wrk_dir = 'L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/FTP_Staging/StreamCat/States'
+#wrk_dir = 'L:/Priv/CORFiles/Geospatial_Library/Data/Project/LakeCat/FTP_Staging/LakeCat/FinalTables'
 #################################################################################################################################
 # create list of filenames that contain the string '.csv' in them from the directory above
 files = os.listdir(wrk_dir)

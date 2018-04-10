@@ -5,7 +5,7 @@ Script to build final StreamCat tables.
 Run script from command line passing directory and name of this script 
 and then directory and name of the control table to use like this:
 Python "F:\Watershed Integrity Spatial Prediction\Scripts\makeFinalTables.py" 
-or Python "L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv"
+ "L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv"
 @author: rdebbout, mweber
 """
 
@@ -13,7 +13,8 @@ import sys, os
 import numpy as np
 import pandas as pd
 
-ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title') 
+ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
+ctl = pd.read_csv('J:/GitProjects/Streamcat/ControlTable_StreamCat.csv').set_index('f_d_Title') 
 dls = 'DirectoryLocations'
 sys.path.append(ctl.ix['StreamCat_repo'][dls])
 from StreamCat_functions import NHD_Dict

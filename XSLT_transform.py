@@ -10,5 +10,5 @@ xslt = "L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Metadata/FGDC
 for xml in arcpy.ListFiles("*.xml"):
     html = html_dir + '/' + xml.split(".")[0] + '.html'    
     if not os.path.exists(html):
-        print html
+#        print html
         arcpy.XSLTransform_conversion(xml, xslt, html)

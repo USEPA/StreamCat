@@ -34,7 +34,7 @@ import numpy as np
 ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
 #ctl = pd.read_csv(r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 #ctl = pd.read_csv(r'D:\Projects\ControlTables_SSWR1.1B\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
-#ctl = pd.read_csv(r'J:/GitProjects/StreamCat/ControlTable_StreamCat.csv').set_index('f_d_Title')
+ctl = pd.read_csv(r'J:/GitProjects/StreamCat/ControlTable_StreamCat.csv').set_index('f_d_Title')
 # Import system modules
 from datetime import datetime as dt
 import geopandas as gpd
