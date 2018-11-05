@@ -13,8 +13,8 @@ import sys, os
 import numpy as np
 import pandas as pd
 
-ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
-ctl = pd.read_csv('J:/GitProjects/Streamcat/ControlTable_StreamCat.csv').set_index('f_d_Title') 
+#ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
+ctl = pd.read_csv('F:/Git Projects/StreamCat/ControlTable_StreamCat.csv').set_index('f_d_Title') 
 dls = 'DirectoryLocations'
 sys.path.append(ctl.ix['StreamCat_repo'][dls])
 from StreamCat_functions import NHD_Dict
