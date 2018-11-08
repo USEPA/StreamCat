@@ -20,7 +20,10 @@ def main():
         os.mkdir('%s/zips' % home)
     for f in os.listdir(home):
         if '.csv' in f:
-            fn = f.split('.')[0]
+            if not f.count('.') ==2:
+                fn = f.split('.')[0]
+            if f.count('.') ==2:
+                fn = f.split('.')[0] + '.' + f.split('.')[1]
             if not os.path.exists('%s/zips/%s.zip' % (home,fn)):
                 print 'zipping......  %s' % fn
                 zf = zipfile.ZipFile('%s/zips/%s.zip' % (home,fn), mode='w')
