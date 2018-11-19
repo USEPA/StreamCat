@@ -114,7 +114,7 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Landsc
 ,,tmin,Continuous,Tmin,none,tmin.tif,,PRISM,Mean,1,0,0,0,
 ,,TRI,Point,TRIDens,none,TRI.shp,,EPA_FRS,Density,1,0,0,0,
 ,,TRI_RipBuf100,Point,TRIDens,Rp100,TRI_RpBuf100.shp,,EPA_FRSRipBuf100,Density,1,0,1,0,
-,,WetnessIndex,Continuous,WetIndex,none,cti_v3.tif,,WetIndx,Mean,1,0,0,1,
+,,WetnessIndex,Continuous,WetIndex,none,cti_v3.tif,,WetIndx,Mean,1,0,0,0,
 ,,WtDep,Continuous,WtDep,none,wtdep.tif,,STATSGO_Set2,Mean,0.01,0,0,0,
 ,,Fire2000_RipBuf100,Continuous,PctFire2000,Rp100,fire2000.tif,,FirePerimetersRipBuf100,Mean,100,0,1,0,
 ,,Fire2001_RipBuf100,Continuous,PctFire2001,Rp100,fire2001.tif,,FirePerimetersRipBuf100,Mean,100,0,1,0,
@@ -167,3 +167,4 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/Landsc
 ,,PointN,Point,PointNSum,none,PointN_usgs.shp,kgn_new,PointN,Density,1,0,0,0,
 ,,WWTPMajor,Point,WWTPMajorDens,none,WWTP_Major_CWA_Active_2013_CONUS.shp,,WWTPMajor,Density,1,0,0,0,
 ,,WWTPMinor,Point,WWTPMinorDens,none,WWTP_Minor_CWA_Active_2013_CONUS.shp,,WWTPMinor,Density,1,0,0,0,
+,,PADUS,Categorical,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/ControlTables/GAP_Status_lookup.csv,none,gap_sts.tif,,PADUS,Percent,1,0,0,1,
