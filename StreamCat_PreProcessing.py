@@ -236,7 +236,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 Feat = Feat.to_crs(epsg=5070)
             if UseStatesMask=='Yes':
                 mask = gpd.GeoDataFrame.from_file(ControlTable.DirectoryLocations[6])
-                mask = mask.ix[0].geometry # see https://michelleful.github.io/code-blog/2015/04/29/geopandas-manipulation/ for explanation - geopandas still a bit beta
+                mask = mask.loc[0].geometry # see https://michelleful.github.io/code-blog/2015/04/29/geopandas-manipulation/ for explanation - geopandas still a bit beta
                 Feat = Feat[Feat.geometry.within(mask)]
             Feat.to_file(FinalDir + '/' + OutFile + '.shp', driver = 'ESRI Shapefile')       
             # Do we need to rasterize shapefile? (Right now only for census block groups)

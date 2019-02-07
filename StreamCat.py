@@ -36,23 +36,24 @@ import numpy as np
 #ctl = pd.read_csv(r'D:\Projects\ControlTables_SSWR1.1B\ControlTable_StreamCat_RD.csv').set_index('f_d_Title')
 ctl = pd.read_csv(r'F:/Git Projects/StreamCat/ControlTable_StreamCat.csv').set_index('f_d_Title')
 #ctl = pd.read_csv(r'H:/WorkingData/Pennino/ControlTable_StreamCat.csv').set_index('f_d_Title')
+ctl = pd.read_csv('F:/Git Projects/NARS/Landscape Metrics/ControlTable_LakeCat_NLA17_StreamCat.csv').set_index('f_d_Title')
 # Import system modules
 from datetime import datetime as dt
 import geopandas as gpd
 dls = 'DirectoryLocations'
-sys.path.append(ctl.ix['StreamCat_repo'][dls])  # sys.path.append('F:/Git Projects/StreamCat')
+sys.path.append(ctl.loc['StreamCat_repo'][dls])  # sys.path.append('F:/Git Projects/StreamCat')
 from StreamCat_functions import Accumulation, appendConnectors, createCatStats, interVPU, PointInPoly, makeNumpyVectors, NHD_Dict
 #####################################################################################################################
 # Populate variables from control table
-igd = ctl.ix['ingrid_dir'][dls]
-nhd = ctl.ix['NHD_dir'][dls]
-out = ctl.ix['out_dir'][dls]
+igd = ctl.loc['ingrid_dir'][dls]
+nhd = ctl.loc['NHD_dir'][dls]
+out = ctl.loc['out_dir'][dls]
 npy = '%s/StreamCat_npy' % nhd
 #####################################################################################################################
 
 totTime = dt.now()
 # Load Inter_VPU table
-interVPUtbl = pd.read_csv("%s/InterVPU.csv" % ctl.ix['StreamCat_repo'][dls])
+interVPUtbl = pd.read_csv("%s/InterVPU.csv" % ctl.loc['StreamCat_repo'][dls])
     
 inputs = NHD_Dict(nhd)
 
@@ -71,11 +72,11 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
         if apm == 'none':
             apm = '' 
         if mask == 1:
-            mask_dir = ctl.ix['mask_dir_RP100'][dls]
+            mask_dir = ctl.loc['mask_dir_RP100'][dls]
         elif mask == 2:
-            mask_dir = ctl.ix['mask_dir_Slp20'][dls]
+            mask_dir = ctl.loc['mask_dir_Slp20'][dls]
         elif mask ==3:
-            mask_dir = ctl.ix['mask_dir_Slp10'][dls]
+            mask_dir = ctl.loc['mask_dir_Slp10'][dls]
         else:
             mask_dir = ''
         LL = '%s/%s' % (igd, ctl.LandscapeLayer[line])
@@ -85,9 +86,9 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
             summaryfield = ctl.summaryfield[line].split(';')
         if accum_type == 'Point':  # Load in point geopandas table and Pct_Full table 
             if mask == 0:
-                pct_full_file = ctl.ix['pct_full_file'][dls]
+                pct_full_file = ctl.loc['pct_full_file'][dls]
             if mask == 1:
-                pct_full_file = ctl.ix['pct_full_file_RP100'][dls]
+                pct_full_file = ctl.loc['pct_full_file_RP100'][dls]
             pct_full = pd.read_csv(pct_full_file)
             points = gpd.GeoDataFrame.from_file(LL)
         if not os.path.exists(out + '/DBF_stash'):

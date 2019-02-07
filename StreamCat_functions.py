@@ -631,7 +631,7 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     # Remove duplicate points for 'Count'
     points2 = points.drop_duplicates('latlon_tuple') # points2.head() polys.head() point_poly_join.head()
     try:
-        point_poly_join = sjoin(points2, polys, how="left", op="within") # point_poly_join.ix[point_poly_join.FEATUREID > 1]
+        point_poly_join = sjoin(points2, polys, how="left", op="within") # point_poly_join.loc[point_poly_join.FEATUREID > 1]
         fld = 'GRIDCODE'  #next(str(unicode(x)) for x in polys.columns if x != 'geometry')
     except:
         polys['link'] = np.nan
@@ -660,7 +660,7 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
             final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100']+ ['Cat'  + y + appendMetric for y in summaryfield] + ['CatPctFullRp100']
         else:
             final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100','CatPctFullRp100']
-    final['CatPctFull%s' % appendMetric] = final['CatPctFull%s' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
+    final['CatPctFull%s' % appendMetric] = final['CatPctFull%s' % appendMetric].fillna(100) # final.head() final.loc[final.CatCount == 0]
     #print "elapsed time " + str(dt.now()-startTime)
     for name in final.columns:
         if 'AreaSqKm' in name:
@@ -721,7 +721,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     # Create subset of the tbl with a COMID in interVPUtbl
     throughVPUs = tbl[tbl.COMID.isin(interVPUtbl.thruCOMIDs.values)].set_index('COMID').copy()
     # Create subset of InterVPUtbl that identifies the zone we are working on
-    interVPUtbl = interVPUtbl.ix[interVPUtbl.FromZone.values == zone]
+    interVPUtbl = interVPUtbl.loc[interVPUtbl.FromZone.values == zone]
     throughVPUs.columns = cols
     
     # COMIDs in the toCOMID column need to swap values with COMIDs in other zones, those COMIDS are then sorted in toVPUS
@@ -769,7 +769,7 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2 = None):  #  ,accum, summaryfield=None
     if tbl2 is None:  # might be able to fix this in the arguments...
         tbl2 = tbl.copy()
     for idx in tbl.columns[:-1]:
-        tbl.ix[comid1, idx] = tbl.ix[comid1, idx] - tbl2.ix[comid2, idx]
+        tbl.loc[comid1, idx] = tbl.loc[comid1, idx] - tbl2.loc[comid2, idx]
 ##############################################################################
 
 
@@ -803,7 +803,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol='COMID'):
         c = np.array(arr[col]) # arr[col].fillna(0) keep out zeros where no data!
         d = c[indices] #Make final vector from desired data (c)
         if 'PctFull' in col:
-            area = np.array(arr.ix[:, 1])
+            area = np.array(arr.loc[:, 1])
             ar = area[indices]
             x = 0
             for i in range(0, len(lengths)):
@@ -892,7 +892,7 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         print(arcpy.GetMessages(2))
 
     if len(mask_dir) > 1:
-        nhdtbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf' % (NHD_dir, hydroregion, zone)).ix[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
+        nhdtbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf' % (NHD_dir, hydroregion, zone)).loc[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
         tbl = dbf2DF(outTable)
         if accum_type == 'Categorical':
             tbl = chkColumnLength(tbl, LandscapeLayer)               
@@ -918,11 +918,11 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         if accum_type == 'Categorical':
             table = chkColumnLength(table,LandscapeLayer)
             table['AREA'] = table[table.columns.tolist()[1:]].sum(axis=1)
-        nhdTable = dbf2DF(inZoneData[:-3] + 'Catchment.dbf').ix[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
+        nhdTable = dbf2DF(inZoneData[:-3] + 'Catchment.dbf').loc[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
         nhdTable = nhdTable.rename(columns = {'FEATUREID':'COMID', 'AREASQKM':'AreaSqKm'})
         result = pd.merge(nhdTable, table, how='left', left_on='GRIDCODE', right_on='VALUE')
         if LandscapeLayer.split('/')[-1].split('.')[0] == 'rdstcrs':
-           slptbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf' % (NHD_dir, hydroregion, zone)).ix[:,['COMID', 'SLOPE']]
+           slptbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf' % (NHD_dir, hydroregion, zone)).loc[:,['COMID', 'SLOPE']]
            slptbl.loc[slptbl['SLOPE'] == -9998.0, 'SLOPE'] = 0           
            result = pd.merge(result, slptbl, on='COMID', how='left')
            result.SLOPE = result.SLOPE.fillna(0)
@@ -986,9 +986,9 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
     for comidx in con.COMID.values.astype(int):
         if comidx in cat.COMID.values.astype(int):
             cat = cat.drop(cat[cat.COMID == comidx].index)
-    con = con.ix[con.COMID.isin(np.append(interVPUtbl.ix[interVPUtbl.ToZone.values == zone].thruCOMIDs.values,interVPUtbl.ix[interVPUtbl.ToZone.values == zone].toCOMIDs.values[np.nonzero(interVPUtbl.ix[interVPUtbl.ToZone.values == zone].toCOMIDs.values)]))]
+    con = con.loc[con.COMID.isin(np.append(interVPUtbl.loc[interVPUtbl.ToZone.values == zone].thruCOMIDs.values,interVPUtbl.loc[interVPUtbl.ToZone.values == zone].toCOMIDs.values[np.nonzero(interVPUtbl.loc[interVPUtbl.ToZone.values == zone].toCOMIDs.values)]))]
 
-    #con = con.ix[con.COMID.isin(np.append(np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].thruCOMIDs),np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].toCOMIDs)[np.nonzero(np.array(interVPUtbl.ix[np.array(interVPUtbl.ToZone) == zone].toCOMIDs))]))]
+    #con = con.loc[con.COMID.isin(np.append(np.array(interVPUtbl.loc[np.array(interVPUtbl.ToZone) == zone].thruCOMIDs),np.array(interVPUtbl.loc[np.array(interVPUtbl.ToZone) == zone].toCOMIDs)[np.nonzero(np.array(interVPUtbl.loc[np.array(interVPUtbl.ToZone) == zone].toCOMIDs))]))]
     cat = cat.append(con)
     return cat
 
@@ -1061,7 +1061,7 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
             start_time = dt.now()
             tbl_dir = NHD_dir + "/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf" % (hydroregion, zone)
             catch = dbf2DF(tbl_dir).set_index('FEATUREID')   
-            COMIDs = np.append(np.array(catch.index),np.array(interVPUtbl.ix[np.logical_and((np.array(interVPUtbl.ToZone) == zone),(np.array(interVPUtbl.DropCOMID) == 0))].thruCOMIDs))
+            COMIDs = np.append(np.array(catch.index),np.array(interVPUtbl.loc[np.logical_and((np.array(interVPUtbl.ToZone) == zone),(np.array(interVPUtbl.DropCOMID) == 0))].thruCOMIDs))
             del catch
             if 0 in COMIDs:
                 COMIDs = np.delete(COMIDs,np.where(COMIDs == 0))
@@ -1108,7 +1108,7 @@ def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
             start_time = dt.now()
             tbl_dir = NHD_dir + "/NHDPlus%s/NHDPlus%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (hydroregion, zone)
             catch = dbf2DF(tbl_dir).set_index('COMID')   
-            COMIDs = np.append(np.array(catch.index),np.array(interVPUtbl.ix[np.logical_and((np.array(interVPUtbl.ToZone) == zone),(np.array(interVPUtbl.DropCOMID) == 0))].thruCOMIDs))
+            COMIDs = np.append(np.array(catch.index),np.array(interVPUtbl.loc[np.logical_and((np.array(interVPUtbl.ToZone) == zone),(np.array(interVPUtbl.DropCOMID) == 0))].thruCOMIDs))
             del catch
             if 0 in COMIDs:
                 COMIDs = np.delete(COMIDs,np.where(COMIDs == 0))
@@ -1132,8 +1132,8 @@ def makeVPUdict(directory):
     directory             : the directory contining NHDPlus data at the top level
     '''
     B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
-    B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
-    B = B.ix[B.UNITTYPE == 'VPU'].sort_values('HYDROSEQ',ascending=False)
+    B = B.drop(B.loc[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
+    B = B.loc[B.UNITTYPE == 'VPU'].sort_values('HYDROSEQ',ascending=False)
     inputs = OrderedDict()  # inputs = OrderedDict((k, inputs[k]) for k in order)
     for idx, row in B.iterrows():
         inputs[row.UNITID] = row.DRAINAGEID
@@ -1153,7 +1153,7 @@ def makeRPUdict(directory):
     directory             : the directory contining NHDPlus data at the top level
     '''
     B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
-    B = B.drop(B.ix[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)      
+    B = B.drop(B.loc[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)      
     rpuinputs = OrderedDict()
     for idx, row in B.iterrows():
         if row.UNITTYPE == 'RPU':

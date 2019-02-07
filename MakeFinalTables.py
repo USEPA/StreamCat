@@ -16,11 +16,11 @@ import pandas as pd
 #ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
 ctl = pd.read_csv('F:/Git Projects/StreamCat/ControlTable_StreamCat.csv').set_index('f_d_Title') 
 dls = 'DirectoryLocations'
-sys.path.append(ctl.ix['StreamCat_repo'][dls])
+sys.path.append(ctl.loc['StreamCat_repo'][dls])
 from StreamCat_functions import NHD_Dict
-inputs = NHD_Dict(ctl.ix['NHD_dir'][dls])
-inDir = ctl.ix['out_dir'][dls]
-outDir = ctl.ix['final_tables_dir'][dls]
+inputs = NHD_Dict(ctl.loc['NHD_dir'][dls])
+inDir = ctl.loc['out_dir'][dls]
+outDir = ctl.loc['final_tables_dir'][dls]
 LENGTHS ={'11': 204120, '02': 126185, '13': 56220, '01': 65968, '06': 57642,
           '07': 183667, '10L': 196552, '05': 170145, '18': 140835, '08': 151544,
           '16': 95143, '04': 105452, '12': 68127, '03S': 55586, '17': 231698,
@@ -29,7 +29,7 @@ LENGTHS ={'11': 204120, '02': 126185, '13': 56220, '01': 65968, '06': 57642,
 tables = dict()
 for row in range(len(ctl.Final_Table_Name)):
     if ctl.run[row] == 1 and  len(ctl.Final_Table_Name[row]):
-        tables[ctl.Final_Table_Name[row]] = ctl.FullTableName.ix[ctl.Final_Table_Name == ctl.Final_Table_Name[row]].tolist()
+        tables[ctl.Final_Table_Name[row]] = ctl.FullTableName.loc[ctl.Final_Table_Name == ctl.Final_Table_Name[row]].tolist()
         tables[ctl.Final_Table_Name[row]].sort()
 missing = []
 for table in tables:
@@ -50,16 +50,16 @@ for table in tables:
         if not os.path.exists(outDir +'/' + table + '_Region' + zone + '.csv'):
             for var in range(len(tables[table])):
                 # Get accumulation type, i.e. point, continuous, categorical
-                accum = ctl.accum_type.ix[ctl.Final_Table_Name == table].any()
-                metricName = ctl.MetricName.ix[ctl.FullTableName == tables[table][var]].item()
+                accum = ctl.accum_type.loc[ctl.Final_Table_Name == table].any()
+                metricName = ctl.MetricName.loc[ctl.FullTableName == tables[table][var]].item()
                 # G3t metric type, i.e. mean, density, percent
-                metricType = ctl.MetricType.ix[ctl.FullTableName == tables[table][var]].item()
+                metricType = ctl.MetricType.loc[ctl.FullTableName == tables[table][var]].item()
                 # appendMetric is simply whether to add Rp100 at end of file name
-                appendMetric = ctl.AppendMetric.ix[ctl.FullTableName == tables[table][var]].item()
+                appendMetric = ctl.AppendMetric.loc[ctl.FullTableName == tables[table][var]].item()
                 if appendMetric == 'none':
                     appendMetric = ''
                 # Typically conversion is 1, but if values need converting apply conversion factor
-                conversion = float(ctl.Conversion.ix[ctl.FullTableName == tables[table][var]].values[0])
+                conversion = float(ctl.Conversion.loc[ctl.FullTableName == tables[table][var]].values[0])
                 # Read in the StreamCat allocation and accumulation table for the zone and the particular metric
                 tbl = pd.read_csv(inDir + '/%s_%s.csv'%(tables[table][var],zone)) 
                 # Grab initial set of columns from allocation and accumulation table to start building final table
@@ -70,8 +70,8 @@ for table in tables:
                 wsPct = frontCols[4] 
                 frontCols = [frontCols[i] for i in [0,1,3,2,4]] #re-order for correct sequence
                 summary = None
-                if ctl.summaryfield.ix[ctl.Final_Table_Name == table].any():
-                    summary = ctl.summaryfield.ix[ctl.FullTableName == tables[table][var]].item().split(';')         
+                if ctl.summaryfield.loc[ctl.Final_Table_Name == table].any():
+                    summary = ctl.summaryfield.loc[ctl.FullTableName == tables[table][var]].item().split(';')         
                 if metricType == 'Mean':   
                     colname1 = metricName + 'Cat' + appendMetric
                     colname2 = metricName + 'Ws' + appendMetric
