@@ -803,7 +803,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol='COMID'):
         c = np.array(arr[col]) # arr[col].fillna(0) keep out zeros where no data!
         d = c[indices] #Make final vector from desired data (c)
         if 'PctFull' in col:
-            area = np.array(arr.loc[:, 1])
+            area = np.array(arr.ix[:, 1])
             ar = area[indices]
             x = 0
             for i in range(0, len(lengths)):

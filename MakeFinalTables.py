@@ -134,7 +134,7 @@ for table in tables:
             if len(final[np.isinf(final)].stack().dropna()) > 0:  # inf values in dams layer - zone 01 remove
                 final = final.replace([np.inf, -np.inf], np.nan) 
             if zone == '04':
-                rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
+                rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
                 final = final.drop(rmtbl.COMID.tolist(),axis=0)
             if zone == '06':
                 stats = {}
