@@ -95,7 +95,7 @@ for table in tables:
                             tbl[fnlname2] = tbl['Ws' + sname] / (tbl[wsArea] * (tbl[wsPct]/100)) 
                             sumL.append(fnlname1)
                             sumL.append(fnlname2)
-                    if table == 'RoadStreamCrossings' or table == 'CanalsDitches':
+                    if table == 'RoadStreamCrossings' or table == 'CanalDensity':
                         tbl[colname1] = (tbl.CatSum / (tbl.CatAreaSqKm * (tbl.CatPctFull/100)) * conversion) ## NOTE:  Will there ever be a situation where we will need to use 'conversion' here
                         tbl[colname2] = (tbl.WsSum / (tbl.WsAreaSqKm * (tbl.WsPctFull/100)) * conversion)                        
                     else:
