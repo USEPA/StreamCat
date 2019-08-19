@@ -128,7 +128,7 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/LandscapeR
 ,,Fire2009_RipBuf100,Continuous,PctFire2009,Rp100,fire2009.tif,,FirePerimetersRipBuf100,Mean,100,0,1,0,
 ,,Fire2010_RipBuf100,Continuous,PctFire2010,Rp100,fire2010.tif,,FirePerimetersRipBuf100,Mean,100,0,1,0,
 ,,Pestic97,Continuous,Pestic97,none,pestic.tif,,,Mean,1,0,0,0,
-,,CanalDensity,Continuous,CanalDens,none,CanalsDitches.tif,,CanalDensity,Density,0.03,0,0,1,
+,,CanalDensity,Continuous,CanalDens,none,CanalsDitches.tif,,CanalDensity,Density,0.03,0,0,0,
 ,,nlcd2001,Categorical,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/ControlTables/NLCD2001_lookup.csv,none,nlcd2001.tif,,NLCD2001,Percent,1,0,0,0,
 ,,nlcd2001_RipBuf100,Categorical,L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/ControlTables/NLCD2001_lookup.csv,Rp100,nlcd2001.tif,,NLCD2001RipBuf100,Percent,1,0,1,0,
 ,,PctImp2001,Continuous,PctImp2001,none,imp2001.tif,,ImperviousSurfaces2001,Mean,1,0,0,0,
@@ -205,3 +205,4 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/LandscapeR
 ,,Phos_Crop_Uptake,Continuous,Phos_Crop_Uptake,none,Phos_Crop_Uptake.tif,,Compton_Phos_Inputs,Mean,1,0,0,0,
 ,,Phos_Fert,Continuous,Phos_Fert,none,Phos_Fert.tif,,Compton_Phos_Inputs,Mean,1,0,0,0,
 ,,Phos_Manure,Continuous,Phos_Manure,none,Phos_Manure.tif,,Compton_Phos_Inputs,Mean,1,0,0,0,
+,,AgDrain,Categorical,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/AgDrain_lookup.csv,none,AgDrain_stlvl_FINAL.tif,,AgDrain,Percent,1,0,0,1,
