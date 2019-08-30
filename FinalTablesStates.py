@@ -7,7 +7,7 @@ FinalTablesStates
 import pandas as pd
 import os
 
-var = 'ICI_IWI_v2.1'
+var = 'CanalDensity'
 # Read in a state / hydro-region lookup table
 lookupdir = 'L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/StateLookup'
 stateVPU = pd.read_csv(lookupdir + '/State_VPU.csv')
