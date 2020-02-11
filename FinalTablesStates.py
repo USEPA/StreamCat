@@ -7,7 +7,7 @@ FinalTablesStates
 import pandas as pd
 import os
 
-var = 'CanalDensity'
+var = 'AgMidHiSlopes'
 # Read in a state / hydro-region lookup table
 lookupdir = 'L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/StateLookup'
 stateVPU = pd.read_csv(lookupdir + '/State_VPU.csv')
@@ -18,7 +18,7 @@ state_lookup = g['UnitID'].unique().to_dict()
 
 # Read in states
 for i in os.listdir(lookupdir):
-    if not i.count('State_VPU') and not i.count('states_lookup'):
+    if i.count('.csv') and not i.count('State_VPU') and not i.count('states_lookup') and not i.count('COMID_State'):
         ST_NM = i.split('.')[0]
         state = pd.read_csv(lookupdir + '/' + i)
         count = 0
