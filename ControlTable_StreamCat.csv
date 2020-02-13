@@ -211,4 +211,4 @@ mask_dir_Slp20,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/LandscapeR
 ,,MODIS_Ir_Ag_2012,Categorical,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/MODIS_IrAg_lookup.csv,none,mirad250_12.tif,,MODIS_IrrigAg,Percent,1,0,0,0,
 ,,US_Level_III_Ecoregions,Categorical,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/US_Level_III_Ecoregions_lookup.csv,none,US_Level_III_Ecoregions.tif,,US_Level_III_Ecoregions,Percent,1,0,0,0,
 ,,nlcd2016,Categorical,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/NLCD2016_lookup.csv,none,nlcd2016.tif,,NLCD2016,Percent,1,0,0,0,
-,,nlcd2016_RipBuf100,Categorical,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/nlcd2016_lookup.csv,Rp100,nlcd2016.tif,,nlcd2016RipBuf100,Percent,1,0,1,1,
+,,nlcd2016_RipBuf100,Categorical,L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/nlcd2016_lookup.csv,Rp100,nlcd2016.tif,,NLCD2016RipBuf100,Percent,1,0,1,1,
