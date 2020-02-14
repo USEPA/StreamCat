@@ -7,7 +7,7 @@ FinalTablesStates
 import pandas as pd
 import os
 
-var = 'AgMidHiSlopes'
+var = 'NLCD2016RipBuf100'
 # Read in a state / hydro-region lookup table
 lookupdir = 'L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/StateLookup'
 stateVPU = pd.read_csv(lookupdir + '/State_VPU.csv')
