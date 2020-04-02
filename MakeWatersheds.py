@@ -128,6 +128,7 @@ out_ws[['WBCOMID']] = out_ws[['WBCOMID']].astype(int)
 out_ws[['COMID']] = out_ws[['COMID']].astype(int)
 out_ws.columns = ['CAT_COMID','geometry', 'COMID']
 out_ws = out_ws[['COMID','CAT_COMID','geometry']]
+
 # Add SITE_ID
 lakes_df = lakes_df[['COMID','SITE_ID']]
 out_ws = out_ws.merge(lakes_df, how='left')
@@ -137,6 +138,7 @@ out_ws.to_file('L:/Priv/CORFiles/Geospatial_Library_Projects/NLA/NLA2017Landscap
 #Off-Net Lakes
 #Read in off-network numpy files
 off_np = np.load('L:/Priv/CORFiles/Geospatial_Library_Projects/LakeCat/Watersheds_Framework/offNetFramework.npz')
+
 #Create off-net lake watersheds
 offnet = lakes[np.in1d(lakes, off_np['off_comids_trns'])]
 basins = gpd.read_file(ws_dir + '/allBasins.shp')
@@ -171,6 +173,7 @@ out_ws = out_ws.merge(lakes_df, how='left')
 out_ws = out_ws[['SITE_ID','COMID','geometry']]     
 out_ws.to_file('L:/Priv/CORFiles/Geospatial_Library_Projects/NLA/NLA2017LandscapeMetrics/Off_Network_Lakes/Off_Network_InNHD_NLA17Lakes.shp', driver = 'ESRI Shapefile')
 off_net_inNHD = out_ws
+
 # Combind on and off network lakes with standard columns
 off_net = gpd.read_file('L:/Priv/CORFiles/Geospatial_Library_Projects/NLA/NLA2017LandscapeMetrics/Off_Network_Lakes/Off_Network_NLA17Lakes.shp')
 on_net = gpd.read_file('L:/Priv/CORFiles/Geospatial_Library_Projects/NLA/NLA2017LandscapeMetrics/On_Network_Lakes/OnNetLakes.shp')
