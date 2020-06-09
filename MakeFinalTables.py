@@ -141,11 +141,16 @@ for table in tables:
                 for c in final.columns.tolist():
                     stats[c] = {'min': final[c].min(), 'max':final[c].max()}
             if zone != '06':
-                for c in final.columns.tolist():
-                    if final[c].min() < stats[c]['min']:
-                        stats[c]['min'] = final[c].min()
-                    if final[c].max() > stats[c]['max']:
-                        stats[c]['max'] = final[c].max()
+                try:
+                    stats
+                except NameError:
+                    pass
+                else:
+                    for c in final.columns.tolist():
+                        if final[c].min() < stats[c]['min']:
+                            stats[c]['min'] = final[c].min()
+                        if final[c].max() > stats[c]['max']:
+                            stats[c]['max'] = final[c].max()
             final = final.fillna('NA')
             final = final[final.columns.tolist()[:5] + [x for x in final.columns[5:] if 'Cat' in x] + [x for x in final.columns[5:] if 'Ws' in x]].fillna('NA')
             if 'ForestLossByYear0013' in table:
@@ -155,6 +160,11 @@ for table in tables:
                         and Accumulation results" % (table, zone)
             final.to_csv(outDir  + '/%s_Region%s.csv'%(table,zone))
     print table
-    for stat in stats:
-        print stat + ' ' + str(stats[stat])
+    try:
+        stats
+    except NameError:
+        pass
+    else:
+        for stat in stats:
+            print stat + ' ' + str(stats[stat])
     print 'All Done.....'
