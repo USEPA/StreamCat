@@ -1065,8 +1065,6 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
             del catch
             if 0 in COMIDs:
                 COMIDs = np.delete(COMIDs,np.where(COMIDs == 0))
-            if zone == '14':
-                cats.remove(17029298) # this problem has been cleaned out of NHDPlus
             a = map(lambda x: bastards(x, UpStreamComs, cats), COMIDs)
             lengths = np.array([len(v) for v in a])
             a = np.int32(np.hstack(np.array(a)))    #Convert to 1d vector
@@ -1200,7 +1198,7 @@ def NHD_Dict(directory, unit='VPU'):
           
 ##############################################################################
 
-    
+
 def findUpstreamNpy(zone, com, numpy_dir):
     '''
     __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
@@ -1212,10 +1210,12 @@ def findUpstreamNpy(zone, com, numpy_dir):
     com                   : COMID of NHD Catchment, integer
     numpy_dir             : directory where .npy files are stored
     '''
-    comids = np.load(numpy_dir + '/comids' + zone + '.npy')
-    lengths= np.load(numpy_dir + '/lengths' + zone + '.npy')
-    upStream = np.load(numpy_dir + '/upStream' + zone + '.npy')
+    accum = np.load(numpy_dir + '/accum_' + zone + '.npz')
+    comids = accum['comids']
+    lengths= accum['lengths']
+    upStream = accum['upstream']
     itemindex = int(np.where(comids == com)[0])
     n = lengths[:itemindex].sum()
     arrlen = lengths[itemindex]
     return upStream[n:n+arrlen]
+
