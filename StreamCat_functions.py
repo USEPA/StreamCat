@@ -873,7 +873,7 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
                 elev = "%s/%s/elev_cm" % (hydrodir, subdirs)
                 rpuList.append(subdirs[-3:])
                 print 'working on ' + elev
-                outTable = out_dir + "/zonalstats_elev%s.dbf" % (subdirs[-3:])
+                outTable = out_dir + "/DBF_stash/zonalstats_elev%s.dbf" % (subdirs[-3:])
                 if not os.path.exists(outTable):
                     ZonalStatisticsAsTable(inZoneData, 'VALUE', elev, outTable, "DATA", "ALL")
             for rpu in range(len(rpuList)):
@@ -923,10 +923,10 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         result = pd.merge(nhdTable, table, how='left', left_on='GRIDCODE', right_on='VALUE')
         if LandscapeLayer.split('/')[-1].split('.')[0] == 'rdstcrs':
            slptbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf' % (NHD_dir, hydroregion, zone)).loc[:,['COMID', 'SLOPE']]
-           slptbl.loc[slptbl['SLOPE'] == -9998.0, 'SLOPE'] = 0           
+           slptbl.loc[slptbl['SLOPE'] == -9998.0, 'SLOPE'] = 0
            result = pd.merge(result, slptbl, on='COMID', how='left')
            result.SLOPE = result.SLOPE.fillna(0)
-           result['SlpWtd'] = result['Sum'] * result['SLOPE']
+           result['SlpWtd'] = result['Sum'] * result['SLOPE'].astype(np.float)
            result = result.drop(['SLOPE'], axis=1)           
         result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm.astype('float'))*100).fillna(0)
         result = result.drop(['GRIDCODE', 'VALUE', 'AREA'], axis=1)
