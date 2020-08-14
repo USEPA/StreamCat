@@ -4,49 +4,58 @@
 The StreamCat Dataset (http://www2.epa.gov/national-aquatic-resource-surveys/streamcat) provides summaries of natural and anthropogenic landscape features for ~2.65 million streams, and their associated catchments, within the conterminous USA. This repo contains code used in StreamCat to process a suite of landscape rasters to watersheds for streams and their associated catchments (local reach contributing area) within the conterminous USA using the [NHDPlus Version 2](http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php) as the geospatial framework.
 
 ## Necessary Python Packages and Installation Tips
-The scripts for StreamCat rely on several python modules a user will need to install such as numpy, pandas, gdal, fiona, rasterio, geopandas, shapely, pysal, and ArcPy with an ESRI license (minimal steps still using ArcPy).  We highly recommend using a scientific python distribution such as [Anaconda](https://www.continuum.io/downloads) or [Enthought Canopy](https://www.enthought.com/products/canopy/).  We used the conda package manager to install necessary python modules. Our essential packages and versions used are listed below (Windows 64 and Python 2.7.11):
+The scripts for StreamCat rely on several python modules a user will need to install such as numpy, pandas, gdal, fiona, rasterio, geopandas, shapely, pysal, and ArcPy with an ESRI license (minimal steps still using ArcPy).  We highly recommend using a scientific python distribution such as [Anaconda](https://www.continuum.io/downloads) or [Enthought Canopy](https://www.enthought.com/products/canopy/).  We used the conda package manager to install necessary python modules. Our essential packages and versions when code was last used are listed below (Windows 64 and Python 3.6.10):
 
 | Package       | Version       | 
 | ------------- |--------------:|
-| fiona         | 1.7.7         | 
-| gdal          | 2.2.0         | 
-| geopandas     | 0.2.1         |  
-| geos          | 3.5.1         |
-| libgdal       | 2.0.0         |
-| numpy         | 1.12.1        |
-| pandas        | 0.20.2        |
-| pyproj        | 1.9.5.1       |
-| pysal         | 1.13.0        |
-| rasterio      | 1.0a9         |
-| shapely       | 1.5.17        |
+| fiona         | 1.8.13        | 
+| gdal          | 3.0.4         | 
+| geopandas     | 0.8.1         |  
+| geos          | 3.8.1         |
+| libgdal       | 3.0.4         |
+| numpy         | 1.19.1        |
+| pandas        | 1.1.0         |
+| pyproj        | 2.6.1         |
+| rasterio      | 1.1.0         |
+| shapely       | 1.7.0         |
 
 If you are using Anaconda, creating a new, clean 'StreamCat' environment with these needed packages can be done easily and simply one of several ways:
 
 * In your conda shell, add one necessary channel and then download the streamcat environment from the Anaconda cloud:
   + conda config --add channels conda-forge
-  + conda env create mweber36/streamcat
+  + conda env create mweber36/StreamCat
   
 * Alternatively, using the streamcat.yml file in this repository, in your conda shell cd to the directory where your streamcat.yml file is located and run:
-  + conda env create -f StreamCat.yml
+  + conda env create -f streamcat_py3.yml
   
 * To build environment yourself, do:
-  + conda env create -n StreamCat rasterio geopandas
-  + pip install georasters
+  + conda env create --name StreamCat -c conda-forge python=3.6 geopandas rasterio=1.1.5=py36h2409764_0
 
-* To activate this new environment and open Spyder, type the following at the conda prompt
+* To activate this new environment, you'll need to install Spyder in the environment, and possibly re-install pyqt with specific version (we did).  You may even need to uninstall pyqt after installing Spyder (as below) and then specifically re-install:
+
+  + install spyder=4.1.4=py36h9f0ad1d_0 -c conda-forge
+  + install pyqt=5.12.3=py36h6538335_1 -c conda-forge
+
+* To open Spyder, type the following at the conda prompt
   + activate Streamcat
   
   Then
 
   + Spyder
 
-Finally, to use arcpy in this new environment, you will need to copy your Arc .pth file into your new environment.  Copy the .pth file for your install of ArcGIS located in a directory like:
+Finally, to use arcpy in this new environment, you will need to copy several ArcPro files and folders to your new environment as follows:
 
-+ C:\Python27\ArcGISx6410.3\Lib\site-packages\DTBGGP64.pth
++ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3\ArcGISPro.pth
+
++ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3\Arcgisscripting 
+
++ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3\arcpy_wmx
+
++ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3\Gapy
 
 To your environment directory which should look something like:
 
-+ C:\Anaconda\envs\streamcat\Lib\site-packages\DTBGGP64.pth
++ C:/Users/mweber/AppData/Local/Continuum/anaconda3/envs/StreamCat
 
 Note that the exact paths may vary depending on the version of ArcGIS and Anaconda you have installed and the configuration of your computer
 
