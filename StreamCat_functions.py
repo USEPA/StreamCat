@@ -151,7 +151,7 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
             np.savez_compressed('%s/bastards/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=a)
             del a, lengths
             print('Making numpy children vectors...')
-            b = map(lambda x: children(x, UpStreamComs, cats), COMIDs)
+            b = np.array(list(map(lambda x: children(x, UpStreamComs, cats), COMIDs)))
             lengths = np.array([len(v) for v in b])
             b = np.int32(np.hstack(np.array(b)))  #Convert to 1d vector
             np.savez_compressed('%s/children/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=b)
@@ -162,8 +162,7 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
 
 def children(token, tree, chkset=None):
     '''
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
+    __author__ = "Marc Weber <weber.marc@epa.gov>"                
     returns a list of every child
     Arguments
     ---------
