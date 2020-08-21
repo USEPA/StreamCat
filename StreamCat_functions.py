@@ -4,10 +4,10 @@
 #          Darren Thornbrugh<thornbrugh.darren@epa.gov>, Rick Debbout<debbout.rick@epa.gov>,
 #          and Tad Larsen<laresn.tad@epa.gov>
 #          __                                       __
-#    _____/ /_________  ____  ____ ___  _________ _/ /_ 
+#    _____/ /_________  ____  ____ ___  _________ _/ /_
 #   / ___/ __/ ___/ _ \/ __ `/ __ `__ \/ ___/ __ `/ __/
-#  (__  ) /_/ /  /  __/ /_/ / / / / / / /__/ /_/ / /_ 
-# /____/\__/_/   \___/\__,_/_/ /_/ /_/\___/\__,_/\__/ 
+#  (__  ) /_/ /  /  __/ /_/ / / / / / / /__/ /_/ / /_
+# /____/\__/_/   \___/\__,_/_/ /_/ /_/\___/\__,_/\__/
 #
 # Date: October 2015
 
@@ -92,7 +92,7 @@ def dbfreader(f):
                 else:
                     value = int(value)
             elif typ == 'C':
-                value = value.rstrip()                                   
+                value = value.rstrip()
             elif typ == 'D':
                 try:
                     y, m, d = int(value[:4]), int(value[4:6]), int(value[6:8])
@@ -166,7 +166,7 @@ def UpcomDict(nhd, interVPUtbl, zone):
     out = out[np.nonzero(out)]
     flow = flow[~flow.FROMCOMID.isin(
                 np.setdiff1d(out, interVPUtbl.thruCOMIDs.values))]
-    # Now table is ready for processing and the UpCOMs dict can be created             
+    # Now table is ready for processing and the UpCOMs dict can be created
     fcom,tcom = flow.FROMCOMID.values,flow.TOCOMID.values
     UpCOMs = defaultdict(list)
     for i in range(0, len(flow), 1):
@@ -178,10 +178,10 @@ def UpcomDict(nhd, interVPUtbl, zone):
     # add IDs from UpCOMadd column if working in ToZone
     for interLine in interVPUtbl.values:
         if interLine[6] > 0 and interLine[2] == zone:
-            UpCOMs[int(interLine[6])].append(int(interLine[0]))    
+            UpCOMs[int(interLine[6])].append(int(interLine[0]))
     return UpCOMs
 ##############################################################################
-    
+
 
 
 
@@ -642,12 +642,12 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     point_poly_count = grouped[fld].count() # point_poly_count.head() next((x for x in points2.columns if x != 'geometry'),None)
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on='FEATUREID', lsuffix='_', how='left')
-    final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0)       
+    final = final[['FEATUREID', 'AreaSqKM', fld]].fillna(0)
     cols = ['COMID', 'CatAreaSqKm%s' % appendMetric, 'CatCount%s' % appendMetric]
     if not summaryfield == None: # Summarize fields in list with gpd table including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby('FEATUREID')
-        for x in summaryfield: # Sum the field in summary field list for each catchment             
+        for x in summaryfield: # Sum the field in summary field list for each catchment
             point_poly_stats = grouped2[x].sum()
             point_poly_stats.name = x
             final = final.join(point_poly_stats, on='FEATUREID', how='left').fillna(0)
@@ -766,7 +766,7 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2 = None):  #  ,accum, summaryfield=None
     tbl2                  : toVPU table from InterVPU function in the case where a COMID comes from a different zone
     '''
 
-    if tbl2 is None:  # might be able to fix this in the arguments...
+    if tbl2 is None:  # might be able to fix this in the arguments
         tbl2 = tbl.copy()
     for idx in tbl.columns[:-1]:
         tbl.loc[comid1, idx] = tbl.loc[comid1, idx] - tbl2.loc[comid2, idx]
@@ -809,6 +809,22 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol='COMID'):
             for i in range(0, len(lengths)):
                 # using nan_to_num in average function to treat NA's as zeros when summing
                 z[i] = np.ma.average(np.nan_to_num(d[x:x + lengths[i]]), weights=ar[x:x + lengths[i]])
+                x = x + lengths[i]
+        elif "MIN" in col:
+            x = 0
+            for i in range(0, len(lengths)):
+                if not lengths[i]: # 0 no upstream values, take from catchment
+                    z[i] = c[i]
+                else:
+                    z[i] = np.min(d[x:x + lengths[i]])
+                x = x + lengths[i]
+        elif "MAX" in col:
+            x = 0
+            for i in range(0, len(lengths)):
+                if not lengths[i]: # 0 no upstream values, take from catchment
+                    z[i] = c[i]
+                else:
+                    z[i] = np.max(d[x:x + lengths[i]])
                 x = x + lengths[i]
         else:
             x = 0
@@ -878,9 +894,9 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
                     ZonalStatisticsAsTable(inZoneData, 'VALUE', elev, outTable, "DATA", "ALL")
             for rpu in range(len(rpuList)):
                 if rpu == 0:
-                    table = dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))
+                    table = dbf2DF(out_dir + "/DBF_stash/zonalstats_elev%s.dbf" % (rpuList[rpu]))
                 else:
-                    table = pd.concat([table, dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))])
+                    table = pd.concat([table, dbf2DF(out_dir + "/DBF_stash/zonalstats_elev%s.dbf" % (rpuList[rpu]))])
             if len(rpuList) > 1:
                 clean = table.groupby('VALUE')['AREA'].nlargest(1).reset_index().rename(columns={0:'AREA', 'level_1': 'index'})
                 table = pd.merge(table.reset_index(), clean, on=['VALUE','AREA', 'index'], how ='right').set_index('index')
@@ -895,7 +911,7 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         nhdtbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf' % (NHD_dir, hydroregion, zone)).loc[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
         tbl = dbf2DF(outTable)
         if accum_type == 'Categorical':
-            tbl = chkColumnLength(tbl, LandscapeLayer)               
+            tbl = chkColumnLength(tbl, LandscapeLayer)
         tbl2 = dbf2DF('%s/%s.tif.vat.dbf' % (mask_dir, zone)) 
         tbl2 = pd.merge(tbl2, nhdtbl, how='right', left_on='VALUE', right_on='GRIDCODE').fillna(0).drop('VALUE', axis=1)
         result = pd.merge(tbl2, tbl, left_on='GRIDCODE', right_on='VALUE', how='left')             
@@ -913,8 +929,11 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
             result.columns = ['COMID','AreaSqKm%s' % appendMetric] + [lbl + appendMetric for lbl in tbl.columns.tolist()[1:]] + ['PctFull%s' % appendMetric]
     else:
         if accum_type == 'Continuous':
-            table = table[['VALUE', 'AREA', 'COUNT', 'SUM']]
-            table = table.rename(columns = {'COUNT':'Count', 'SUM':'Sum'})              
+            if by_RPU == 1:
+                table = table[['VALUE', 'AREA', 'COUNT', 'SUM', 'MIN', 'MAX']]
+            else:
+                table = table[['VALUE', 'AREA', 'COUNT', 'SUM']]
+            table = table.rename(columns = {'COUNT':'Count', 'SUM':'Sum'})
         if accum_type == 'Categorical':
             table = chkColumnLength(table,LandscapeLayer)
             table['AREA'] = table[table.columns.tolist()[1:]].sum(axis=1)
@@ -927,7 +946,7 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
            result = pd.merge(result, slptbl, on='COMID', how='left')
            result.SLOPE = result.SLOPE.fillna(0)
            result['SlpWtd'] = result['Sum'] * result['SLOPE'].astype(np.float)
-           result = result.drop(['SLOPE'], axis=1)           
+           result = result.drop(['SLOPE'], axis=1)
         result['PctFull'] = (((result.AREA * 1e-6)/result.AreaSqKm.astype('float'))*100).fillna(0)
         result = result.drop(['GRIDCODE', 'VALUE', 'AREA'], axis=1)
     cols = result.columns[1:]
@@ -966,7 +985,7 @@ def chkColumnLength(table, LandscapeLayer):
             here = AllCols.index(spot) + 1
             table.insert(here, spot ,0)
     return table
-##############################################################################        
+##############################################################################
 
 
 def appendConnectors(cat, Connector, zone, interVPUtbl):
@@ -1046,7 +1065,7 @@ def makeNumpyVectors(d, interVPUtbl, inputs, NHD_dir):
     cats = set(cat)
     cats.discard(0)
     os.mkdir(d + '/bastards')
-    os.mkdir(d + '/children')            
+    os.mkdir(d + '/children')
     for zone in inputs:
         if not os.path.exists('%s/bastards/accum_%s.npz' % (d,zone)):
             print zone
@@ -1151,7 +1170,7 @@ def makeRPUdict(directory):
     directory             : the directory contining NHDPlus data at the top level
     '''
     B = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % directory)
-    B = B.drop(B.loc[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)      
+    B = B.drop(B.loc[B.DRAINAGEID.isin(['HI','CI'])].index, axis=0)
     rpuinputs = OrderedDict()
     for idx, row in B.iterrows():
         if row.UNITTYPE == 'RPU':
@@ -1164,7 +1183,7 @@ def makeRPUdict(directory):
                         break
             if not zone in rpuinputs.keys():
                 rpuinputs[zone] = []
-            print 'RPU: ' + rpu + ' in zone: ' + zone 
+            print 'RPU: ' + rpu + ' in zone: ' + zone
             rpuinputs[zone].append(row.UNITID)
     np.save('%s/StreamCat_npy/rpuInputs.npy' % directory, rpuinputs)
     return rpuinputs
@@ -1182,14 +1201,14 @@ def NHD_Dict(directory, unit='VPU'):
     '''  
     if unit == 'VPU':
         if not os.path.exists('%s/StreamCat_npy' % directory):
-            os.mkdir('%s/StreamCat_npy' % directory)    
+            os.mkdir('%s/StreamCat_npy' % directory)
         if not os.path.exists('%s/StreamCat_npy/zoneInputs.npy' % directory):
             inputs = makeVPUdict(directory)
         else:
             inputs = np.load('%s/StreamCat_npy/zoneInputs.npy' % directory).item() 
     if unit == 'RPU':
         if not os.path.exists('%s/StreamCat_npy' % directory):
-            os.mkdir('%s/StreamCat_npy' % directory)    
+            os.mkdir('%s/StreamCat_npy' % directory)
         if not os.path.exists('%s/StreamCat_npy/rpuInputs.npy' % directory):
             inputs = makeRPUdict(directory)
         else:
