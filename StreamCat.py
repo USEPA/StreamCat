@@ -126,7 +126,7 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                                                          zone)).columns)
         accumTime = dt.now()
         for zone in inputs:
-            cat = pd.read_csv('%s/%s_%s.csv' % (out, ftn, zone))
+            cat = pd.read_csv('%s/%s_%s.csv' % (out, ftn, zone),usecols = ['COMID', 'CatAREASQKM', 'CatCOUNT','CatSUM','CatPctFull'])
             in2accum = len(cat.columns)
             if len(cat.columns) == in2accum:
                 print('running accumulation for ' + zone)

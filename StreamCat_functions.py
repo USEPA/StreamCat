@@ -66,6 +66,7 @@ def UpcomDict(nhd, interVPUtbl, zone):
     flow  = flow[flow.TOCOMID != 0]
     # check to see if out of zone values have FTYPE = 'Coastline'
     fls = gpd.GeoDataFrame.from_file("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (nhd))
+    fls.columns = map(str.upper, fls.columns)
     coastfl = fls.COMID[fls.FTYPE == 'Coastline']
     flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
     # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs here
@@ -681,7 +682,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     throughVPUs = tbl[tbl.COMID.isin(interVPUtbl.thruCOMIDs.values)].set_index('COMID').copy()
     # Create subset of InterVPUtbl that identifies the zone we are working on
     interVPUtbl = interVPUtbl.loc[interVPUtbl.FromZone.values == zone]
-    throughVPUs.columns = cols
+    throughVPUs.columns = cols.drop(['CatSOURCEFC', 'CatGEOMETRY'])
     
     # COMIDs in the toCOMID column need to swap values with COMIDs in other zones, those COMIDS are then sorted in toVPUS
     if any(interVPUtbl.toCOMIDs.values > 0): # [x for x in interVPUtbl.toCOMIDs if x > 0]
@@ -705,7 +706,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
         toVPUs.to_csv(Connector)
     if os.path.exists(Connector):  # if Connector already exists, read it in and append
         con = pd.read_csv(Connector).set_index('COMID')
-        con.columns = map(str, con.columns)
+        con.columns = list(map(str, con.columns))
         throughVPUs = throughVPUs.append(con)
     throughVPUs.to_csv(Connector)
 ##############################################################################
@@ -750,37 +751,39 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol='COMID'):
     coms = np.array(arr[icol])  #Read in COMIDs
     indices = swapper(coms, upStream)  #Get indices that will be used to map values
     del upStream  # a and indices are big - clean up to minimize RAM
-    cols = arr.columns[1:]  #Get column names that will be accumulated
+    cols = arr.columns  #Get column names that will be accumulated
     z = np.zeros(COMIDs.shape)  #Make empty vector for placing values
     outT = np.zeros((len(COMIDs), len(arr.columns)))  #Make empty array for placing final values
     outT[:,0] = COMIDs  #Define first column as comids
     #Loop and accumulate values
-    for k in range(0,len(cols)):
+    for k in range(1,len(cols)):
         col = cols[k]
         c = np.array(arr[col]) # arr[col].fillna(0) keep out zeros where no data!
         d = c[indices] #Make final vector from desired data (c)
         if 'PctFull' in col:
-            area = np.array(arr.ix[:, 1])
+            area = np.array(arr[['CatAREASQKM']])
             ar = area[indices]
             x = 0
             for i in range(0, len(lengths)):
                 # using nan_to_num in average function to treat NA's as zeros when summing
-                z[i] = np.ma.average(np.nan_to_num(d[x:x + lengths[i]]), weights=ar[x:x + lengths[i]])
+                z[i] = np.ma.average(np.nan_to_num(d[x:x + lengths[i]]), weights=ar[x:x + lengths[i]].flatten())
                 x = x + lengths[i]
         else:
             x = 0
             for i in range(0, len(lengths)):
                 z[i] = np.nansum(d[x:x + lengths[i]])
                 x = x + lengths[i]
-        outT[:,k+1] = z  #np.nan_to_num() -used to convert to zeros here, now done above in the np.ma.average()
+        z = np.nan_to_num(z)
+        outT[:,k] = z  #np.nan_to_num() -used to convert to zeros here, now done above in the np.ma.average()
     outT = outT[np.in1d(outT[:,0], coms),:]  #Remove the extra COMIDs
     outDF = pd.DataFrame(outT)
     if tbl_type == 'Ws':
-        outDF.columns = np.append(icol, map(lambda x : x.replace('Cat', 'Ws'),cols.values))
+        outDF.columns = np.append(icol, list(map(lambda x : x.replace('Cat', 'Ws'),cols[1:5].values)))
+        # outDF.columns = np.append(list(map(lambda x : x.replace('Cat', 'Ws'),cols.values)))
     if tbl_type == 'UpCat':
-        outDF.columns = np.append(icol, 'Up' + cols.values)
+        outDF.columns = np.append(icol, 'Up' + cols[1:5].values)
     for name in outDF.columns:
-        if 'AreaSqKm' in name:
+        if 'AREASQKM' in name:
             areaName = name
     outDF.loc[(outDF[areaName] == 0), outDF.columns[2:]] = np.nan  # identifies that there is no area in catchment mask, then NA values across the table   
     return outDF
