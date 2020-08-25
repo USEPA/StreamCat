@@ -682,7 +682,8 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     throughVPUs = tbl[tbl.COMID.isin(interVPUtbl.thruCOMIDs.values)].set_index('COMID').copy()
     # Create subset of InterVPUtbl that identifies the zone we are working on
     interVPUtbl = interVPUtbl.loc[interVPUtbl.FromZone.values == zone]
-    throughVPUs.columns = cols.drop(['CatSOURCEFC', 'CatGEOMETRY'])
+    if 'CatSOURCEFC' in throughVPUs.columns  or 'CatGEOMETRY' in throughVPUs.columns:
+        throughVPUs.columns = cols.drop(['CatSOURCEFC', 'CatGEOMETRY'])
     
     # COMIDs in the toCOMID column need to swap values with COMIDs in other zones, those COMIDS are then sorted in toVPUS
     if any(interVPUtbl.toCOMIDs.values > 0): # [x for x in interVPUtbl.toCOMIDs if x > 0]
