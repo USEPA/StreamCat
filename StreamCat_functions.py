@@ -949,6 +949,7 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
     con = con.loc[con.COMID.isin(np.append(interVPUtbl.loc[interVPUtbl.ToZone.values == zone].thruCOMIDs.values,interVPUtbl.loc[interVPUtbl.ToZone.values == zone].toCOMIDs.values[np.nonzero(interVPUtbl.loc[interVPUtbl.ToZone.values == zone].toCOMIDs.values)]))]
 
     #con = con.loc[con.COMID.isin(np.append(np.array(interVPUtbl.loc[np.array(interVPUtbl.ToZone) == zone].thruCOMIDs),np.array(interVPUtbl.loc[np.array(interVPUtbl.ToZone) == zone].toCOMIDs)[np.nonzero(np.array(interVPUtbl.loc[np.array(interVPUtbl.ToZone) == zone].toCOMIDs))]))]
+    con.columns=cat.columns.values
     cat = cat.append(con)
     return cat
 
