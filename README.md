@@ -29,7 +29,7 @@ If you are using Anaconda, creating a new, clean 'StreamCat' environment with th
   + conda env create -f streamcat_py3.yml
   
 * To build environment yourself, do:
-  + conda env create --name StreamCat -c conda-forge python=3.6 geopandas rasterio=1.1.5=py36h2409764_0
+  + conda create --name StreamCat -c conda-forge python=3.6 geopandas rasterio=1.1.5=py36h2409764_0
 
 * To activate this new environment, you'll need to install Spyder in the environment, and possibly re-install pyqt with specific version (we did).  You may even need to uninstall pyqt after installing Spyder (as below) and then specifically re-install:
 
