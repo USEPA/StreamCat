@@ -187,28 +187,6 @@ def UpcomDict(nhd, interVPUtbl, zone):
             UpCOMs[int(interLine[6])].append(int(interLine[0]))    
     return UpCOMs
 ##############################################################################
-    
-a = defaultdict(list)
-a['b'].append(47)
-
-flow2  = flow[flow.FROMCOMID != 0]
-
-chx = defaultdict(list)
-fcom,tcom = flow.FROMCOMID.values,flow.TOCOMID.values
-
-for i in range(0, len(flow), 1):
-    from_comid = fcom[i]
-    if from_comid == 0:
-        continue
-    else:
-        chx[tcom[i]].append(from_comid)
-        
- 
-for k,v in UpCOMs.iteritems():
-    if not chx[k] == v:
-        print k
-0 in fcom
-##############################################################################
 
 
 def children(token, tree, chkset=None):
@@ -1124,74 +1102,6 @@ def makeNumpyVectors(inter_tbl, inputs, nhd):
 
 
 
-len(a)  # 34611
-len(comids)
-
-for i in range(len(a)):
-    a[i].sort()
-    z[i].sort()    
-    if not a[i] == z[i]:
-        print a[i]
-        print z[i]
-        break
-len(a[i])
-for x in comids:
-    print x
-    v = findUpstreamNpy(zone, 362177, npy)
-    w = findUpstreamNpy(zone, x, './accum_npy')
-    v.sort()
-    w.sort()
-    if not (v==w).all():
-        print x
-        break
-    
-    
-list(up) == a[i]
-#a[i]
-#for i in range(len(a)):
-#    if len(a[i]) == 0:
-#        comids = np.delete(comids, i)
-#
-#0 in lengths  # COMID gets filtered out w/ wet intersection
-#
-#start = dt.now()
-#for x in comids:
-#    print x
-#    print bastards(x,UpStreamComs)
-#print dt.now() - start
-#
-#for k,v in UpStreamComs.iteritems():
-#    UpStreamComs[k] = [x for x in v if x in all_comids]
-#    
-#    type(a[0])
-#    
-#comi = set(all_comids)
-#    
-#b=[]
-#for arr in a:
-##    break
-#    f = list(comi.intersection(arr))
-#    b.append(f)
-#
-#start = dt.now()
-#c = [list(comi.intersection(arr)) for arr in a]
-#print dt.now() - start
-#
-#14942212 in comi    
-#    
-#%timeit np.int32(np.hstack(np.array(a)))
-#%timeit np.hstack(np.array(a, dtype=np.int32))
-#np.array(a).shape
-
-#from StreamCat_functions import dbf2DF
-#for zone in INPUTS:
-#    print zone
-#    hr = INPUTS[zone]
-#    pre = '%s/NHDPlus%s/NHDPlus%s' % (NHD_DIR, hr, zone)
-#    cat = dbf2DF("%s/NHDPlusCatchment/Catchment.dbf" % pre)
-#    print 0 in cat.FEATUREID.values
-#    
-#cat.ix[cat.FEATUREID == 0]
 ##############################################################################
 def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
     '''
