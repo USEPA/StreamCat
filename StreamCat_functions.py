@@ -822,11 +822,11 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol="COMID"):
         icol, map(lambda x: x.replace("Cat", tbl_type), cols.values)
     )
     areaName = outDF.columns[outDF.columns.str.contains("Area")][0]
-    outDF.loc[
-        (outDF[areaName] == 0), outDF.columns[2:]
-    ] = (
-        np.nan
-    )  # identifies that there is no area in catchment mask, then NA values across the table
+    # identifies that there is no area in catchment mask,
+    # then NA values for everything past Area, covers upcats w. no area AND
+    # WS w/ no area
+    no_area_rows, na_columns = (outDF[areaName] == 0), outDF.columns[2:]
+    outDF.loc[no_area_rows, na_columns] = np.nan
     return outDF
 
 
