@@ -64,9 +64,7 @@ def UpcomDict(nhd, interVPUtbl, zone):
     """
     # Returns UpCOMs dictionary for accumulation process
     # Provide either path to from-to tables or completed from-to table
-    flow = dbf2DF("%s/NHDPlusAttributes/PlusFlow.dbf" % (nhd))[
-        ["TOCOMID", "FROMCOMID"]
-    ]
+    flow = dbf2DF("%s/NHDPlusAttributes/PlusFlow.dbf" % (nhd))[["TOCOMID", "FROMCOMID"]]
     flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
     # check to see if out of zone values have FTYPE = 'Coastline'
     fls = dbf2DF("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (nhd))
@@ -796,26 +794,28 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol="COMID"):
     for index, column in enumerate(cols, 1):
         connected_ids = arr[column].values.astype("float")
         all_values = np.array(
-            np.split(connected_ids[indices], accumulated_indexes),
-            dtype=object
+            np.split(connected_ids[indices], accumulated_indexes), dtype=object
         )
-        # idea for 'Ws' accum
         if tbl_type is "Ws":
-            all_values = np.array([np.append(val, connected_ids[idx]) 
-                                   for idx, val in enumerate(all_values)])
+            # add identity value to each array for full watershed
+            all_values = np.array(
+                [np.append(val, connected_ids[idx]) for idx, val in enumerate(all_values)]
+            )
         if index is 1:
             area = arr.iloc[:, 1].values.astype("float")[indices]
             area = np.array(np.split(area, accumulated_indexes), dtype=object)
         if "PctFull" in column:
-            values = [np.ma.average(np.nan_to_num(val), weights=w) 
-                 for val, w in zip(all_values, area)]
+            values = [
+                np.ma.average(np.nan_to_num(val), weights=w)
+                for val, w in zip(all_values, area)
+            ]
         elif "MIN" in column or "MAX" in column:
             func = np.max if "MAX" in column else np.min
             values = np.array([func(val) for val in all_values])
-            values[lengths==0] = connected_ids[lengths==0]
+            values[lengths == 0] = connected_ids[lengths == 0]
         else:
             values = np.array([np.nansum(val) for val in all_values])
-        data[:, index] = values  
+        data[:, index] = values
     data = data[np.in1d(data[:, 0], coms), :]  # Remove the extra comids
     outDF = pd.DataFrame(data)
     outDF.columns = np.append(
@@ -907,16 +907,12 @@ def createCatStats(
                     )
             for rpu in range(len(rpuList)):
                 if rpu == 0:
-                    table = dbf2DF(
-                        out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu])
-                    )
+                    table = dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))
                 else:
                     table = pd.concat(
                         [
                             table,
-                            dbf2DF(
-                                out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu])
-                            ),
+                            dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu])),
                         ]
                     )
             if len(rpuList) > 1:
@@ -1283,9 +1279,8 @@ def findUpstreamNpy(zone, com, numpy_dir):
     return upStream[n : n + arrlen]
 
 
-def dbf2DF (f, upper=True):
+def dbf2DF(f, upper=True):
     data = gpd.read_file(f)
     if upper is True:
         data.columns = data.columns.str.upper()
     return data
-  
