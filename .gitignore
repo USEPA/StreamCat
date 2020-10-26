@@ -8,3 +8,4 @@ lookup/
 accum_npy/
 scripts/
 .spyproject/
+stream_cat_config.py
