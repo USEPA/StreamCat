@@ -17,24 +17,18 @@
  Date: October 2015
 '''
 
-# load modules
 import os, sys
 import arcpy
 from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 import pysal as ps
 import numpy as np
 import pandas as pd
-import itertools
-import decimal
-import struct
-import datetime
-from datetime import datetime as dt
-from collections import deque, defaultdict, OrderedDict
+from datetime import datetime
 from osgeo import gdal, osr, ogr
+from collections import deque, defaultdict, OrderedDict
 from gdalconst import *
 import rasterio
 from rasterio import transform
-#os.environ['GDAL_DATA'] = 'C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data'
 if rasterio.__version__[0] == '0':
     from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
 if rasterio.__version__[0] == '1':
@@ -49,95 +43,6 @@ import fiona
 class LicenseError(Exception):
     pass
 ##############################################################################
-
-def dbfreader(f):
-    """Returns an iterator over records in a Xbase DBF file.
-
-    The first row returned contains the field names.
-    The second row contains field specs: (type, size, decimal places).
-    Subsequent rows contain the data records.
-    If a record is marked as deleted, it is skipped.
-
-    File should be opened for binary reads.
-
-    """
-    # See DBF format spec at:
-    # http://www.pgts.com.au/download/public/xbase.htm#DBF_STRUCT
-
-    numrec, lenheader = struct.unpack('<xxxxLH22x', f.read(32))
-    numfields = (lenheader - 33) // 32
-
-    fields = []
-    for fieldno in xrange(numfields):
-        name, typ, size, deci = struct.unpack('<11sc4xBB14x', f.read(32))
-        name = name.replace('\0', '')       # eliminate NULs from string
-        fields.append((name, typ, size, deci))
-    yield [field[0] for field in fields]
-    yield [tuple(field[1:]) for field in fields]
-
-    terminator = f.read(1)
-    assert terminator == '\r'
-
-    fields.insert(0, ('DeletionFlag', 'C', 1, 0))
-    fmt = ''.join(['%ds' % fieldinfo[2] for fieldinfo in fields])
-    fmtsiz = struct.calcsize(fmt)
-    for i in xrange(numrec):
-        record = struct.unpack(fmt, f.read(fmtsiz))
-        if record[0] != ' ':
-            continue                        # deleted record
-        result = []
-        for (name, typ, size, deci), value in itertools.izip(fields, record):
-            if name == 'DeletionFlag':
-                continue
-            if typ == "N":
-                value = value.replace('\0', '').lstrip()
-                if value == '':
-                    value = 0
-                elif deci:
-                    value = decimal.Decimal(value)
-                else:
-                    value = int(value)
-            elif typ == 'C':
-                value = value.rstrip()
-            elif typ == 'D':
-                try:
-                    y, m, d = int(value[:4]), int(value[4:6]), int(value[6:8])
-                    value = datetime.date(y, m, d)
-                except:
-                    value = None
-            elif typ == 'L':
-                value = (value in 'YyTt' and 'T') or (value in 'NnFf' and 'F') or '?'
-            elif typ == 'F':
-                value = float(value)
-            result.append(value)
-        yield result
-
-def dbf2DF(f, upper=True):
-    data = list(dbfreader(open(f, 'rb')))
-    if upper == False:
-        return pd.DataFrame(data[2:], columns=data[0])
-    else:
-        return pd.DataFrame(data[2:], columns=map(str.upper,data[0]))
-
-#def dbf2DF(dbfile, upper=True):
-#    '''
-#    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-#                 "Marc Weber <weber.marc@epa.gov>"
-#    Reads and converts a dbf file to a pandas data frame using pysal.
-#
-#    Arguments
-#    ---------
-#    dbfile           : a dbase (.dbf) file
-#    '''
-#    db = ps.open(dbfile)
-#    cols = {col: db.by_col(col) for col in db.header}
-#    db.close()  #Close dbf
-#    pandasDF = pd.DataFrame(cols)
-#    if upper == True:
-#        pandasDF.columns = pandasDF.columns.str.upper()
-#    return pandasDF
-##############################################################################
-
 
 def UpcomDict(nhd, interVPUtbl, zone):
     '''
@@ -155,11 +60,11 @@ def UpcomDict(nhd, interVPUtbl, zone):
     '''
     #Returns UpCOMs dictionary for accumulation process
     #Provide either path to from-to tables or completed from-to table
-    flow = dbf2DF("%s/NHDPlusAttributes/PlusFlow.dbf" % (nhd))[['TOCOMID',
+    flow = gpd.read_file("%s/NHDPlusAttributes/PlusFlow.dbf" % (nhd))[['TOCOMID',
                                                                 'FROMCOMID']]
     flow  = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
     # check to see if out of zone values have FTYPE = 'Coastline'
-    fls = dbf2DF("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (nhd))
+    fls = gpd.read_file("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (nhd))
     coastfl = fls.COMID[fls.FTYPE == 'Coastline']
     flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
     # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs here
@@ -614,12 +519,11 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
     pct_full      : table that links COMIDs to pct_full, determined from catchments that are  not within the US Census border
     summaryfield  : a list of the field/s in points feature to use for getting summary stats in polygons
     '''
-    #startTime = dt.now()
     polys = gpd.GeoDataFrame.from_file(inZoneData)#.set_index('FEATUREID')
     points = points.to_crs(polys.crs)
     if len(mask_dir) > 1:
         polys = polys.drop('AreaSqKM', axis=1)
-        tblRP = dbf2DF('%s/%s.tif.vat.dbf' % (mask_dir, zone))
+        tblRP = gpd.read_file('%s/%s.tif.vat.dbf' % (mask_dir, zone))
         tblRP['AreaSqKM'] = (tblRP.COUNT * 900) * 1e-6
         tblRP['AreaSqKM'] = tblRP['AreaSqKM'].fillna(0)
         polys = pd.merge(polys, tblRP, left_on='GRIDCODE', right_on='VALUE', how='left')
@@ -660,7 +564,6 @@ def PointInPoly(points, zone, inZoneData, pct_full, mask_dir, appendMetric, summ
         else:
             final.columns = ['COMID','CatAreaSqKmRp100','CatCountRp100','CatPctFullRp100']
     final['CatPctFull%s' % appendMetric] = final['CatPctFull%s' % appendMetric].fillna(100) # final.head() final.ix[final.CatCount == 0]
-    #print "elapsed time " + str(dt.now()-startTime)
     for name in final.columns:
         if 'AreaSqKm' in name:
             area = name
@@ -867,7 +770,7 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
                     TabulateArea(inZoneData, 'VALUE', LandscapeLayer, "Value", outTable, "30")
                 if accum_type == 'Continuous':
                     ZonalStatisticsAsTable(inZoneData, 'VALUE', LandscapeLayer, outTable, "DATA", "ALL")
-            table = dbf2DF(outTable)
+            table = gpd.read_file(outTable)
         if by_RPU == 1:
             hydrodir = '/'.join(inZoneData.split('/')[:-2]) + '/NEDSnapshot'
             rpuList = []
@@ -880,9 +783,9 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
                     ZonalStatisticsAsTable(inZoneData, 'VALUE', elev, outTable, "DATA", "ALL")
             for rpu in range(len(rpuList)):
                 if rpu == 0:
-                    table = dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))
+                    table = gpd.read_file(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))
                 else:
-                    table = pd.concat([table, dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))])
+                    table = pd.concat([table, gpd.read_file(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))])
             if len(rpuList) > 1:
                 clean = table.groupby('VALUE')['AREA'].nlargest(1).reset_index().rename(columns={0:'AREA', 'level_1': 'index'})
                 table = pd.merge(table.reset_index(), clean, on=['VALUE','AREA', 'index'], how ='right').set_index('index')
@@ -894,11 +797,11 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         print(arcpy.GetMessages(2))
 
     if len(mask_dir) > 1:
-        nhdtbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf' % (NHD_dir, hydroregion, zone)).ix[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
-        tbl = dbf2DF(outTable)
+        nhdtbl = gpd.read_file('%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf' % (NHD_dir, hydroregion, zone)).ix[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
+        tbl = gpd.read_file(outTable)
         if accum_type == 'Categorical':
             tbl = chkColumnLength(tbl, LandscapeLayer)
-        tbl2 = dbf2DF('%s/%s.tif.vat.dbf' % (mask_dir, zone))
+        tbl2 = gpd.read_file('%s/%s.tif.vat.dbf' % (mask_dir, zone))
         tbl2 = pd.merge(tbl2, nhdtbl, how='right', left_on='VALUE', right_on='GRIDCODE').fillna(0).drop('VALUE', axis=1)
         result = pd.merge(tbl2, tbl, left_on='GRIDCODE', right_on='VALUE', how='left')
         if accum_type == 'Continuous':
@@ -920,11 +823,11 @@ def createCatStats(accum_type, LandscapeLayer, inZoneData, out_dir, zone, by_RPU
         if accum_type == 'Categorical':
             table = chkColumnLength(table,LandscapeLayer)
             table['AREA'] = table[table.columns.tolist()[1:]].sum(axis=1)
-        nhdTable = dbf2DF(inZoneData[:-3] + 'Catchment.dbf').ix[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
+        nhdTable = gpd.read_file(inZoneData[:-3] + 'Catchment.dbf').ix[:,['FEATUREID', 'AREASQKM', 'GRIDCODE']]
         nhdTable = nhdTable.rename(columns = {'FEATUREID':'COMID', 'AREASQKM':'AreaSqKm'})
         result = pd.merge(nhdTable, table, how='left', left_on='GRIDCODE', right_on='VALUE')
         if LandscapeLayer.split('/')[-1].split('.')[0] == 'rdstcrs':
-           slptbl = dbf2DF('%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf' % (NHD_dir, hydroregion, zone)).ix[:,['COMID', 'SLOPE']]
+           slptbl = gpd.read_file('%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf' % (NHD_dir, hydroregion, zone)).ix[:,['COMID', 'SLOPE']]
            slptbl.loc[slptbl['SLOPE'] == -9998.0, 'SLOPE'] = 0
            result = pd.merge(result, slptbl, on='COMID', how='left')
            result.SLOPE = result.SLOPE.fillna(0)
@@ -953,7 +856,7 @@ def chkColumnLength(table, LandscapeLayer):
     '''
     # Get ALL categorical values from the dbf associated with the raster to retain all values
     # in the raster in every table, even when a given value doesn't exist in a given hydroregion
-    AllCols = dbf2DF(LandscapeLayer + '.vat.dbf').VALUE.tolist()
+    AllCols = gpd.read_file(LandscapeLayer + '.vat.dbf').VALUE.tolist()
     col_list = table.columns.tolist()
     col_list.sort()
 
@@ -1020,7 +923,7 @@ def make_all_cat_comids(nhd, inputs):
         hydroregion = inputs[zone]
         pre = '%s/NHDPlus%s/NHDPlus%s' % (nhd, hydroregion, zone)
         catchment = "%s/NHDPlusCatchment/Catchment.dbf" % pre
-        cats = dbf2DF(catchment)
+        cats = gpd.read_file(catchment)
         all_comids = np.append(all_comids, cats.FEATUREID.values.astype(int))
         np.savez_compressed('./accum_npy/allCatCOMs.npz', all_comids=all_comids)
         return set(all_comids) #RETURN A SET!
@@ -1043,10 +946,10 @@ def makeNumpyVectors(inter_tbl, inputs, nhd):
     for zone in inputs:
         hydroregion = inputs[zone]
         pre = '%s/NHDPlus%s/NHDPlus%s' % (nhd, hydroregion, zone)
-        flow = dbf2DF(("%s/NHDPlusAttributes/"
+        flow = gpd.read_file(("%s/NHDPlusAttributes/"
                        "PlusFlow.dbf") % (pre))[['TOCOMID','FROMCOMID']]
         flow  = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
-        fls = dbf2DF("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (pre))
+        fls = gpd.read_file("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (pre))
         coastfl = fls.COMID[fls.FTYPE == 'Coastline']
         flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
         # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs
@@ -1122,15 +1025,15 @@ def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
             print zone
             hydroregion = inputs[zone]
             print 'Making UpStreamComs dictionary...'
-            start_time = dt.now()
+            start_time = datetime.now()
             NHD_pre = '%s/NHDPlus%s/NHDPlus%s' % (NHD_dir, hydroregion, zone)
             UpStreamComs = UpcomDict(NHD_pre, interVPUtbl, zone)
-            print("--- %s seconds ---" % (dt.now() - start_time))
+            print("--- %s seconds ---" % (datetime.now() - start_time))
             print '....'
             print 'Making numpy bastard vectors...'
-            start_time = dt.now()
+            start_time = datetime.now()
             tbl_dir = NHD_dir + "/NHDPlus%s/NHDPlus%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (hydroregion, zone)
-            catch = dbf2DF(tbl_dir).set_index('COMID')
+            catch = gpd.read_file(tbl_dir).set_index('COMID')
             COMIDs = np.append(np.array(catch.index),np.array(interVPUtbl.ix[np.logical_and((np.array(interVPUtbl.ToZone) == zone),(np.array(interVPUtbl.DropCOMID) == 0))].thruCOMIDs))
             del catch
             if 0 in COMIDs:
@@ -1139,7 +1042,7 @@ def makeNumpyVectors2(d, interVPUtbl, inputs, NHD_dir):
             lengths = np.array([len(v) for v in a])
             a = np.int32(np.hstack(np.array(a)))    #Convert to 1d vector
             np.savez_compressed('%s/bastards/accum_%s.npz' % (d,zone), comids=COMIDs,lengths=lengths,upstream=a)
-            print("--- %s seconds ---" % (dt.now() - start_time))
+            print("--- %s seconds ---" % (datetime.now() - start_time))
             print '___________________'
 ##############################################################################
 
@@ -1161,7 +1064,7 @@ def nhd_dict(nhd, unit='VPU'):
     '''
 
     inputs = OrderedDict()
-    bounds = dbf2DF('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % nhd)
+    bounds = gpd.read_file('%s/NHDPlusGlobalData/BoundaryUnit.dbf' % nhd)
     remove = bounds.ix[bounds.DRAINAGEID.isin(['HI','CI'])].index
     bounds = bounds.drop(remove, axis=0)
     if unit == 'VPU':
