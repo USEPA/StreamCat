@@ -41,7 +41,7 @@ from StreamCat_functions import (Accumulation, appendConnectors, createCatStats,
                                   PointInPoly)
 
 # Load table of layers to be run...
-ctl = pd.read_csv('ControlTable_test_config.csv')
+ctl = pd.read_csv('ControlTable_StreamCat.csv')
 
 if not os.path.exists('accum_npy'):
     os.mkdir('accum_npy')
