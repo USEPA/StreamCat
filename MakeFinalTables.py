@@ -11,8 +11,10 @@ and then directory and name of the control table to use like this:
 
 import os
 import sys
+import zipfile
 import numpy as np
 import pandas as pd
+
 from stream_cat_config import OUT_DIR, LENGTHS, FINAL_DIR
 
 ctl = pd.read_csv("ControlTable_StreamCat.csv")
@@ -38,8 +40,10 @@ for table in tables:
     print 'Running ' + table + ' .....into ' + FINAL_DIR 
     # Looop through NHD Hydro-regions
     for zone in inputs:
+        out_file = FINAL_DIR  + '/%s_Region%s.csv'%(table,zone)
+        zip_file = FINAL_DIR +'/zips/' + table + '_Region' + zone + '.zip'
         # Check if output tables exist before writing
-        if not os.path.exists(FINAL_DIR +'/' + table + '_Region' + zone + '.csv'):
+        if not os.path.exists(out_file):
             for var in range(len(tables[table])):
                 # Get accumulation type, i.e. point, continuous, categorical
                 accum = ctl.accum_type.loc[ctl.Final_Table_Name == table].any()
@@ -150,8 +154,18 @@ for table in tables:
             if not LENGTHS[zone] == len(final):
                 print "Table %s length zone %s incorrect!!!!...check Allocation\
                         and Accumulation results" % (table, zone)
-            final.to_csv(FINAL_DIR  + '/%s_Region%s.csv'%(table,zone))
-    print table
+            final.to_csv(out_file)
+        file_exists = os.path.exists(zip_file)
+        if not file_exists or os.path.getmtime(zip_file) < os.path.getmtime(out_file):
+            if file_exists:
+                os.remove(zip_file)
+            fn = os.path.basename(out_file).split(".")[0]
+            print 'zipping......  %s' % fn
+            zf = zipfile.ZipFile('%s/zips/%s.zip' % (FINAL_DIR,fn), mode='w')
+            zf.write(out_file, os.path.basename(out_file),
+                     compress_type=zipfile.ZIP_DEFLATED)
+            zf.close()
+    print(table)
     try:
         stats
     except NameError:
