@@ -245,13 +245,22 @@ for table, metrics in tables.items():
 
 ###########################
 #table = "RoadStreamCrossings"
+#aa = []
+#for f in os.listdir(str(REDO_DIR)):
+#    s = f.split("_Region")[0]
+#    if not s in aa:
+#        aa.append(f.split("_Region")[0])
+#FINAL_DIR = Path("L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions")
 #for table in tables:
+#for table in aa[49:-1]:
+#    print(table)
 #    for vpu in inputs:
-#    
+#        print(vpu)
 #        orig = pd.read_csv(FINAL_DIR / region_fn.format(table,vpu))
 #        new = pd.read_csv(REDO_DIR / region_fn.format(table,vpu))
-#        print(table, vpu, orig.equals(new))
-#
+#        if not orig.equals(new):
+#            print(table, vpu, orig.equals(new))
+
 #for col in orig.columns:
 #    print(col, (orig[col] == new[col]).all())
 #    if not (orig[col] == new[col]).all():
