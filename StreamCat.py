@@ -62,6 +62,9 @@ totTime = dt.now()
 # Load table of inter vpu connections
 inter_vpu = pd.read_csv("InterVPU.csv")
 
+if not os.path.exists(OUT_DIR):
+    os.mkdir(OUT_DIR)
+
 if not os.path.exists("accum_npy"):
     # TODO: work out children OR bastards only
     makeNumpyVectors(inter_vpu, NHD_DIR)
@@ -150,13 +153,15 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                 if zone in inter_vpu.ToZone.values:
                     cat = appendConnectors(cat, Connector, zone, inter_vpu)
                 accum = np.load("accum_npy/bastards/accum_%s.npz" % zone)
+
                 up = Accumulation(
                     cat, accum["comids"], accum["lengths"], accum["upstream"], "Up"
                 )
-                accum = np.load("accum_npy/children/accum_%s.npz" % zone)
+
                 ws = Accumulation(
                     cat, accum["comids"], accum["lengths"], accum["upstream"], "Ws"
                 )
+
                 if zone in inter_vpu.ToZone.values:
                     cat = pd.read_csv("%s/%s_%s.csv" % (OUT_DIR, ftn, zone))
                 if zone in inter_vpu.FromZone.values:

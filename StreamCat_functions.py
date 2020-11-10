@@ -576,7 +576,7 @@ def PointInPoly(
         tblRP["AreaSqKM"] = tblRP["AreaSqKM"].fillna(0)
         polys = pd.merge(polys, tblRP, left_on="GRIDCODE", right_on="VALUE", how="left")
         polys.crs = {u"datum": u"NAD83", u"no_defs": True, u"proj": u"longlat"}
-        # polys = final[['FEATUREID', 'AreaSqKM', fld]]
+
     # Get list of lat/long fields in the table
     points["latlon_tuple"] = zip(
         points.geometry.map(lambda point: point.x),
@@ -585,25 +585,25 @@ def PointInPoly(
     # Remove duplicate points for 'Count'
     points2 = points.drop_duplicates(
         "latlon_tuple"
-    )  # points2.head() polys.head() point_poly_join.head()
+    )
     try:
         point_poly_join = sjoin(
             points2, polys, how="left", op="within"
         )  # point_poly_join.loc[point_poly_join.FEATUREID > 1]
         fld = (
-            "GRIDCODE"  # next(str(unicode(x)) for x in polys.columns if x != 'geometry')
+            "GRIDCODE"
         )
     except:
         polys["link"] = np.nan
         point_poly_join = (
-            polys  # gpd.GeoDataFrame( pd.concat( [points2, polys], ignore_index=True) )
+            polys
         )
         fld = "link"
     # Create group of all points in catchment
     grouped = point_poly_join.groupby("FEATUREID")
     point_poly_count = grouped[
         fld
-    ].count()  # point_poly_count.head() next((x for x in points2.columns if x != 'geometry'),None)
+    ].count()
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
     final = final[["FEATUREID", "AreaSqKM", fld]].fillna(0)
@@ -766,7 +766,7 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2=None):  #  ,accum, summaryfield=None
 ##############################################################################
 
 
-def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol="COMID"):
+def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
                   "Ryan Hill <hill.ryan@epa.gov>"
@@ -782,28 +782,27 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol="COMID"):
     tbl_type              : string value of table metrics to be returned
     icol                  : column in arr object to index
     """
-    coms = arr[icol].values.astype("int32")  # Read in comids
+    coms = tbl[icol].values.astype("int32")  # Read in comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
-    del upStream  # a and indices are big - clean up to minimize RAM
-    cols = arr.columns[1:]  # Get column names that will be accumulated
+    del upstream  # a and indices are big - clean up to minimize RAM
+    cols = tbl.columns[1:]  # Get column names that will be accumulated
     z = np.zeros(comids.shape)  # Make empty vector for placing values
-    data = np.zeros((len(comids), len(arr.columns)))
+    data = np.zeros((len(comids), len(tbl.columns)))
     data[:, 0] = comids  # Define first column as comids
     accumulated_indexes = np.add.accumulate(lengths)[:-1]
     # Loop and accumulate values
     for index, column in enumerate(cols, 1):
-        connected_ids = arr[column].values.astype("float")
+        col_values = tbl[column].values.astype("float")
         all_values = np.array(
-            np.split(connected_ids[indices], accumulated_indexes), dtype=object
+            np.split(col_values[indices], accumulated_indexes), dtype=object
         )
         if tbl_type is "Ws":
             # add identity value to each array for full watershed
             all_values = np.array(
-                [np.append(val, connected_ids[idx]) for idx, val in enumerate(all_values)]
+                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
             )
         if index is 1:
-            area = arr.iloc[:, 1].values.astype("float")[indices]
-            area = np.array(np.split(area, accumulated_indexes), dtype=object)
+            area = all_values.copy()
         if "PctFull" in column:
             values = [
                 np.ma.average(np.nan_to_num(val), weights=w)
@@ -812,7 +811,7 @@ def Accumulation(arr, COMIDs, lengths, upStream, tbl_type, icol="COMID"):
         elif "MIN" in column or "MAX" in column:
             func = np.max if "MAX" in column else np.min
             values = np.array([func(val) for val in all_values])
-            values[lengths == 0] = connected_ids[lengths == 0]
+            values[lengths == 0] = col_values[lengths == 0]
         else:
             values = np.array([np.nansum(val) for val in all_values])
         data[:, index] = values
@@ -1133,14 +1132,13 @@ def make_all_cat_comids(nhd, inputs):
 
 def makeNumpyVectors(inter_tbl, nhd):
     """
-    Uses the NHD tables to create arrays of upstream catchments which are used in the Accumulation function
+    Uses the NHD tables to create arrays of upstream catchments which are used
+    in the Accumulation function
 
     Arguments
     ---------
-    d                     : directory where .npy files will be stored
-    interVPUtbl           : table of inter-VPU connections
-    inputs                : Ordered Dictionary of Hydroregions and zones from the NHD
-    NHD_dir               : directory where NHD is stored
+    inter_tbl   : table of inter-VPU connections
+    nhd         : directory where NHD is stored
     """
     os.mkdir("accum_npy")
     inputs = nhd_dict(nhd)
