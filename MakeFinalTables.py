@@ -59,12 +59,8 @@ if len(missing) > 0:
     print "Check output from StreamCat.py"
     sys.exit()
 
-states_lookup = Path("state_dict_comp_junk.npz")
-if not states_lookup.exists(): # TODO: figure this out on monday
-    states_dict = make_states_dict(inputs)
-    np.savez_compressed("states_dict.npz", data=states_dict)
-else:
-    states_dict = np.load(str(states_lookup))["data"].item()
+states_lookup = Path("state_dict.npz")
+states_dict = np.load(str(states_lookup))["data"].item()
 
 STATES_DIR = FINAL_DIR.parents[0] / "States"
 if not FINAL_DIR.exists():
