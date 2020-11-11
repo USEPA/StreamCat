@@ -219,7 +219,7 @@ for table, metrics in tables.items():
         # ZIP up every region as we write them out
         zip_name = out_file.name.replace("csv","zip")
         zf = zipfile.ZipFile(str(FINAL_DIR / "zips" / zip_name), mode="w")
-        zf.write(str(out_file), zip_name,
+        zf.write(str(out_file), out_file.name,
                  compress_type=zipfile.ZIP_DEFLATED)
         zf.close()
 
