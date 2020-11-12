@@ -17,8 +17,8 @@
  Date: October 2015
 """
 
-# import arcpy
-# from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
+import arcpy
+from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 import os, sys
 
 import numpy as np
