@@ -15,6 +15,7 @@ import pandas as pd
 
 #ctl = pd.read_csv(sys.argv[1]).set_index('f_d_Title')
 ctl = pd.read_csv('F:/GitProjects/StreamCat/ControlTable_StreamCat.csv').set_index('f_d_Title') 
+ctl = pd.read_csv('F:/GitProjects/USGS_PesticideProject/ControlTable_StreamCat.csv').set_index('f_d_Title')
 dls = 'DirectoryLocations'
 sys.path.append(ctl.loc['StreamCat_repo'][dls])
 from StreamCat_functions import NHD_Dict
@@ -134,7 +135,7 @@ for table in tables:
             if len(final[np.isinf(final)].stack().dropna()) > 0:  # inf values in dams layer - zone 01 remove
                 final = final.replace([np.inf, -np.inf], np.nan) 
             if zone == '04':
-                rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/StreamCat/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
+                rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
                 final = final.drop(rmtbl.COMID.tolist(),axis=0)
             if zone == '06':
                 stats = {}

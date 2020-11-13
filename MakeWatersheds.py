@@ -99,14 +99,14 @@ for vpu in vpu_list:
         print lake
         start_time2 = time.time()
         if i==0:
-            out_ws = watershed_onnet(lake, tmp_np['comids'], tmp_np['lengths'], tmp_np['upstream'], nhdcats, intervpu)
+            out_ws = watershed_onnet(comid, tmp_np['comids'], tmp_np['lengths'], tmp_np['upstream'], nhdcats, intervpu)
             out_ws = out_ws.to_crs(epsg=5070)
             out_ws['geometry'] = out_ws.buffer(0.01)
             out_ws = out_ws.dissolve(by='COMID')
             out_ws['COMID'] = out_ws.index
 #            out_ws['SITE_ID'] = lakes_df.loc[lakes_df.index[i],'SITE_ID']
         else:
-            temp_ws = watershed_onnet(lake, tmp_np['comids'], tmp_np['lengths'], tmp_np['upstream'], nhdcats, intervpu)
+            temp_ws = watershed_onnet(comid, tmp_np['comids'], tmp_np['lengths'], tmp_np['upstream'], nhdcats, intervpu)
             temp_ws = temp_ws.to_crs(epsg=5070)
             temp_ws['COMID'] = lake
             temp_ws['geometry'] = temp_ws.buffer(0.01)
