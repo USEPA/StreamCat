@@ -1278,7 +1278,7 @@ def findUpstreamNpy(zone, com, numpy_dir):
 
 
 def dbf2DF(f, upper=True):
-    data = gpd.read_file(f)
+    data = gpd.read_file(f).drop("geometry", axis=1)
     if upper is True:
         data.columns = data.columns.str.upper()
     return data

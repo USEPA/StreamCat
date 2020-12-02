@@ -101,8 +101,8 @@ for table, metrics in tables.items():
                             if not str(row.summaryfield) == "nan"
                             else None)
 
-                weighted_cat_area = tbl[catArea + a_m] * (tbl[catPct + a_m]/100)
-                weighted_ws_area = tbl[wsArea + a_m] * (tbl[wsPct + a_m]/100)
+                weighted_cat_area = tbl[catArea] * (tbl[catPct]/100)
+                weighted_ws_area = tbl[wsArea] * (tbl[wsPct]/100)
 
                 if row.MetricType == "Mean":
                     cat_colname = row.MetricName + "Cat" + a_m
