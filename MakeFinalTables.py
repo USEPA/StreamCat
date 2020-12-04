@@ -264,12 +264,19 @@ for table, metrics in tables.items():
     for state in states_dict:
         state_tbl = pd.DataFrame()
         keepers = states_dict[state]["COMIDs"]
+        state_file = STATES_DIR / fn.format(table, state)
         for vpu in states_dict[state]["VPUs"]:
             vpu_tbl = pd.read_csv(FINAL_DIR  / region_fn.format(table, vpu))
             vpu_tbl.query("COMID in @keepers", inplace=True)
             state_tbl = state_tbl.append(vpu_tbl)
-        state_tbl.to_csv(STATES_DIR / fn.format(table, state), index=False)
+        state_tbl.to_csv(state_file, index=False)
 
+        # ZIP up every state as we write them out
+        zip_name = state_file.name.replace("csv","zip")
+        zf = zipfile.ZipFile(str(STATES_DIR / "zips" / zip_name), mode="w")
+        zf.write(str(state_file), state_file.name,
+                 compress_type=zipfile.ZIP_DEFLATED)
+        zf.close()
     print(table)
 
     for stat in stats:
