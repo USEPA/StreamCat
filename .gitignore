@@ -4,3 +4,9 @@
 /*.RData
 /*.pyc
 .Rproj.user
+accum_npy/
+scripts/
+.spyproject/
+stream_cat_config.py
+StreamCat.Rproj
+
