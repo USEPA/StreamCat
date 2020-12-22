@@ -931,7 +931,7 @@ def createCatStats(
     except arcpy.ExecuteError:
         print(arcpy.GetMessages(2))
 
-    if len(mask_dir) > 1:
+    if mask_dir:
         nhdtbl = dbf2DF(
             "%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf"
             % (NHD_dir, hydroregion, zone)
