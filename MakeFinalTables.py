@@ -195,43 +195,6 @@ for table, metrics in tables.items():
             if len(final[np.isinf(final)].stack().dropna()) > 0:
                 # inf values in dams layer - vpu 01 remove
                 final = final.replace([np.inf, -np.inf], np.nan) 
-<<<<<<< HEAD
-            if zone == '04':
-                rmtbl = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv')[['COMID']]
-                final = final.drop(rmtbl.COMID.tolist(),axis=0)
-            if zone == '06':
-                stats = {}
-                for c in final.columns.tolist():
-                    stats[c] = {'min': final[c].min(), 'max':final[c].max()}
-            if zone != '06':
-                try:
-                    stats
-                except NameError:
-                    pass
-                else:
-                    for c in final.columns.tolist():
-                        if final[c].min() < stats[c]['min']:
-                            stats[c]['min'] = final[c].min()
-                        if final[c].max() > stats[c]['max']:
-                            stats[c]['max'] = final[c].max()
-            final = final.fillna('NA')
-            final = final[final.columns.tolist()[:5] + [x for x in final.columns[5:] if 'Cat' in x] + [x for x in final.columns[5:] if 'Ws' in x]].fillna('NA')
-            if 'ForestLossByYear0013' in table:
-                final.drop([col for col in final.columns if 'NoData' in col], axis=1, inplace=True)
-            if not LENGTHS[zone] == len(final):
-                print "Table %s length zone %s incorrect!!!!...check Allocation\
-                        and Accumulation results" % (table, zone)
-            final.to_csv(outDir  + '/%s_Region%s.csv'%(table,zone))
-    print table
-    try:
-        stats
-    except NameError:
-        pass
-    else:
-        for stat in stats:
-            print stat + ' ' + str(stats[stat])
-    print 'All Done.....'
-=======
             if vpu == "04":
                 rmtbl = pd.read_csv("L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/Documentation/DataProcessingAndQualityAssurance/QA_Files/ProblemStreamsR04.csv")[["COMID"]]
                 final = final.drop(rmtbl.COMID.tolist())
@@ -316,13 +279,3 @@ for table, metrics in tables.items():
 #    orig = pd.read_csv(STATES_DIR / f)
 #    new = pd.read_csv(REDO_STATES / f)
 #    print(table, state, orig.equals(new))
-
-
-
-
-
-
-
-
-
->>>>>>> 465b8b5d4a242d0861bcd3f9181121b4f23b1842
