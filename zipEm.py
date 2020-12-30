@@ -27,7 +27,7 @@ def main():
             if not os.path.exists('%s/zips/%s.zip' % (home,fn)):
                 print 'zipping......  %s' % fn
                 zf = zipfile.ZipFile('%s/zips/%s.zip' % (home,fn), mode='w')
-#                zf.write('%s/%s'%(home,f), 
+#                zf.write('%s/%s'%(home,f),
 #                         compress_type=zipfile.ZIP_DEFLATED)
                 zf.write('%s/%s'%(home,f), basename('%s/%s'%(home,f)),
                          compress_type=zipfile.ZIP_DEFLATED)
@@ -37,8 +37,8 @@ def main():
 
 if __name__ =='__main__':
     main()
-   
-    
+
+
 #vpus = r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\StreamCat\FTP_Staging\StreamCat\HydroRegions'
 #states = r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\StreamCat\FTP_Staging\StreamCat\States'
 #v_uni = []
@@ -47,7 +47,7 @@ if __name__ =='__main__':
 #        v_uni.append(f.split('.')[0].split('Region')[0])
 #
 #
-#s_uni = []       
+#s_uni = []
 #for f in os.listdir(states):
 #    if '.csv' in f:
 #        s_uni.append(f.split('.')[0][:-2])

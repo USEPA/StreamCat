@@ -1,15 +1,15 @@
 #--------------------------------------------------------
 # Name: Standardize landscape features
 # Purpose: Apply standard steps to each landscape raster
-#          used in StreamCat, reading values in from a 
+#          used in StreamCat, reading values in from a
 #          control table to pass to functions
 # Author: Marc Weber
 # Created 2/4/2014
 # Python Version:  2.7
 
-# NOTE: run script from command line passing directory and name of this script 
+# NOTE: run script from command line passing directory and name of this script
 # and then directory and name of the control table to use like:
-# > Python "F:\Watershed Integrity Spatial Prediction\Scripts\StreamCat_PreProcessing.py" 
+# > Python "F:\Watershed Integrity Spatial Prediction\Scripts\StreamCat_PreProcessing.py"
 # L:\Priv\CORFiles\Geospatial_Library\Data\Project\SSWR1.1B\ControlTables\RasterControlTable.csv
 #--------------------------------------------------------
 import pandas as pd
@@ -26,7 +26,7 @@ os.environ['GDAL_DATA'] = 'C:/Users/Rdebbout/AppData/Local/Continuum/Anaconda/pk
 #sys.path.append(ControlTable.DirectoryLocations[3])  #'F:/Watershed Integrity Spatial Prediction/Scripts'
 sys.path.append('F:/Watershed Integrity Spatial Prediction/Scripts')
 from StreamCat_functions import Reclass, rasterMath, getRasterInfo, dbf2DF, rat_to_dict
-import geopandas as gpd   
+import geopandas as gpd
 from subprocess import call
 import arcpy
 
@@ -60,8 +60,8 @@ out_coor_system = "PROJCS['NAD_1983_Contiguous_USA_Albers',\
                     PARAMETER['standard_parallel_2',45.5],\
                     PARAMETER['latitude_of_origin',23.0],\
                     UNIT['Meter',1.0]]"
-                
-for line in ControlTable.values: # loop through each landscape_var in control table 
+
+for line in ControlTable.values: # loop through each landscape_var in control table
     if line[-1] == 1:   # check 'run' field from the table, if 1 run, if not, skip
         print 'running ' + str(line[2])
         InFile = line[2]
@@ -86,10 +86,10 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 InRas = InFile + '.tif'
             else:
                 InRas = InFile
-                
+
             NDV, Stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType = getRasterInfo(InDir + '/' + InRas)
             print DataType
-            
+
             # Check if we need to reclass any raster values
             if ReclassTable=='Yes':
                 reclass_dict = dict()
@@ -108,8 +108,8 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                                     reclass_dict[k] = int(lookup[v])
                                 except:
                                     reclass_dict[k] = float(lookup[v])
-                elif RasterAttTable=='No':  
-                    g = ReClassTable.loc[ReClassTable['FileName'] == OutFile]                     
+                elif RasterAttTable=='No':
+                    g = ReClassTable.loc[ReClassTable['FileName'] == OutFile]
                     lookup = g.set_index('OldVal')['NewVal'].to_dict()
                     OldVal = ReClassTable.loc[ReClassTable['FileName'] == OutFile,'OldVal']
                     NewVal = ReClassTable.loc[ReClassTable['FileName'] == OutFile,'NewVal']
@@ -125,20 +125,20 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 tempras = TempDir + '/' + OutFile + '_2.tif'
                 inras = InDir + '/' + InRas
                 if not os.path.isfile(tempras):
-                    rasterMath(inras, tempras, expression= inras + ' * ' + str(ModifyBy), out_dtype=RastType)                 
+                    rasterMath(inras, tempras, expression= inras + ' * ' + str(ModifyBy), out_dtype=RastType)
             # if temp raster hasn't been created in previous steps, just poiint to input raster
             if not os.path.isfile(TempDir + '/' + OutFile + '.tif') and not os.path.isfile(TempDir + '/' + OutFile + '_2.tif'):
                 if FileType == 'ESRI raster':
                     tempras = InDir + '/' + InFile
                 elif FileType == 'Geotiff':
-                    tempras = InDir + '/' + InFile + '.tif' 
+                    tempras = InDir + '/' + InFile + '.tif'
                 elif FileType == 'Image file':
                     tempras = InDir + '/' + InFile + '.img'
                 elif FileType == 'ASCII':
                     tempras = InDir + '/' + InFile
-                    
+
                     # ADD ELSE HERE IF NO CONDITIONS ARE MET, KICK OUT ERROR STATEMENT AND MOVE TO NEXT LINE OF LOOP
-            
+
             # get raster info from temp raster
             minx = GeoT[0]
             maxy = GeoT[3]
@@ -151,13 +151,13 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
             dst_crs = 'NAD_1983_Contiguous_USA_Albers'
 
 
-            # If final file doesn't already exists use gdal resample to resample to desired resolution and project.  
+            # If final file doesn't already exists use gdal resample to resample to desired resolution and project.
             # Also apply a mask if needed to produce final raster
             if not os.path.isfile(FinalDir + '/' + OutFile + '.tif'):
-               if UseArcpy == 'Yes': 
+               if UseArcpy == 'Yes':
                    finalras = FinalDir + '/' + OutFile + '.tif'
                    if UseStatesMask == 'No':
-                       desc = arcpy.Describe(tempras) 
+                       desc = arcpy.Describe(tempras)
                        sr = desc.spatialReference.exportToString()
                        if DataCategory == 'continuous':
                            resamp_type='BILINEAR'
@@ -167,10 +167,10 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                        arcpy.ProjectRaster_management(tempras, finalras, out_coor_system, resamp_type, ConvertRes, "", snapping_pnt)
                    if UseStatesMask == 'Yes':
                         # Execute ExtractByMask
-                       desc = arcpy.Describe(tempras) 
+                       desc = arcpy.Describe(tempras)
                        sr = desc.spatialReference.exportToString()
                        arcpy.CheckOutExtension("Spatial")
-                       arcpy.env.mask = MaskRas                        
+                       arcpy.env.mask = MaskRas
                        if DataCategory == 'continuous':
                            resamp_type='BILINEAR'
                        if DataCategory == 'categorical':
@@ -184,8 +184,8 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                         resamp_string = "gdalwarp --config GDAL_DATA " + '"C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data" ' +' -tr ' + str(ConvertRes) + ' -' + str(ConvertRes) + " -te " + bounds + " -srcnodata " + str(outNDV) +  " -dstnodata "  + str(outNDV) +  " -of GTiff -r near -t_srs " + dst_crs + " -co COMPRESS=DEFLATE -co TFW=YES -co TILED=YES -co TIFF_USE_OVR=TRUE -ot " + outDataType + " " + tempras + " " + resamp_ras
                         startTime = dt.now()
                         call(resamp_string)
-                        print "elapsed time " + str(dt.now()-startTime)  
-                
+                        print "elapsed time " + str(dt.now()-startTime)
+
         # Processes for vector features
         if FileType == 'ESRI Shapefile':
             Feat = gpd.GeoDataFrame.from_file(InDir + '/' + InFile + '.shp')
@@ -197,14 +197,14 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 # first project if needed to Albers Equal Area
                 if not Feat.crs['proj'] == 'aea':
                     Feat = Feat.to_crs(epsg=5070)
-                # gather all the values from the ShapefileFieldCalc control table 
+                # gather all the values from the ShapefileFieldCalc control table
                 f = FieldCalcTable.loc[FieldCalcTable['FileName'] == InFile]
                 JoinTable = f.loc[f['FileName'] == InFile,'JoinTable']
                 InField = f.loc[f['FileName'] == InFile,'InField']
                 OutField = f.loc[f['FileName'] == InFile,'OutField']
                 Operation = f.loc[f['FileName'] == InFile,'Operation']
                 Value = f.loc[f['FileName'] == InFile,'Value']
-        
+
                 # iterate through processes to run for each feature in the ShapfileFieldCalc control table
                 rangelist = JoinTable.index.tolist()
                 for k in rangelist:
@@ -212,7 +212,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                         lookup = dbf2DF(InDir + '/' + JoinTable[k])
                         lookup=lookup[[InField[k],'STCNTRBG']]
                         lookup.rename(columns={'STCNTRBG':'GEOID10'}, inplace=True)
-    #                    Feat = pd.merge(left=Feat,right=lookup, how='left', left_on='GEOID10', right_on='STCNTRBG')                        
+    #                    Feat = pd.merge(left=Feat,right=lookup, how='left', left_on='GEOID10', right_on='STCNTRBG')
                         Feat= Feat.merge(lookup, on='GEOID10')
                     if InField[k] == 'AREA':
                         expression= 'Feat.area * %f'%(float(Value[k]))
@@ -238,10 +238,10 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 mask = gpd.GeoDataFrame.from_file(ControlTable.DirectoryLocations[6])
                 mask = mask.loc[0].geometry # see https://michelleful.github.io/code-blog/2015/04/29/geopandas-manipulation/ for explanation - geopandas still a bit beta
                 Feat = Feat[Feat.geometry.within(mask)]
-            Feat.to_file(FinalDir + '/' + OutFile + '.shp', driver = 'ESRI Shapefile')       
+            Feat.to_file(FinalDir + '/' + OutFile + '.shp', driver = 'ESRI Shapefile')
             # Do we need to rasterize shapefile? (Right now only for census block groups)
             if Convert == 'Yes':
-                for item in ConvertFields.split(';'):   
+                for item in ConvertFields.split(';'):
                     print item
                     InShp = FinalDir + '/' + InFile + '.shp'
         #            InShp = InDir + '/' + Rast + '.shp'
@@ -252,5 +252,5 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                     ##  call() statement not working for me, use arcpy, rickD
                     arcpy.PolygonToRaster_conversion(InShp, item, OutRas, 'CELL_CENTER', "", str(ConvertRes))
                     print "elapsed time " + str(dt.now()-startTime)
-                    
+
 
