@@ -919,16 +919,8 @@ def createCatStats(
                         ]
                     )
             if len(rpuList) > 1:
-                clean = (
-                    table.groupby("VALUE")["AREA"]
-                    .nlargest(1)
-                    .reset_index()
-                    .rename(columns={0: "AREA", "level_1": "index"})
-                )
-                table = pd.merge(
-                    table.reset_index(), clean, on=["VALUE", "AREA", "index"], how="right"
-                ).set_index("index")
-                table = table.drop_duplicates(subset="VALUE")
+                table.reset_index(drop=True, inplace=True)
+                table = table.loc[table.groupby("VALUE").AREA.idxmax()]
         arcpy.CheckInExtension("spatial")
     except LicenseError:
         print("Spatial Analyst license is unavailable")
