@@ -812,7 +812,10 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
             ]
         elif "MIN" in column or "MAX" in column:
             func = np.max if "MAX" in column else np.min
-            values = np.array([func(val) for val in all_values])
+            # initial is necessary to eval empty upstream arrays
+            # these values will be overwritten w/ nan later
+            initial = -999 if "MAX" in column else 999999
+            values = np.array([func(val, initial=initial) for val in all_values])
             values[lengths == 0] = col_values[lengths == 0]
         else:
             values = np.array([np.nansum(val) for val in all_values])
