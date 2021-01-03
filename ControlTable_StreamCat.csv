@@ -1,6 +1,6 @@
 FullTableName,accum_type,MetricName,AppendMetric,LandscapeLayer,summaryfield,Final_Table_Name,MetricType,Conversion,by_RPU,use_mask,run,notes
-Ag2006HiSlp,Categorical,lookup/Ag2006HiSlp_lookup.csv,none,Ag2006HiSlp.tif,,AgMidHiSlopes,Percent,1,0,2,0,"run w/ mask, but no AppendMetric"
-Ag2006MidSlp,Categorical,lookup/Ag2006MidSlp_lookup.csv,none,Ag2006MidSlp.tif,,AgMidHiSlopes,Percent,1,0,3,0,"run w/ mask, but no AppendMetric"
+Ag2006HiSlp,Categorical,lookup/Ag2006HiSlp_lookup.csv,none,Ag2006HiSlp.tif,,AgMidHiSlopes,Percent,1,0,0,0,
+Ag2006MidSlp,Categorical,lookup/Ag2006MidSlp_lookup.csv,none,Ag2006MidSlp.tif,,AgMidHiSlopes,Percent,1,0,0,0,
 AgDrain,Categorical,lookup/AgDrain_lookup.csv,none,AgDrain_stlvl_FINAL.tif,,AgDrain,Percent,1,0,0,0,
 AgKffact,Continuous,AgKffact,none,AgKffact.tif,,Kffact,Mean,0.01,0,0,0,
 Al2O3,Continuous,Al2O3,none,al20mar14.tif,,GeoChemPhys1,Mean,1,0,0,0,
@@ -10,14 +10,14 @@ bedrock_perm,Continuous,lookup/bedrock_perm_lookup.csv,none,bedrock_perm.tif,,be
 BFI,Continuous,BFI,none,bfi48grd.tif,,BFI,Mean,1,0,0,0,
 CanalDensity,Continuous,CanalDens,none,CanalsDitches.tif,,CanalDensity,Density,0.03,0,0,0,
 CaO,Continuous,CaO,none,cao20mar14.tif,,GeoChemPhys1,Mean,1,0,0,0,
-CBNF,Continuous,CBNF,none,cbnf.tif,,AgriculturalNitrogen,Mean,1,0,1,0,
+CBNF,Continuous,CBNF,none,cbnf.tif,,AgriculturalNitrogen,Mean,1,0,0,0,
 Clay,Continuous,Clay,none,clay.tif,,STATSGO_Set1,Mean,0.01,0,0,0,
 CoalMines,Point,CoalMineDens,none,USTRAT.shp,,CoalMines,Density,1,0,0,0,
 CompStrgth,Continuous,CompStrgth,none,ucs20mar14.tif,,GeoChemPhys4,Mean,1,0,0,0,
 Dams,Point,DamDens,none,dams.shp,NIDStorM3;NrmStorM3,Dams,Density,1,0,0,0,
 Elev,Continuous,Elev,none,elev_cm,,Elevation,Mean,0.01,1,0,0,Elevation takes an extremely long time to run..by_RPU
 Fe2O3,Continuous,Fe2O3,none,fe20mar14.tif,,GeoChemPhys1,Mean,1,0,0,0,
-Fert,Continuous,Fert,none,fert.tif,,AgriculturalNitrogen,Mean,1,0,1,0,
+Fert,Continuous,Fert,none,fert.tif,,AgriculturalNitrogen,Mean,1,0,0,0,
 Fire2000,Continuous,PctFire2000,none,fire2000.tif,,FirePerimeters,Mean,100,0,0,0,
 Fire2000_RipBuf100,Continuous,PctFire2000,Rp100,fire2000.tif,,FirePerimetersRipBuf100,Mean,100,0,1,0,
 Fire2001,Continuous,PctFire2001,none,fire2001.tif,,FirePerimeters,Mean,100,0,0,0,
@@ -49,7 +49,7 @@ K2O,Continuous,K2O,none,k20mar14.tif,,GeoChemPhys1,Mean,1,0,0,0,
 Kffact,Continuous,Kffact,none,kffact.tif,,Kffact,Mean,0.01,0,0,0,used to create the pctfull on the rp100 rasters
 lith,Categorical,lookup/Lithology_lookup.csv,none,us_lithology_1km_dd83.tif,,Lithology,Percent,1,0,0,0,
 lstfrz,Continuous,LST32F,none,lstfrz.tif,,lstfrz,Mean,1,0,0,0,
-Manure,Continuous,Manure,none,manure.tif,,AgriculturalNitrogen,Mean,1,0,1,0,
+Manure,Continuous,Manure,none,manure.tif,,AgriculturalNitrogen,Mean,1,0,0,0,
 MgO,Continuous,MgO,none,mgo20mar14.tif,,GeoChemPhys1,Mean,1,0,0,0,
 Mine,Point,MineDens,none,mines.shp,,Mines,Density,1,0,0,0,
 Mine_RipBuf100,Point,MineDens,Rp100,mines_RpBuf100.shp,,MinesRipBuf100,Density,1,0,1,0,
