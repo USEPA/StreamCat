@@ -64,10 +64,10 @@ def UpcomDict(nhd, interVPUtbl, zone):
     """
     # Returns UpCOMs dictionary for accumulation process
     # Provide either path to from-to tables or completed from-to table
-    flow = dbf2DF("%s/NHDPlusAttributes/PlusFlow.dbf" % (nhd))[["TOCOMID", "FROMCOMID"]]
+    flow = dbf2DF(f"{nhd}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
     flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
     # check to see if out of zone values have FTYPE = 'Coastline'
-    fls = dbf2DF("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (nhd))
+    fls = dbf2DF(f"{nhd}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
     coastfl = fls.COMID[fls.FTYPE == "Coastline"]
     flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
     # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs here
@@ -568,20 +568,20 @@ def PointInPoly(
     summaryfield  : a list of the field/s in points feature to use for getting summary stats in polygons
     """
     polys = gpd.GeoDataFrame.from_file(inZoneData)
-    points = points.to_crs(polys.crs)
-    if len(mask_dir) > 1:
+    polys.to_crs(points.crs, inplace=True)
+    if mask_dir:
         polys = polys.drop("AreaSqKM", axis=1)
-        tblRP = dbf2DF("%s/%s.tif.vat.dbf" % (mask_dir, zone))
+        tblRP = dbf2DF(f"{mask_dir}/{zone}.tif.vat.dbf")
         tblRP["AreaSqKM"] = (tblRP.COUNT * 900) * 1e-6
         tblRP["AreaSqKM"] = tblRP["AreaSqKM"].fillna(0)
         polys = pd.merge(polys, tblRP, left_on="GRIDCODE", right_on="VALUE", how="left")
         polys.crs = {u"datum": u"NAD83", u"no_defs": True, u"proj": u"longlat"}
 
     # Get list of lat/long fields in the table
-    points["latlon_tuple"] = zip(
+    points["latlon_tuple"] = tuple(zip(
         points.geometry.map(lambda point: point.x),
         points.geometry.map(lambda point: point.y),
-    )
+    ))
     # Remove duplicate points for 'Count'
     points2 = points.drop_duplicates(
         "latlon_tuple"
@@ -604,10 +604,11 @@ def PointInPoly(
     point_poly_count = grouped[
         fld
     ].count()
+    point_poly_count.name = "COUNT"
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
-    final = final[["FEATUREID", "AreaSqKM", fld]].fillna(0)
-    cols = ["COMID", "CatAreaSqKm%s" % appendMetric, "CatCount%s" % appendMetric]
+    final = final[["FEATUREID", "AreaSqKM", "COUNT"]].fillna(0)
+    cols = ["COMID", f"CatAreaSqKm{appendMetric}", f"CatCount{appendMetric}"]
     if (
         not summaryfield == None
     ):  # Summarize fields in list with gpd table including duplicates
@@ -635,7 +636,7 @@ def PointInPoly(
                 "CatCountRp100",
                 "CatPctFullRp100",
             ]
-    final["CatPctFull%s" % appendMetric] = final["CatPctFull%s" % appendMetric].fillna(
+    final[f"CatPctFull{appendMetric}"] = final[f"CatPctFull{appendMetric}"].fillna(
         100
     )
     for name in final.columns:
@@ -799,7 +800,8 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
         if tbl_type is "Ws":
             # add identity value to each array for full watershed
             all_values = np.array(
-                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
+                dtype=object
             )
         if index is 1:
             area = all_values.copy()
@@ -810,16 +812,18 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
             ]
         elif "MIN" in column or "MAX" in column:
             func = np.max if "MAX" in column else np.min
-            values = np.array([func(val) for val in all_values])
+            # initial is necessary to eval empty upstream arrays
+            # these values will be overwritten w/ nan later
+            initial = -999 if "MAX" in column else 999999
+            values = np.array([func(val, initial=initial) for val in all_values])
             values[lengths == 0] = col_values[lengths == 0]
         else:
             values = np.array([np.nansum(val) for val in all_values])
         data[:, index] = values
     data = data[np.in1d(data[:, 0], coms), :]  # Remove the extra comids
     outDF = pd.DataFrame(data)
-    outDF.columns = np.append(
-        icol, map(lambda x: x.replace("Cat", tbl_type), cols.values)
-    )
+    prefix = "UpCat" if tbl_type == "Up" else "Ws"
+    outDF.columns = [icol] + [c.replace("Cat", prefix) for c in cols.tolist()]
     areaName = outDF.columns[outDF.columns.str.contains("Area")][0]
     # identifies that there is no area in catchment mask,
     # then NA values for everything past Area, covers upcats w. no area AND
@@ -904,27 +908,19 @@ def createCatStats(
                     ZonalStatisticsAsTable(
                         inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
                     )
-            for rpu in range(len(rpuList)):
-                if rpu == 0:
-                    table = dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu]))
+            for count, rpu in enumerate(rpuList):
+                if count == 0:
+                    table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
                 else:
                     table = pd.concat(
                         [
                             table,
-                            dbf2DF(out_dir + "/zonalstats_elev%s.dbf" % (rpuList[rpu])),
+                            dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf"),
                         ]
                     )
             if len(rpuList) > 1:
-                clean = (
-                    table.groupby("VALUE")["AREA"]
-                    .nlargest(1)
-                    .reset_index()
-                    .rename(columns={0: "AREA", "level_1": "index"})
-                )
-                table = pd.merge(
-                    table.reset_index(), clean, on=["VALUE", "AREA", "index"], how="right"
-                ).set_index("index")
-                table = table.drop_duplicates(subset="VALUE")
+                table.reset_index(drop=True, inplace=True)
+                table = table.loc[table.groupby("VALUE").AREA.idxmax()]
         arcpy.CheckInExtension("spatial")
     except LicenseError:
         print("Spatial Analyst license is unavailable")
@@ -1115,15 +1111,12 @@ def swapper(coms, upStream):
 
 ##############################################################################
 def make_all_cat_comids(nhd, inputs):
-    sys.stdout.write("Making allFLOWCOMs numpy file, reading zones...")
+    print("Making allFLOWCOMs numpy file, reading zones...", end="", flush=True)
     all_comids = np.array([], dtype=np.int32)
-    for zone in inputs:
-        sys.stdout.write(zone + ", ")
-        sys.stdout.flush()
-        hydroregion = inputs[zone]
-        pre = "%s/NHDPlus%s/NHDPlus%s" % (nhd, hydroregion, zone)
-        catchment = "%s/NHDPlusCatchment/Catchment.dbf" % pre
-        cats = dbf2DF(catchment)
+    for zone, hr in inputs.items():
+        print(zone, end=", ", flush=True)
+        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
+        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
         all_comids = np.append(all_comids, cats.FEATUREID.values.astype(int))
     np.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
     print("...done!")
@@ -1143,17 +1136,13 @@ def makeNumpyVectors(inter_tbl, nhd):
     os.mkdir("accum_npy")
     inputs = nhd_dict(nhd)
     all_comids = make_all_cat_comids(nhd, inputs)
-    print("Making numpy files in zone...")
-    for zone in inputs:
-        sys.stdout.write(zone + ", ")
-        sys.stdout.flush()
-        hydroregion = inputs[zone]
-        pre = "%s/NHDPlus%s/NHDPlus%s" % (nhd, hydroregion, zone)
-        flow = dbf2DF(("%s/NHDPlusAttributes/" "PlusFlow.dbf") % (pre))[
-            ["TOCOMID", "FROMCOMID"]
-        ]
+    print("Making numpy files in zone...", end="", flush=True)
+    for zone, hr in inputs.items():
+        print(zone, end=", ", flush=True)
+        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
+        flow = dbf2DF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
         flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
-        fls = dbf2DF("%s/NHDSnapshot/Hydrography/NHDFlowline.dbf" % (pre))
+        fls = dbf2DF(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
         coastfl = fls.COMID[fls.FTYPE == "Coastline"]
         flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
         # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs
@@ -1161,44 +1150,30 @@ def makeNumpyVectors(inter_tbl, nhd):
         flow = flow[~flow.FROMCOMID.isin(inter_tbl.removeCOMs)]
         # find values that are coming from other zones and remove the ones that
         # aren't in the interVPU table
-
         out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
-        out = out[
-            np.nonzero(out)
-        ]  # this should be what combines zones and above^, but we force connections with inter_tbl
+        out = out[np.nonzero(out)]  # this should be what combines zones and above^, but we force connections with inter_tbl
         flow = flow[~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))]
-
         # Table is ready for processing and flow connection dict can be created
-        fcom, tcom = flow.FROMCOMID.values, flow.TOCOMID.values
         flow_dict = defaultdict(list)
-        for i in range(0, len(flow), 1):
-            from_comid = fcom[i]
-            if from_comid == 0:
-                continue
-            else:
-                flow_dict[tcom[i]].append(from_comid)
+        for _, row in flow.iterrows():
+            flow_dict[row.TOCOMID].append(row.FROMCOMID)
         # add IDs from UpCOMadd column if working in ToZone, forces the flowtable connection though not there
         for interLine in inter_tbl.values:
             if interLine[6] > 0 and interLine[2] == zone:
                 flow_dict[int(interLine[6])].append(int(interLine[0]))
-
         out_of_vpus = inter_tbl.loc[
             (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
         ].thruCOMIDs.values
-        comids = list(all_comids.intersection(set(flow_dict.keys())))
-        comids = np.append(comids, out_of_vpus)  # TODO: check this out!
-        a = map(lambda x: bastards(x, flow_dict), comids)  # list of upstream lists
-        b = []
-        for i in range(len(a)):
-            if len(a[i]) == 0:
-                comids = np.delete(comids, 1)
-                continue
-            b.append(list(all_comids.intersection(a[i])))
-        lengths = np.array([len(v) for v in b])
-        upstream = np.int32(np.hstack(np.array(b)))  # Convert to 1d vector
-        assert len(b) == len(lengths) == len(comids)
+        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf").set_index("FEATUREID")
+        comids = cats.index.values
+        comids = np.append(comids, out_of_vpus)
+        # list of upstream lists, filter comids in all_comids
+        ups = [list(all_comids.intersection(bastards(x, flow_dict))) for x in comids]
+        lengths = np.array([len(u) for u in ups])
+        upstream = np.hstack(ups).astype(np.int32)  # Convert to 1d vector
+        assert len(ups) == len(lengths) == len(comids)
         np.savez_compressed(
-            "./accum_npy/accum_%s.npz" % zone,
+            f"./accum_npy/accum_{zone}.npz",
             comids=comids,
             lengths=lengths,
             upstream=upstream,
@@ -1225,7 +1200,7 @@ def nhd_dict(nhd, unit="VPU"):
     """
 
     inputs = OrderedDict()
-    bounds = dbf2DF("%s/NHDPlusGlobalData/BoundaryUnit.dbf" % nhd)
+    bounds = dbf2DF(f"{nhd}/NHDPlusGlobalData/BoundaryUnit.dbf")
     remove = bounds.loc[bounds.DRAINAGEID.isin(["HI", "CI"])].index
     bounds = bounds.drop(remove, axis=0)
     if unit == "VPU":
@@ -1242,7 +1217,7 @@ def nhd_dict(nhd, unit="VPU"):
         for _, row in rpu_bounds.iterrows():
             hr = row.DRAINAGEID
             rpu = row.UNITID
-            for root, _, _ in os.walk("%s/NHDPlus%s" % (nhd, hr)):
+            for root, _, _ in os.walk(f"{nhd}/NHDPlus{hr}"):
                 if rpu in root:
                     zone = os.path.split(os.path.split(root)[0])[0][-2:]
             if not zone in inputs.keys():
@@ -1273,7 +1248,6 @@ def findUpstreamNpy(zone, com, numpy_dir):
     itemindex = int(np.where(comids == com)[0])
     n = lengths[:itemindex].sum()
     arrlen = lengths[itemindex]
-    print("indexes (%s : %s)" % (n, n + arrlen))
     return upStream[n : n + arrlen]
 
 
