@@ -568,7 +568,7 @@ def PointInPoly(
     summaryfield  : a list of the field/s in points feature to use for getting summary stats in polygons
     """
     polys = gpd.GeoDataFrame.from_file(inZoneData)
-    polys.to_crs(points.crs, inplace=True)
+    points.to_crs(polys.crs, inplace=True)
     if mask_dir:
         polys = polys.drop("AreaSqKM", axis=1)
         tblRP = dbf2DF(f"{mask_dir}/{zone}.tif.vat.dbf")
@@ -814,7 +814,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
             func = np.max if "MAX" in column else np.min
             # initial is necessary to eval empty upstream arrays
             # these values will be overwritten w/ nan later
-            initial = -999 if "MAX" in column else 999999
+            initial = -999999 if "MAX" in column else 999999
             values = np.array([func(val, initial=initial) for val in all_values])
             values[lengths == 0] = col_values[lengths == 0]
         else:
