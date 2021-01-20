@@ -38,6 +38,7 @@ import geopandas as gpd
 from geopandas.tools import sjoin
 import fiona
 
+
 ##############################################################################
 
 
@@ -783,6 +784,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     tbl_type              : string value of table metrics to be returned
     icol                  : column in arr object to index
     """
+    np.seterr(divide='ignore')
     coms = tbl[icol].values.astype("int32")  # Read in comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
     del upstream  # a and indices are big - clean up to minimize RAM
@@ -794,15 +796,10 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     # Loop and accumulate values
     for index, column in enumerate(cols, 1):
         col_values = tbl[column].values.astype("float")
-        all_values = np.array(
-            np.split(col_values[indices], accumulated_indexes), dtype=object
-        )
+        all_values = np.split(col_values[indices], accumulated_indexes)
         if tbl_type is "Ws":
             # add identity value to each array for full watershed
-            all_values = np.array(
-                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
-                dtype=object
-            )
+            all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
         if index is 1:
             area = all_values.copy()
         if "PctFull" in column:
@@ -1086,7 +1083,7 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
     ]
 
     cat = cat.append(con)
-    return cat
+    return cat.reset_index(drop=True)
 
 
 ##############################################################################

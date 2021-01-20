@@ -153,7 +153,11 @@ for line in range(len(ctl.values)):  # loop through each FullTableName in contro
                 if zone in inter_vpu.ToZone.values:
                     cat = appendConnectors(cat, Connector, zone, inter_vpu)
                 accum = np.load("accum_npy/accum_%s.npz" % zone)
-
+                
+                cat.COMID = cat.COMID.astype(accum["comids"].dtype)
+                cat.set_index("COMID",inplace=True)
+                cat = cat.loc[accum["comids"]].reset_index().copy()                
+                
                 up = Accumulation(
                     cat, accum["comids"], accum["lengths"], accum["upstream"], "Up"
                 )
