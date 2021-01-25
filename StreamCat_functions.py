@@ -784,7 +784,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     tbl_type              : string value of table metrics to be returned
     icol                  : column in arr object to index
     """
-    np.seterr(divide='ignore')
+    np.seterr(all='ignore') # RuntimeWarning: invalid value encountered in double_scalars
     coms = tbl[icol].values.astype("int32")  # Read in comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
     del upstream  # a and indices are big - clean up to minimize RAM
