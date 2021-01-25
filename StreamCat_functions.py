@@ -817,9 +817,8 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
         data[:, index] = values
     data = data[np.in1d(data[:, 0], coms), :]  # Remove the extra comids
     outDF = pd.DataFrame(data)
-    outDF.columns = np.append(
-        icol, map(lambda x: x.replace("Cat", tbl_type), cols.values)
-    )
+    prefix = "UpCat" if tbl_type == "Up" else "Ws"
+    outDF.columns = [icol] + [c.replace("Cat", prefix) for c in cols.tolist()]
     areaName = outDF.columns[outDF.columns.str.contains("Area")][0]
     # identifies that there is no area in catchment mask,
     # then NA values for everything past Area, covers upcats w. no area AND
