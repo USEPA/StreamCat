@@ -31,8 +31,9 @@ def run_checks(metrics, final=False):
             assert t1.columns.sort_values().tolist() == t2.columns.sort_values().tolist()
             tot = pd.merge(t1, t2, left_on=t1.index, right_on=t2.index)
             for col in t1.columns:
-                tot["diff"] = abs(tot[f"{col}_x"] - tot[f"{col}_y"])
-                assert len(tot.loc[tot["diff"] > 0.0000001]) == 0
+                if not "StorM3" in col: # N/A values won't compare in Dams summaryfields
+                    tot["diff"] = abs(tot[f"{col}_x"] - tot[f"{col}_y"])
+                    assert len(tot.loc[tot["diff"] > 0.0000001]) == 0
             print("good!")
 
 metrics = ["nlcd2001_RipBuf100", "Dams", "CBNF"]
