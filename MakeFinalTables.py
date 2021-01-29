@@ -40,7 +40,6 @@ ctl = pd.read_csv("ControlTable_StreamCat.csv") # TODO move CONTROL_TABLE to con
 
 inputs = np.load("accum_npy/vpu_inputs.npy", allow_pickle=True).item()
 
-tables = dict()
 runners = ctl.query("run == 1").groupby("Final_Table_Name")
 tables = runners["FullTableName"].unique().to_dict()
 # check that all accumulated files are present
