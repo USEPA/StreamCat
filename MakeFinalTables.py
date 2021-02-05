@@ -66,8 +66,11 @@ states_dict = np.load(str(states_lookup),
 STATES_DIR = FINAL_DIR.parents[0] / "States"
 if not FINAL_DIR.exists():
     FINAL_DIR.mkdir(parents=True)
+if not (FINAL_DIR / "zips").exists():
     (FINAL_DIR / "zips").mkdir()
+if not STATES_DIR.exists():
     STATES_DIR.mkdir()
+if not (STATES_DIR / "zips").exists():
     (STATES_DIR / "zips").mkdir()
 
 region_fn = "{}_Region{}.csv"
