@@ -58,6 +58,9 @@ To your environment directory which should look something like:
 
 + C:/Users/mweber/AppData/Local/Continuum/anaconda3/envs/StreamCat/Lib/site-packages
 
+You will also need to install dateutils:
+  + conda install -c anaconda python-dateutil
+
 Note that the exact paths may vary depending on the version of ArcGIS and Anaconda you have installed and the configuration of your computer
 
 ## How to Run Scripts
