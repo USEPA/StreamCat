@@ -15,7 +15,7 @@ import math
 import zipfile
 import numpy as np
 import pandas as pd
-from pathlib2 import Path
+from pathlib import Path
 
 from stream_cat_config import OUT_DIR, LENGTHS, FINAL_DIR
 
@@ -38,9 +38,8 @@ OUT_DIR = Path(OUT_DIR) # TODO: change this in the config
 FINAL_DIR = Path(FINAL_DIR) # TODO: change this in the config
 ctl = pd.read_csv("ControlTable_StreamCat.csv") # TODO move CONTROL_TABLE to config
 
-inputs = np.load("accum_npy/vpu_inputs.npy").item()
+inputs = np.load("accum_npy/vpu_inputs.npy", allow_pickle=True).item()
 
-tables = dict()
 runners = ctl.query("run == 1").groupby("Final_Table_Name")
 tables = runners["FullTableName"].unique().to_dict()
 # check that all accumulated files are present
@@ -55,23 +54,29 @@ for table, metrics in tables.items(): # make sure all tables exist
 
 if len(missing) > 0:
     for miss in missing:
-        print("Missing {}".format(miss.name))
-    print "Check output from StreamCat.py"
+        print(f"Missing {miss.name}")
+    print("Check output from StreamCat.py")
     sys.exit()
 
 states_lookup = Path("state_dict.npz")
-states_dict = np.load(str(states_lookup))["data"].item()
+states_dict = np.load(str(states_lookup),
+                      allow_pickle=True,
+                      encoding="latin1")["data"].item()
 
 STATES_DIR = FINAL_DIR.parents[0] / "States"
 if not FINAL_DIR.exists():
     FINAL_DIR.mkdir(parents=True)
+if not (FINAL_DIR / "zips").exists():
     (FINAL_DIR / "zips").mkdir()
+if not STATES_DIR.exists():
     STATES_DIR.mkdir()
+if not (STATES_DIR / "zips").exists():
+    (STATES_DIR / "zips").mkdir()
 
 region_fn = "{}_Region{}.csv"
 for table, metrics in tables.items():
 
-    print("Running {} .....into {}".format(table, FINAL_DIR))
+    print(f"Running {table} .....into {FINAL_DIR}")
     # this will print stats for every final table, used for metadata
     stats = dict()
     # Looop through NHD Hydro-regions
@@ -243,39 +248,5 @@ for table, metrics in tables.items():
     print(table)
 
     for stat in stats:
-        print stat + " " + str(stats[stat])
-    print "All Done....."
-
-###########################
-#table = "RoadStreamCrossings"
-#aa = []
-#for f in os.listdir(str(REDO_DIR)):
-#    s = f.split("_Region")[0]
-#    if not s in aa:
-#        aa.append(f.split("_Region")[0])
-#FINAL_DIR = Path("L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions")
-#for table in tables:
-#for table in aa[49:-1]:
-#    print(table)
-#    for vpu in inputs:
-#        print(vpu)
-#        orig = pd.read_csv(FINAL_DIR / region_fn.format(table,vpu))
-#        new = pd.read_csv(REDO_DIR / region_fn.format(table,vpu))
-#        if not orig.equals(new):
-#            print(table, vpu, orig.equals(new))
-
-#for col in orig.columns:
-#    print(col, (orig[col] == new[col]).all())
-#    if not (orig[col] == new[col]).all():
-#        break
-#
-#qq = pd.merge(orig[["COMID", col]], new[["COMID", col]],
-#              on="COMID", suffixes=("_orig", "_new"))
-
-
-#for state in states_dict:
-#
-#    f = fn.format(table, state)
-#    orig = pd.read_csv(STATES_DIR / f)
-#    new = pd.read_csv(REDO_STATES / f)
-#    print(table, state, orig.equals(new))
+        print (stat + " " + str(stats[stat]))
+    print("All Done.....")
