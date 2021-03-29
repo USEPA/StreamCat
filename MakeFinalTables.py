@@ -40,7 +40,6 @@ ctl = pd.read_csv("ControlTable_StreamCat.csv") # TODO move CONTROL_TABLE to con
 
 inputs = np.load("accum_npy/vpu_inputs.npy", allow_pickle=True).item()
 
-tables = dict()
 runners = ctl.query("run == 1").groupby("Final_Table_Name")
 tables = runners["FullTableName"].unique().to_dict()
 # check that all accumulated files are present
@@ -67,8 +66,11 @@ states_dict = np.load(str(states_lookup),
 STATES_DIR = FINAL_DIR.parents[0] / "States"
 if not FINAL_DIR.exists():
     FINAL_DIR.mkdir(parents=True)
+if not (FINAL_DIR / "zips").exists():
     (FINAL_DIR / "zips").mkdir()
+if not STATES_DIR.exists():
     STATES_DIR.mkdir()
+if not (STATES_DIR / "zips").exists():
     (STATES_DIR / "zips").mkdir()
 
 region_fn = "{}_Region{}.csv"
