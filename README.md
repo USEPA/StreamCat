@@ -27,7 +27,7 @@ If you are using Anaconda, creating a new, clean 'StreamCat' environment with th
   + conda env create mweber36/StreamCat
   
 * Alternatively, using the streamcat.yml file in this repository, in your conda shell cd to the directory where your streamcat.yml file is located and run:
-  + conda env create -f streamcat_py3.yml
+  + conda env create -f StreamCat.yml
   
 * To build environment yourself, we [followed the steps suggest here](https://www.e-education.psu.edu/geog489/node/2348) which are:
   + conda create -n StreamCat -c conda-forge python=3.7 anaconda gdal=3.1.4 vs2015_runtime=14.28.29325 numpy=1.19.5 jupyter pandas geopandas matplotlib cartopy beautifulsoup4 shapely rpy2=3.4.1 simplegeneric r-raster=3.4_5 r-dismo=1.3_3 r-maptools pyproj=2.6.1.post1 rasterio
@@ -95,4 +95,3 @@ Final text in Conda shell should resemble this: python C:\some_path\StreamCat.py
 
 ## EPA Disclaimer
 The United States Environmental Protection Agency (EPA) GitHub project code is provided on an "as is" basis and the user assumes responsibility for its use.  EPA has relinquished control of the information and no longer has responsibility to protect the integrity , confidentiality, or availability of the information.  Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA.  The EPA seal and logo shall not be used in any manner to imply endorsement of any commercial product or activity by EPA or the United States Government.
-
