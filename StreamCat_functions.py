@@ -17,8 +17,6 @@
  Date: October 2015
 """
 
-import arcpy
-from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 import os, sys
 
 import numpy as np
@@ -37,6 +35,10 @@ if rasterio.__version__[0] == "1":
 import geopandas as gpd
 from geopandas.tools import sjoin
 import fiona
+os.environ["PATH"] = r"{};{}".format(os.environ["PATH"], r"C:\Program Files\ArcGIS\Pro\bin")
+sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
+import arcpy
+from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 
 
 ##############################################################################
