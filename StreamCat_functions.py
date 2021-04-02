@@ -898,25 +898,51 @@ def createCatStats(
         if by_RPU == 1:
             hydrodir = "/".join(inZoneData.split("/")[:-2]) + "/NEDSnapshot"
             rpuList = []
-            for subdirs in os.listdir(hydrodir):
-                elev = "%s/%s/elev_cm" % (hydrodir, subdirs)
-                rpuList.append(subdirs[-3:])
-                print("working on " + elev)
-                outTable = out_dir + "/DBF_stash/zonalstats_elev%s.dbf" % (subdirs[-3:])
-                if not os.path.exists(outTable):
-                    ZonalStatisticsAsTable(
-                        inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
-                    )
-            for count, rpu in enumerate(rpuList):
-                if count == 0:
-                    table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
-                else:
-                    table = pd.concat(
-                        [
-                            table,
-                            dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf"),
-                        ]
-                    )
+            if LandscapeLayer.split('/')[-1] == 'elev_cm':
+                for subdirs in os.listdir(hydrodir):
+                    elev = "%s/%s/elev_cm" % (hydrodir, subdirs)
+                    rpuList.append(subdirs[-3:])
+                    print("working on " + elev)
+                    outTable = out_dir + "/DBF_stash/zonalstats_elev%s.dbf" % (subdirs[-3:])
+                    if not os.path.exists(outTable):
+                        ZonalStatisticsAsTable(
+                            inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
+                        )
+                for count, rpu in enumerate(rpuList):
+                    if count == 0:
+                        table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
+                    else:
+                        table = pd.concat(
+                            [
+                                table,
+                                dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf"),
+                            ]
+                        )
+            if LandscapeLayer.split('/')[-1] == 'slope':
+                for subdirs in os.listdir(hydrodir):
+                    slope = "%s/%s/slope_perc" % (hydrodir, subdirs)
+                    rpuList.append(subdirs[-3:])
+                    print("working on " + slope)
+                    if not os.path.exists(slope):
+                        elev = "%s/%s/elev_cm" % (hydrodir, subdirs)
+                        out_raster = arcpy.sa.Slope(elev, "PERCENT_RISE", 0.01, "PLANAR", "METER")
+                        out_raster.save(slope)
+
+                    outTable = out_dir + "/DBF_stash/zonalstats_slope%s.dbf" % (subdirs[-3:])
+                    if not os.path.exists(outTable):
+                        ZonalStatisticsAsTable(
+                            inZoneData, "VALUE", slope, outTable, "DATA", "ALL"
+                        )    
+                for count, rpu in enumerate(rpuList):
+                    if count == 0:
+                        table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_slope{rpu}.dbf")
+                    else:
+                        table = pd.concat(
+                            [
+                                table,
+                                dbf2DF(f"{out_dir}/DBF_stash/zonalstats_slope{rpu}.dbf"),
+                            ]
+                        )
             if len(rpuList) > 1:
                 table.reset_index(drop=True, inplace=True)
                 table = table.loc[table.groupby("VALUE").AREA.idxmax()]
