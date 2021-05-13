@@ -212,8 +212,8 @@ nlcd2016_RipBuf100,Categorical,lookup/NLCD2016_lookup.csv,Rp100,NLCD_2016_Land_C
 PctNonAgIntrodManagVeg,Continuous,PctNonAgIntrodManagVeg,none,IntrodManagVeg.tif,,NonAgIntrodManagVeg,Mean,100,0,0,0,
 PctNonAgIntrodManagVeg_RipBuf100,Continuous,PctNonAgIntrodManagVeg,Rp100,IntrodManagVegRipBuf100.tif,,NonAgIntrodManagVegRipBuf100,Mean,100,0,1,0,
 Irrgation_Pct_Onag,Continuous,Irrgation_Pct_Onag,none,irr_perc_onag.tif,,none,Mean,1,0,0,0,
-N_rmv,Continuous,N_rmv,none,N_Remv_onag.tif,,none,Mean,1,0,0,0,
-N_Urb_Fert,Continuous,N_Urb_Fert,none,N_Fert_onurb.tif,,none,Mean,1,0,0,0,
+N_rmv,Continuous,N_rmv,none,N_Remv_onag.tif,,none,Mean,1,0,0,0,run -> nani_nsurp_finalTables.py / not a published metric
+N_Urb_Fert,Continuous,N_Urb_Fert,none,N_Fert_onurb.tif,,none,Mean,1,0,0,0,run -> nani_nsurp_finalTables.py / not a published metric
 PADUS,Categorical,lookup/GAP_Status_lookup.csv,none,gap_sts.tif,,PADUS,Percent,1,0,0,0,
 Pestic97,Continuous,Pestic97,none,pestic.tif,,Pestic97,Mean,1,0,0,0,
 pmax,Continuous,PMAX,none,pmax_usgs.tif,,pmax,Mean,1,0,0,0,
