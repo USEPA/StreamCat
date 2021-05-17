@@ -38,7 +38,7 @@ If you are using Anaconda, creating a new, clean 'StreamCat' environment with th
 
 * 
 * To open Spyder, type the following at the conda prompt
-  + activate Streamcat
+  + activate StreamCat
   
   Then
 
