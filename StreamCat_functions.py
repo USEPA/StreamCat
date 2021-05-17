@@ -918,7 +918,7 @@ def createCatStats(
                                 dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf"),
                             ]
                         )
-            if LandscapeLayer.split('/')[-1] == 'slope':
+            if LandscapeLayer.split('/')[-1] == 'slope_perc':
                 for subdirs in os.listdir(hydrodir):
                     slope = "%s/%s/slope_perc" % (hydrodir, subdirs)
                     rpuList.append(subdirs[-3:])
