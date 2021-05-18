@@ -297,3 +297,4 @@ WWTPMinor,Point,WWTPMinorDens,none,WWTP_Minor_CWA_Active_2013_CONUS.shp,,WWTP,De
 Precip_Minus_EVT,Continuous,Precip_Minus_EVT,none,USAavgPeriod_pptSurp_1994to2016.tif,,Precip_Minus_EVT,Mean,1,0,0,0,
 RockN,Continuous,RockN,none,RockN_USA_USGSproj_1km_kgkm2.tif,,RockN,Mean,1,0,0,0,
 sw_flux,Continuous,sw_flux,none,TN_load_px.tif,,sw_flux,Mean,1,0,0,0,
+Solar_apr2007,Continuous,Solar_apr2007,none,Solar_apr2007,,solar,Mean,1,0,0,1,
