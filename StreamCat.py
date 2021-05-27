@@ -102,30 +102,30 @@ for _, row in ctl.query("run == 1").iterrows():
     Connector = f"{OUT_DIR}/{row.FullTableName}_connectors.csv"
     catTime = dt.now()
     for zone, hydroregion in INPUTS.items():
-    #     if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
-    #         pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
-    #         if not row.accum_type == "Point":
-    #             izd = f"{mask_dir}/{zone}.tif" if mask_dir else f"{pre}/NHDPlusCatchment/cat"
-    #             cat = createCatStats(
-    #                 row.accum_type,
-    #                 LL,
-    #                 izd,
-    #                 OUT_DIR,
-    #                 zone,
-    #                 row.by_RPU,
-    #                 mask_dir,
-    #                 NHD_DIR,
-    #                 hydroregion,
-    #                 apm,
-    #             )
-    #         if row.accum_type == "Point":
-    #             izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
-    #             cat = PointInPoly(
-    #                 points, zone, izd, pct_full, mask_dir, apm, summaryfield
-    #             )
-    #         cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
-    #         in2accum = len(cat.columns)
-    # print("Cat Results Complete in : " + str(dt.now() - catTime))
+        if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
+            pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
+            if not row.accum_type == "Point":
+                izd = f"{mask_dir}/{zone}.tif" if mask_dir else f"{pre}/NHDPlusCatchment/cat"
+                cat = createCatStats(
+                    row.accum_type,
+                    LL,
+                    izd,
+                    OUT_DIR,
+                    zone,
+                    row.by_RPU,
+                    mask_dir,
+                    NHD_DIR,
+                    hydroregion,
+                    apm,
+                )
+            if row.accum_type == "Point":
+                izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
+                cat = PointInPoly(
+                    points, zone, izd, pct_full, mask_dir, apm, summaryfield
+                )
+            cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+            in2accum = len(cat.columns)
+    print("Cat Results Complete in : " + str(dt.now() - catTime))
     try:
         # if in2accum not defined...Cat process done,but error thrown in accum
         in2accum
