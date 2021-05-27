@@ -801,7 +801,13 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
         all_values = np.split(col_values[indices], accumulated_indexes)
         if tbl_type is "Ws":
             # add identity value to each array for full watershed
-            all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+            all_values = np.array(
+                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
+                dtype=object
+            )
+
+            # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+
         if index is 1:
             area = all_values.copy()
         if "PctFull" in column:
@@ -813,7 +819,11 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
             func = np.max if "MAX" in column else np.min
             # initial is necessary to eval empty upstream arrays
             # these values will be overwritten w/ nan later
+
+            # initial = -999 if "MAX" in column else 999999
+
             initial = -999999 if "MAX" in column else 999999
+
             values = np.array([func(val, initial=initial) for val in all_values])
             values[lengths == 0] = col_values[lengths == 0]
         else:
