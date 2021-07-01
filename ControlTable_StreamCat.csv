@@ -329,3 +329,16 @@ PRISM_TMEAN_201206,Continuous,PRISM_TMEAN_201206,none,PRISM_tmean_stable_4kmM3_2
 PRISM_TMEAN_201207,Continuous,PRISM_TMEAN_201207,none,PRISM_tmean_stable_4kmM3_201207_bil.tif,,PRISM_TMEAN,Mean,1,0,0,0,,No
 PRISM_TMEAN_201208,Continuous,PRISM_TMEAN_201208,none,PRISM_tmean_stable_4kmM3_201208_bil.tif,,PRISM_TMEAN,Mean,1,0,0,0,,No
 PRISM_TMEAN_201209,Continuous,PRISM_TMEAN_201209,none,PRISM_tmean_stable_4kmM3_201209_bil.tif,,PRISM_TMEAN,Mean,1,0,0,0,,No
+SOLAR_APR2007,Continuous,SOLAR_APR2007,none,Solar_apr2007,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_MAY2007,Continuous,SOLAR_MAY2007,none,Solar_may2007,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_JUN2007,Continuous,SOLAR_JUN2007,none,Solar_jun2007,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_JUL2007,Continuous,SOLAR_JUL2007,none,Solar_jul2007,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_AUG2007,Continuous,SOLAR_AUG2007,none,Solar_aug2007,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_SEP2007,Continuous,SOLAR_SEP2007,none,Solar_sep2007,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_OCT2007,Continuous,SOLAR_OCT2007,none,Solar_oct2007,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_APR2012,Continuous,SOLAR_APR2012,none,Solar_apr2012,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_MAY2012,Continuous,SOLAR_MAY2012,none,Solar_may2012,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_JUN2012,Continuous,SOLAR_JUN2012,none,Solar_jun2012,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_JUL2012,Continuous,SOLAR_JUL2012,none,Solar_jul2012,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_AUG2012,Continuous,SOLAR_AUG2012,none,Solar_aug2012,,SOLAR,Mean,1,0,0,1,,No
+SOLAR_SEP2012,Continuous,SOLAR_SEP2012,none,Solar_sep2012,,SOLAR,Mean,1,0,0,1,,No

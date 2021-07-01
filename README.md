@@ -4,7 +4,7 @@
 The StreamCat Dataset (http://www2.epa.gov/national-aquatic-resource-surveys/streamcat) provides summaries of natural and anthropogenic landscape features for ~2.65 million streams, and their associated catchments, within the conterminous USA. This repo contains code used in StreamCat to process a suite of landscape rasters to watersheds for streams and their associated catchments (local reach contributing area) within the conterminous USA using the [NHDPlus Version 2](http://www.horizon-systems.com/NHDPlus/NHDPlusV2_data.php) as the geospatial framework.
 
 ## Necessary Python Packages and Installation Tips
-The scripts for StreamCat rely on several python modules a user will need to install such as numpy, pandas, gdal, fiona, rasterio, geopandas, shapely, pysal, and ArcPy with an ESRI license (minimal steps still using ArcPy).  We highly recommend using a scientific python distribution such as [Anaconda](https://www.continuum.io/downloads) or [Enthought Canopy](https://www.enthought.com/products/canopy/).  We used the conda package manager to install necessary python modules. Note that package configurations and dependencies are sensitive and can change - in particular, setting up an environment with a working version of both `geopandas` and `arcpy` can be challenging. Our working version of the conda environment is contained in the StreamCat.yml file in the repository, and our essential packages and versions when code was last used are listed below - note that other configurations may work, we simply have verified this particular combination (Windows 64 and Python 3.7.10):
+The scripts for StreamCat rely on several python modules a user will need to install such as numpy, gdal, rasterio, geopandas, shapely and ArcPy with an ESRI license (minimal steps still using ArcPy).  We highly recommend using a scientific python distribution such as [Anaconda](https://www.continuum.io/downloads) or [Enthought Canopy](https://www.enthought.com/products/canopy/).  We used the conda package manager to install necessary python modules. Note that package configurations and dependencies are sensitive and can change - in particular, setting up an environment with a working version of both `geopandas` and `arcpy` can be challenging. Our working version of the conda environment is contained in the StreamCat.yml file in the repository, and our essential packages and versions when code was last used are listed below - note that other configurations may work, we simply have verified this particular combination (Windows 64 and Python 3.7.10):
 
 | Package       | Version       | 
 | ------------- |--------------:|
@@ -12,11 +12,11 @@ The scripts for StreamCat rely on several python modules a user will need to ins
 | fiona         | 1.8.18        | 
 | gdal          | 3.1.4=py37    | 
 | geopandas     | 0.9.0         |  
-| geos          | 3.8.1         |
+| geos          | 3.9.1         |
 | libgdal       | 3.1.4         |
 | numpy         | 1.19.5        |
-| pandas        | 1.2.3         |
-| pyproj        | 2.6.1         |
+| pandas        | 1.2.5         |
+| pyproj        | 3.1.0         |
 | rasterio      | 1.2.1=py37    |
 | shapely       | 1.7.1         |
 
@@ -30,7 +30,7 @@ If you are using Anaconda, creating a new, clean 'StreamCat' environment with th
   + conda env create -f StreamCat.yml
   
 * To build environment yourself, we [followed the steps suggest here](https://www.e-education.psu.edu/geog489/node/2348) which are:
-  + conda create -n StreamCat -c conda-forge python=3.7 anaconda gdal=3.1.4 vs2015_runtime=14.28.29325 numpy=1.19.5 jupyter pandas geopandas matplotlib cartopy beautifulsoup4 shapely rpy2=3.4.1 simplegeneric r-raster=3.4_5 r-dismo=1.3_3 r-maptools pyproj=2.6.1.post1 rasterio
+  + conda create -n StreamCat -c conda-forge python=3.7 anaconda gdal=3.1.4  jupyter pandas geopandas matplotlib cartopy shapely rasterio numpy=1.19.5 spyder
 
 * Activate the new environment:
 
@@ -50,11 +50,22 @@ Finally, to use arcpy in this new environment, you will need to copy several Arc
 
 + C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/Lib/site-packages/arcpy_wmx
 
-+ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/Lib/site-packages/Gapy
++ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/Lib/site-packages/gapy
+
++ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/Lib/site-packages/bapy
 
 To your environment directory which should look something like:
 
 + C:/Users/mweber/AppData/Local/Continuum/anaconda3/envs/StreamCat/Lib/site-packages
+
+In order to use `arcpy`, at the python command prompt or in your script, you need to run:
+
++ import os,sys
++ # these next two lines assume your Pro installation is in the default location
+# if it is not amend those paths to point to where it really is e.g. c:\ArcGIS\Pro\bin etc.
++ os.environ["PATH"] = r"{};{}".format(os.environ["PATH"], r"C:\Program Files\ArcGIS\Pro\bin")
++ sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
++ import arcpy
 
 Note that the exact paths may vary depending on the version of ArcGIS and Anaconda you have installed and the configuration of your computer
 
