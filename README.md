@@ -61,8 +61,6 @@ To your environment directory which should look something like:
 In order to use `arcpy`, at the python command prompt or in your script, you need to run:
 
 + import os,sys
-+ # these next two lines assume your Pro installation is in the default location
-# if it is not amend those paths to point to where it really is e.g. c:\ArcGIS\Pro\bin etc.
 + os.environ["PATH"] = r"{};{}".format(os.environ["PATH"], r"C:\Program Files\ArcGIS\Pro\bin")
 + sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
 + import arcpy
