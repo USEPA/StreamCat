@@ -205,10 +205,9 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
     gt = src_ds.GetGeoTransform()
     rb = src_ds.GetRasterBand(1)
     df = pd.DataFrame(columns=(fieldname, "RasterVal"))
-    i = 0
     ds = ogr.Open(shapefile)
     lyr = ds.GetLayer()
-
+    data = []
     for feat in lyr:
         geom = feat.GetGeometryRef()
         name = feat.GetField(fieldname)
@@ -222,9 +221,9 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
         intval = rb.ReadAsArray(px, py, 1, 1)
         if intval == no_data:
             intval = -9999
-        df.set_value(i, fieldname, name)
-        df.set_value(i, "RasterVal", float(intval))
-        i += 1
+        data.append((name, float(intval)))
+
+    df = pd.DataFrame(data, columns=(fieldname, "RasterVal"))
     return df
 
 
