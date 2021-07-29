@@ -1,0 +1,8 @@
+raster_val,final_val
+VALUE_0,NoFire
+VALUE_1,Underburned to Low Burn Severity
+VALUE_2,Low Burn Severity
+VALUE_3,Moderate Burn Severity
+VALUE_4,High Burn Severity
+VALUE_5,Increased Greenness and Veg Response
+VALUE_6,Non Processing Mask
