@@ -1,0 +1,69 @@
+---
+title: "API QA for StreamCat"
+author: "Marc Weber"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    theme: yeti
+    highlighted: default 
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+      number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Introduction to StreamCatTools}
+  %\VignetteEncoding{UTF-8}{inputenc}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+```{r setup, include=FALSE, message=FALSE}
+# requires devtools to install
+# install.packages('devtools')
+library(devtools)
+
+# install from repository
+# install_github('USEPA/StreamCatTools')
+library(StreamCatTools)
+library(sf)
+library(nhdplusTools)
+library(readr)
+library(mapview)
+library(dplyr)
+library(knitr)
+library(readr)
+library(purrr)
+library(tidyr)
+library(ggplot2)
+library(jsonlite)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error=FALSE,
+                      comment = "#>",
+                      fig.height = 7,
+                      fig.width = 7)
+sessionInfo()
+```
+
+
+
+## QA StreamCat API
+
+### Select Metric
+Pull data into R from the [StreamCat API](http://v26267mcpk506/StreamCat/v1/stable/metrics/about.jsp) by simply using `read_csv` function from the `readr` package for selected metric and hydrogrion. This grabs data from the database via the API. Compare result with original StreamCat .csv files.
+```{r, message=FALSE, comment=FALSE,error=FALSE}
+df_API <- read_csv("http://v26267mcpk506/StreamCat/v1/stable/metrics?name=fert&areaOfInterest=watershed&region=region01")
+df_csv <- read_csv("O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions/AgriculturalNitrogen_Region01.csv")
+df_API$FERTWS_Orig <- df_csv$FertWs[match(df_API$COMID,df_csv$COMID)]
+```
+
+### Plot
+```{r, message=FALSE, comment=FALSE,error=FALSE}
+options(scipen=3)
+p <- ggplot(df_API, aes(FERTWS, FERTWS_Orig))
+p + geom_point()
+```
