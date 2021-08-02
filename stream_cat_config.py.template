@@ -21,13 +21,13 @@ OUT_DIR = ('C:/path/to/write/out/files/to')
 FINAL_DIR = "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/Hydroregions"
 
 # below are the directories that hold the mask rasters by VPU
-mask_dir_RP100	= "D:/Projects/Masks/RipBuf100"
-mask_dir_Slp10	= "D:/Projects/Masks/midslope"
-mask_dir_Slp20	= "D:/Projects/Masks/highslope"
+MASK_DIR_RP100		= "D:/Projects/Masks/RipBuf100"
+MASK_DIR_SLP10		= "D:/Projects/Masks/midslope"
+MASK_DIR_SLP20		= "D:/Projects/Masks/highslope"
 
 # files that hold the pct_full data, created from ???
-pct_full_file	= "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/ALL_BORDER_CATS.csv"
-pct_full_file_RP100 = "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/ALL_BORDER_CATS_Rp100.csv"
+PCT_FULL_FILE 	= "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/ALL_BORDER_CATS.csv"
+PCT_FULL_FILE_RP100  = "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/ALL_BORDER_CATS_Rp100.csv"
 
 #final_tables_dir	L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/FTP_Staging/StreamCat/HydroRegions
 
