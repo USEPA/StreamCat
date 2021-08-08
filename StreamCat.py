@@ -65,11 +65,11 @@ def run_stream_cat():
 
         apm = "" if row.AppendMetric == "none" else row.AppendMetric
         if row.use_mask == 1:
-            mask_dir = mask_dir_RP100
+            mask_dir = MASK_DIR_RP100
         elif row.use_mask == 2:
-            mask_dir = mask_dir_Slp10
+            mask_dir = MASK_DIR_SLP10
         elif row.use_mask == 3:
-            mask_dir = mask_dir_Slp20
+            mask_dir = MASK_DIR_SLP20
         else:
             mask_dir = ""
         LL = f"{LYR_DIR}/{row.LandscapeLayer}"
