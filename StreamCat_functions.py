@@ -38,9 +38,7 @@ import fiona
 import geopandas as gpd
 from geopandas.tools import sjoin
 
-os.environ["PATH"] = r"{};{}".format(
-    os.environ["PATH"], r"C:\Program Files\ArcGIS\Pro\bin"
-)
+os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
 sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
 import arcpy
 from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
