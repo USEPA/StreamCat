@@ -1,10 +1,8 @@
-
-
 # location of the landscape layers to perform statistics on
-LYR_DIR = 'C:/path/to/landscape/layers'
+LYR_DIR = "C:/path/to/landscape/layers"
 
 # location of the NHDPlus, indicate the top-level directory
-NHD_DIR = 'D:/NHDPlusV21'
+NHD_DIR = "D:/NHDPlusV21"
 
 # TIGER shapefile is needed for calculaitng the PctFUll values of Point type
 # metrics as well as organizing the final tables into separate files for states.
@@ -15,44 +13,46 @@ STATES_FILE = "path/to/file/tl_2008_us_state.shp"
 #   $Cat -> statistics for each catchment
 #   $UpCat -> the accumulated upstream catchment statistics
 #   $Ws -> statistics for the entire watershed
-OUT_DIR = ('C:/path/to/write/out/files/to')
+OUT_DIR = "C:/path/to/write/out/files/to"
 
 # location for the  final tables
-FINAL_DIR = "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/Hydroregions"
+FINAL_DIR = (
+    "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/Hydroregions"
+)
 
 # below are the directories that hold the mask rasters by VPU
-MASK_DIR_RP100		= "D:/Projects/Masks/RipBuf100"
-MASK_DIR_SLP10		= "D:/Projects/Masks/midslope"
-MASK_DIR_SLP20		= "D:/Projects/Masks/highslope"
+MASK_DIR_RP100 = "D:/Projects/Masks/RipBuf100"
+MASK_DIR_SLP10 = "D:/Projects/Masks/midslope"
+MASK_DIR_SLP20 = "D:/Projects/Masks/highslope"
 
 # files that hold the pct_full data, created from ???
-PCT_FULL_FILE 	= "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/ALL_BORDER_CATS.csv"
-PCT_FULL_FILE_RP100  = "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/ALL_BORDER_CATS_Rp100.csv"
+PCT_FULL_FILE = "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/ALL_BORDER_CATS.csv"
+PCT_FULL_FILE_RP100 = "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/ControlTables/ALL_BORDER_CATS_Rp100.csv"
 
-#final_tables_dir	L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/FTP_Staging/StreamCat/HydroRegions
+# final_tables_dir	L:/Priv/CORFiles/Geospatial_Library/Data/Project/StreamCat/FTP_Staging/StreamCat/HydroRegions
 
 # these are the evaluated lengths of each VPU table when finished.
 
-LENGTHS ={
-    '01': 65968,
-    '02': 126185,
-    '03N': 132903,
-    '03S': 55586,
-    '03W': 135522,
-    '04': 105452,
-    '05': 170145,
-    '06': 57642,
-    '07': 183667,
-    '08': 151544,
-    '09': 29776,
-    '10L': 196552,
-    '10U': 256645,
-    '11': 204120,
-    '12': 68127,
-    '13': 56220,
-    '14': 83084,
-    '15': 100243,
-    '16': 95143,
-    '17': 231698,
-    '18': 140835
+LENGTHS = {
+    "01": 65968,
+    "02": 126185,
+    "03N": 132903,
+    "03S": 55586,
+    "03W": 135522,
+    "04": 105452,
+    "05": 170145,
+    "06": 57642,
+    "07": 183667,
+    "08": 151544,
+    "09": 29776,
+    "10L": 196552,
+    "10U": 256645,
+    "11": 204120,
+    "12": 68127,
+    "13": 56220,
+    "14": 83084,
+    "15": 100243,
+    "16": 95143,
+    "17": 231698,
+    "18": 140835,
 }

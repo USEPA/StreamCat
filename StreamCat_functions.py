@@ -17,29 +17,31 @@
  Date: October 2015
 """
 
-import os, sys
+import os
+import sys
+import time
+from collections import OrderedDict, defaultdict, deque
 
 import numpy as np
 import pandas as pd
-from datetime import datetime
-from osgeo import gdal, osr, ogr
-from collections import deque, defaultdict, OrderedDict
-from gdalconst import *
 import rasterio
+from gdalconst import *
+from osgeo import gdal, ogr, osr
 from rasterio import transform
 
 if rasterio.__version__[0] == "0":
-    from rasterio.warp import calculate_default_transform, reproject, RESAMPLING
+    from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
 if rasterio.__version__[0] == "1":
     from rasterio.warp import calculate_default_transform, reproject, Resampling
+
+import fiona
 import geopandas as gpd
 from geopandas.tools import sjoin
-import fiona
-os.environ["PATH"] = r"{};{}".format(os.environ["PATH"], r"C:\Program Files\ArcGIS\Pro\bin")
+
+os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
 sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
 import arcpy
 from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
-
 
 ##############################################################################
 
@@ -272,16 +274,18 @@ def Reclass(inras, outras, reclass_dict, dtype=None):
             for idx, window in windows:
                 src_data = src.read(1, window=window)
                 # Convert values
-                #                    src_data = np.where(src_data == in_nodata, nd, src_data).astype(dtype)
+                # src_data = np.where(src_data == in_nodata, nd, src_data).astype(dtype)
                 for inval, outval in reclass_dict.iteritems():
                     if np.isnan(outval).any():
-                        #                        src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
-                        src_data = np.where(src_data == inval, nd, src_data).astype(dtype)
+                        # src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
+                        src_data = np.where(src_data == inval, nd, src_data).astype(
+                            dtype
+                        )
                     else:
                         src_data = np.where(src_data == inval, outval, src_data).astype(
                             dtype
                         )
-                #                    src_data = np.where(src_data == inval, outval, src_data)
+                # src_data = np.where(src_data == inval, outval, src_data)
                 dst_data = src_data
                 dst.write_band(1, dst_data, window=window)
 
@@ -528,7 +532,10 @@ def ProjectResamp(inras, outras, out_proj, resamp_type, out_res):
                             src_transform=src.affine,
                             src_crs=src.crs,
                             dst_transform=transform.from_origin(
-                                affine[2], affine[5], dist.transform[0], dst.transform[0]
+                                affine[2],
+                                affine[5],
+                                dist.transform[0],
+                                dst.transform[0],
                             ),
                             dst_crs=dst_crs,
                             resampling=RESAMPLING.bilinear,
@@ -577,35 +584,27 @@ def PointInPoly(
         tblRP["AreaSqKM"] = (tblRP.COUNT * 900) * 1e-6
         tblRP["AreaSqKM"] = tblRP["AreaSqKM"].fillna(0)
         polys = pd.merge(polys, tblRP, left_on="GRIDCODE", right_on="VALUE", how="left")
-        polys.crs = {u"datum": u"NAD83", u"no_defs": True, u"proj": u"longlat"}
+        polys.crs = {"datum": "NAD83", "no_defs": True, "proj": "longlat"}
 
     # Get list of lat/long fields in the table
-    points["latlon_tuple"] = tuple(zip(
-        points.geometry.map(lambda point: point.x),
-        points.geometry.map(lambda point: point.y),
-    ))
-    # Remove duplicate points for 'Count'
-    points2 = points.drop_duplicates(
-        "latlon_tuple"
-    )
-    try:
-        point_poly_join = sjoin(
-            points2, polys, how="left", op="within"
-        )  # point_poly_join.loc[point_poly_join.FEATUREID > 1]
-        fld = (
-            "GRIDCODE"
+    points["latlon_tuple"] = tuple(
+        zip(
+            points.geometry.map(lambda point: point.x),
+            points.geometry.map(lambda point: point.y),
         )
+    )
+    # Remove duplicate points for 'Count'
+    points2 = points.drop_duplicates("latlon_tuple")
+    try:
+        point_poly_join = sjoin(points2, polys, how="left", op="within")
+        fld = "GRIDCODE"
     except:
         polys["link"] = np.nan
-        point_poly_join = (
-            polys
-        )
+        point_poly_join = polys
         fld = "link"
     # Create group of all points in catchment
     grouped = point_poly_join.groupby("FEATUREID")
-    point_poly_count = grouped[
-        fld
-    ].count()
+    point_poly_count = grouped[fld].count()
     point_poly_count.name = "COUNT"
     # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
     final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
@@ -638,9 +637,7 @@ def PointInPoly(
                 "CatCountRp100",
                 "CatPctFullRp100",
             ]
-    final[f"CatPctFull{appendMetric}"] = final[f"CatPctFull{appendMetric}"].fillna(
-        100
-    )
+    final[f"CatPctFull{appendMetric}"] = final[f"CatPctFull{appendMetric}"].fillna(100)
     for name in final.columns:
         if "AreaSqKm" in name:
             area = name
@@ -711,8 +708,9 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     interVPUtbl = interVPUtbl.loc[interVPUtbl.FromZone.values == zone]
     throughVPUs.columns = cols
 
-    # COMIDs in the toCOMID column need to swap values with COMIDs in other zones, those COMIDS are then sorted in toVPUS
-    if any(interVPUtbl.toCOMIDs.values > 0):  # [x for x in interVPUtbl.toCOMIDs if x > 0]
+    # COMIDs in the toCOMID column need to swap values with COMIDs in other
+    # zones, those COMIDS are then sorted in toVPUS
+    if any(interVPUtbl.toCOMIDs.values > 0):
         interAlloc = "%s_%s.csv" % (
             Connector[: Connector.find("_connectors")],
             interVPUtbl.ToZone.values[0],
@@ -727,11 +725,7 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
             AdjustCOMs(throughVPUs, int(row.AdjustComs), int(row.thruCOMIDs), None)
         if row.DropCOMID > 0:
             throughVPUs = throughVPUs.drop(int(row.DropCOMID))
-    if any(
-        interVPUtbl.toCOMIDs.values > 0
-    ):  # if COMIDs came from other zone append to Connector table
-
-        #!!!! This format assumes that the Connector table has already been made by the time it gets to these COMIDs!!!!!
+    if any(interVPUtbl.toCOMIDs.values > 0):
         con = pd.read_csv(Connector).set_index("COMID")
         con.columns = map(str, con.columns)
         toVPUs = toVPUs.append(con)
@@ -785,7 +779,8 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     tbl_type              : string value of table metrics to be returned
     icol                  : column in arr object to index
     """
-    np.seterr(all='ignore') # RuntimeWarning: invalid value encountered in double_scalars
+    # RuntimeWarning: invalid value encountered in double_scalars
+    np.seterr(all="ignore")
     coms = tbl[icol].values.astype("int32")  # Read in comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
     del upstream  # a and indices are big - clean up to minimize RAM
@@ -802,7 +797,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
             # add identity value to each array for full watershed
             all_values = np.array(
                 [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
-                dtype=object
+                dtype=object,
             )
 
             # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
@@ -873,10 +868,6 @@ def createCatStats(
     """
 
     try:
-        if arcpy.CheckExtension("spatial") == "Available":
-            arcpy.CheckOutExtension("spatial")
-        else:
-            raise LicenseError
         arcpy.env.cellSize = "30"
         arcpy.env.snapRaster = inZoneData
         if by_RPU == 0:
@@ -903,7 +894,13 @@ def createCatStats(
                     ZonalStatisticsAsTable(
                         inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
                     )
-            table = dbf2DF(outTable)
+            try:
+                table = dbf2DF(outTable)
+            except fiona.errors.DriverError as e:
+                # arc occassionally doesn't release the file and fails here
+                print(e, "\n\n!EXCEPTION CAUGHT! TRYING AGAIN!")
+                time.sleep(4)
+                table = dbf2DF(outTable)
         if by_RPU == 1:
             hydrodir = "/".join(inZoneData.split("/")[:-2]) + "/NEDSnapshot"
             rpuList = []
@@ -929,21 +926,23 @@ def createCatStats(
             if len(rpuList) > 1:
                 table.reset_index(drop=True, inplace=True)
                 table = table.loc[table.groupby("VALUE").AREA.idxmax()]
-        arcpy.CheckInExtension("spatial")
     except LicenseError:
         print("Spatial Analyst license is unavailable")
     except arcpy.ExecuteError:
+        print("Failing at the ExecuteError!")
         print(arcpy.GetMessages(2))
 
     if mask_dir:
         nhdtbl = dbf2DF(
-            "%s/NHDPlus%s/NHDPlus%s/NHDPlusCatchment/Catchment.dbf"
-            % (NHD_dir, hydroregion, zone)
+            f"{NHD_dir}/NHDPlus{hydroregion}/NHDPlus{zone}"
+            "/NHDPlusCatchment/Catchment.dbf"
         ).loc[:, ["FEATUREID", "AREASQKM", "GRIDCODE"]]
         tbl = dbf2DF(outTable)
         if accum_type == "Categorical":
             tbl = chkColumnLength(tbl, LandscapeLayer)
-        tbl2 = dbf2DF("%s/%s.tif.vat.dbf" % (mask_dir, zone))
+        # We need to use the raster attribute table here for PctFull & Area
+        # TODO: this needs to be considered when making masks!!!
+        tbl2 = dbf2DF(f"{mask_dir}/{zone}.tif.vat.dbf")
         tbl2 = (
             pd.merge(tbl2, nhdtbl, how="right", left_on="VALUE", right_on="GRIDCODE")
             .fillna(0)
@@ -990,6 +989,7 @@ def createCatStats(
                 + ["PctFull%s" % appendMetric]
             )
     else:
+        # TODO: `table` here is referenced as `tbl` above -- confusing
         if accum_type == "Continuous":
             if by_RPU == 1:
                 table = table[["VALUE", "AREA", "COUNT", "SUM", "MIN", "MAX"]]
@@ -1002,7 +1002,9 @@ def createCatStats(
         nhdTable = dbf2DF(inZoneData[:-3] + "Catchment.dbf").loc[
             :, ["FEATUREID", "AREASQKM", "GRIDCODE"]
         ]
-        nhdTable = nhdTable.rename(columns={"FEATUREID": "COMID", "AREASQKM": "AreaSqKm"})
+        nhdTable = nhdTable.rename(
+            columns={"FEATUREID": "COMID", "AREASQKM": "AreaSqKm"}
+        )
         result = pd.merge(
             nhdTable, table, how="left", left_on="GRIDCODE", right_on="VALUE"
         )
@@ -1025,42 +1027,83 @@ def createCatStats(
     return result  # ALL NAs need to be filled w/ zero here for Accumulation!!
 
 
-##############################################################################
-
-
-def chkColumnLength(table, LandscapeLayer):
+def get_rat_vals(raster):
     """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Ryan Hill <hill.ryan@epa.gov>"
+    Build the raster attribute table and extract distinct values. Assume that
+    it has only one band.
+
+    WARNING!: this has only been used with GEOTIFF and ERDAS IMAGINE (IMG)
+    formatted rasters, results may vary with other formats.
+
+    Parameters
+    ---------
+    raster : str
+        Absolute path to raster
+
+    Returns
+    ---------
+    list
+        Integer values that exist in the raster with `Opacity > 0`
+    """
+    ds = gdal.Open(raster)
+    rb = ds.GetRasterBand(1)
+    rat = rb.GetDefaultRAT()
+    df = pd.DataFrame.from_dict(
+        {rat.GetNameOfCol(i): rat.ReadAsArray(i) for i in range(rat.GetColumnCount())}
+    )
+    ds = None
+    return df.loc[(df.Opacity > 0) & (df.Histogram > 0)].index.tolist()
+
+
+def chkColumnLength(table, landscape_layer):
+    """
     Checks the number of columns returned from zonal stats and adds any of the
     categorical values that that didn't exist within the zone and fills the
     column with zeros so that all categories will be represented in the table.
 
-    Arguments
+    Need ALL categorical values from the dbf associated with the
+    landscape_layer to retain all values every table, even when a given value
+    doesn't exist in a given VPU (vector processing unit).
+
+    Output from the stats dbf headers follows the form:
+        | VALUE | VALUE_11 | VALUE_12 | VALUE_21 | VALUE_22 | VALUE_23 |
+
+    The VALUE w/o any int is the one that holds the COMID.
+
+    TODO: this should really be split out into two parts, the lanscape_layer
+    TODO: raster vals only need to be read in once and can then be checked
+    TODO: against the output TabulateArea to find if all vals exist, then,
+    TODO: if not, we can insert the empty columns where needed.
+
+    Parameters
     ---------
-    table                 : Results table of catchment summarizations
-    LandscapeLayer        : string to file holding the table of inter VPU COMIDs
+    table : pd.DataFrame
+        Results table of catchment summarizations - from arc dbf
+    landscape_layer : str
+        string to file that statistics are being read from
+
+    Returns
+    ---------
+    pd.DataFrame
+        if any missing VALUEs from landscape_layer else
     """
-    # Get ALL categorical values from the dbf associated with the raster to retain all values
-    # in the raster in every table, even when a given value doesn't exist in a given hydroregion
-    AllCols = dbf2DF(LandscapeLayer + ".vat.dbf").VALUE.tolist()
-    col_list = table.columns.tolist()
-    col_list.sort()
-
-    col_list.sort(key=len)  # table.columns
-    table = table[col_list]
-    if len(AllCols) != len(col_list[1:]):
-        AllCols = ["VALUE_" + str(x) for x in AllCols]
-        diff = list(set(AllCols) - set(col_list[1:]))
-        diff.sort()
-        diff.sort(key=len)
-        for spot in diff:
-            here = AllCols.index(spot) + 1
-            table.insert(here, spot, 0)
+    rat_file = f"{landscape_layer}.vat.dbf"
+    if not os.path.exists(rat_file):
+        # build RAT with GDAL
+        rat_cols = get_rat_vals(landscape_layer)
+    else:
+        rat_cols = dbf2DF(rat_file).VALUE.tolist()
+    tbl_cols = table.columns.tolist()
+    tbl_cols.sort(key=len)  # sort() is done in place on a list -- returns None
+    table, val_cols = table[tbl_cols], tbl_cols[1:]
+    rat_cols = [f"VALUE_{x}" for x in rat_cols]  # align ints w/ strs
+    missing = list(set(rat_cols).difference(set(tbl_cols)))
+    if missing:
+        missing.sort(key=len)
+        for col in missing:
+            idx = rat_cols.index(col)
+            table.insert(idx + 1, col, 0)  # add 1 to shift for VALUE
     return table
-
-
-##############################################################################
 
 
 def appendConnectors(cat, Connector, zone, interVPUtbl):
@@ -1086,7 +1129,9 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
                 interVPUtbl.loc[interVPUtbl.ToZone.values == zone].thruCOMIDs.values,
                 interVPUtbl.loc[interVPUtbl.ToZone.values == zone].toCOMIDs.values[
                     np.nonzero(
-                        interVPUtbl.loc[interVPUtbl.ToZone.values == zone].toCOMIDs.values
+                        interVPUtbl.loc[
+                            interVPUtbl.ToZone.values == zone
+                        ].toCOMIDs.values
                     )
                 ],
             )
@@ -1159,8 +1204,12 @@ def makeNumpyVectors(inter_tbl, nhd):
         # find values that are coming from other zones and remove the ones that
         # aren't in the interVPU table
         out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
-        out = out[np.nonzero(out)]  # this should be what combines zones and above^, but we force connections with inter_tbl
-        flow = flow[~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))]
+        out = out[
+            np.nonzero(out)
+        ]  # this should be what combines zones and above^, but we force connections with inter_tbl
+        flow = flow[
+            ~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))
+        ]
         # Table is ready for processing and flow connection dict can be created
         flow_dict = defaultdict(list)
         for _, row in flow.iterrows():

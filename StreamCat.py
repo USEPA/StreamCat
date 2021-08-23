@@ -31,10 +31,10 @@ import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-
 from stream_cat_config import (LYR_DIR, MASK_DIR_RP100, MASK_DIR_SLP10,
                                MASK_DIR_SLP20, NHD_DIR, OUT_DIR, PCT_FULL_FILE,
                                PCT_FULL_FILE_RP100)
+
 from StreamCat_functions import (Accumulation, PointInPoly, appendConnectors,
                                  createCatStats, interVPU, makeNumpyVectors,
                                  nhd_dict)
@@ -132,6 +132,7 @@ def run_stream_cat():
                 already_processed.append(row.FullTableName)
                 break
             print(zone, end=", ", flush=True)
+
             if zone in inter_vpu.ToZone.values:
                 cat = appendConnectors(cat, Connector, zone, inter_vpu)
             accum = np.load(f"accum_npy/accum_{zone}.npz")
@@ -169,8 +170,8 @@ def run_stream_cat():
             "\n!!!Processing Problem!!!\n\n"
             f"{', '.join(already_processed)} already run!\n"
             "Be sure to delete the associated files in your `OUTDIR` to rerun:"
-            f"\n\t> {OUT_DIR}\n\n"
-            f"!!! `$OUT_DIR/DBF_stash/*` output used in 'Continuous' and 'Categorical' metrics!!!"
+            f"\n\t> {OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
+            f"output used in 'Continuous' and 'Categorical' metrics!!!"
         )
 
 
