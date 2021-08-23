@@ -29,28 +29,30 @@
 # TODO: create function like findUpstreamNPY for up and ws
 
 import os
+from datetime import datetime as dt
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-from datetime import datetime as dt
+
 from stream_cat_config import (
     LYR_DIR,
+    MASK_DIR_RP100,
+    MASK_DIR_SLP10,
+    MASK_DIR_SLP20,
     NHD_DIR,
     OUT_DIR,
-    mask_dir_RP100,
-    mask_dir_Slp10,
-    mask_dir_Slp20,
-    pct_full_file,
-    pct_full_file_RP100,
+    PCT_FULL_FILE,
+    PCT_FULL_FILE_RP100,
 )
 from StreamCat_functions import (
     Accumulation,
+    PointInPoly,
     appendConnectors,
     createCatStats,
     interVPU,
     makeNumpyVectors,
     nhd_dict,
-    PointInPoly,
 )
 
 # Load table of layers to be run...
@@ -69,20 +71,18 @@ if not os.path.exists("accum_npy"):
     # TODO: work out children OR bastards only
     makeNumpyVectors(inter_vpu, NHD_DIR)
 
-INPUTS = np.load(
-    "accum_npy/vpu_inputs.npy", allow_pickle=True
-).item()
+INPUTS = np.load("accum_npy/vpu_inputs.npy", allow_pickle=True).item()
 
 for _, row in ctl.query("run == 1").iterrows():
 
     print("running: " + row.FullTableName)
     apm = "" if row.AppendMetric == "none" else row.AppendMetric
     if row.use_mask == 1:
-        mask_dir = mask_dir_RP100
+        mask_dir = MASK_DIR_RP100
     elif row.use_mask == 2:
-        mask_dir = mask_dir_Slp10
+        mask_dir = MASK_DIR_SLP10
     elif row.use_mask == 3:
-        mask_dir = mask_dir_Slp20
+        mask_dir = MASK_DIR_SLP20
     else:
         mask_dir = ""
     LL = f"{LYR_DIR}/{row.LandscapeLayer}"
@@ -91,9 +91,9 @@ for _, row in ctl.query("run == 1").iterrows():
         summaryfield = row.summaryfield.split(";")
     if row.accum_type == "Point":  # Load in point geopandas table and Pct_Full table
         if row.use_mask == 0:  # TODO: script to create this pct_full_file
-            pct_full_file = pct_full_file
+            pct_full_file = PCT_FULL_FILE
         if row.use_mask == 1:
-            pct_full_file = pct_full_file_RP100
+            pct_full_file = PCT_FULL_FILE_RP100
         pct_full = pd.read_csv(pct_full_file)
         points = gpd.GeoDataFrame.from_file(LL)
     if not os.path.exists(OUT_DIR + "/DBF_stash"):
@@ -105,7 +105,11 @@ for _, row in ctl.query("run == 1").iterrows():
         if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
             pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
             if not row.accum_type == "Point":
-                izd = f"{mask_dir}/{zone}.tif" if mask_dir else f"{pre}/NHDPlusCatchment/cat"
+                izd = (
+                    f"{mask_dir}/{zone}.tif"
+                    if mask_dir
+                    else f"{pre}/NHDPlusCatchment/cat"
+                )
                 cat = createCatStats(
                     row.accum_type,
                     LL,
@@ -140,11 +144,11 @@ for _, row in ctl.query("run == 1").iterrows():
             if zone in inter_vpu.ToZone.values:
                 cat = appendConnectors(cat, Connector, zone, inter_vpu)
             accum = np.load(f"accum_npy/accum_{zone}.npz")
-            
+
             cat.COMID = cat.COMID.astype(accum["comids"].dtype)
-            cat.set_index("COMID",inplace=True)
-            cat = cat.loc[accum["comids"]].reset_index().copy()                
-            
+            cat.set_index("COMID", inplace=True)
+            cat = cat.loc[accum["comids"]].reset_index().copy()
+
             up = Accumulation(
                 cat, accum["comids"], accum["lengths"], accum["upstream"], "Up"
             )
