@@ -1099,6 +1099,7 @@ def chkColumnLength(table, landscape_layer):
     rat_cols = [f"VALUE_{x}" for x in rat_cols]  # align ints w/ strs
     missing = list(set(rat_cols).difference(set(tbl_cols)))
     if missing:
+        missing.sort()
         missing.sort(key=len)
         for col in missing:
             idx = rat_cols.index(col)
