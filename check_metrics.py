@@ -42,10 +42,21 @@ check_file_error = (
 )
 @click.argument("metric", nargs=-1)
 def compare(debug, metric, final, precision):
-    """Check output values from another run of StreamCat with the
-    base run.
+    """Assert that values from another run of StreamCat align with
+    the base run that we have on th O: drive. It is imperative that 
+    the 'OUT_DIR` or `FINAL_DIR` paths in `stream_cat_config.py` 
+    point to a place other than where our data is on the O:
 
-        `compare nlcd2006 Clay Dams`
+    \b
+    assertions:
+        * column names match
+        * table lengths match
+        * COMIDs are equivalent
+        * equality across columns w/in `precision`
+
+    example:
+
+        `$ python check_metrics.py compare nlcd2006 Clay Dams`
     """
 
     check_dir = P(FINAL_DIR) if final else P(OUT_DIR)
