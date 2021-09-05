@@ -1,11 +1,4 @@
-#!/usr/bin/env python
 """
- Script to call StreamCat functions script and run allocation and
- accumulation of landscape metrics to NHDPlus catchments.  Assumes
- landscape rasters in desired projection with appropriate
- pre-processing to deal with any reclassing of values or recoding
- of NA, and directories of NHDPlusV2 data installed in standard
- directory format.
           __                                       __
     _____/ /_________  ____  ____ ___  _________ _/ /_
    / ___/ __/ ___/ _ \/ __ `/ __ `__ \/ ___/ __ `/ __/
@@ -16,13 +9,9 @@
            Ryan Hill<hill.ryan@epa.gov>,
            Darren Thornbrugh<thornbrugh.darren@epa.gov>,
            Rick Debbout<debbout.rick@epa.gov>,
-           and Tad Larsen<laresn.tad@epa.gov>
+           Tad Larsen<laresn.tad@epa.gov>
 
  Date: November 29, 2015
-
- NOTE: Navigate to the directory and run script:
- > python StreamCat.py
- --------------------------------------------------------
 """
 
 import os
@@ -32,21 +21,52 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from stream_cat_config import (LYR_DIR, MASK_DIR_RP100, MASK_DIR_SLP10,
-                               MASK_DIR_SLP20, NHD_DIR, OUT_DIR, PCT_FULL_FILE,
-                               PCT_FULL_FILE_RP100)
-
-from StreamCat_functions import (Accumulation, PointInPoly, appendConnectors,
-                                 createCatStats, interVPU, makeNumpyVectors,
-                                 nhd_dict)
+from stream_cat_config import (
+    LYR_DIR,
+    MASK_DIR_RP100,
+    MASK_DIR_SLP10,
+    MASK_DIR_SLP20,
+    NHD_DIR,
+    OUT_DIR,
+    PCT_FULL_FILE,
+    PCT_FULL_FILE_RP100,
+)
+from StreamCat_functions import (
+    Accumulation,
+    PointInPoly,
+    appendConnectors,
+    createCatStats,
+    interVPU,
+    makeNumpyVectors,
+    nhd_dict,
+)
 
 
 @click.command()
-def run_stream_cat():
-    """Process Landscape Layers through NHDPlusV21 framework"""
+@click.option(
+    "-c",
+    "--control",
+    show_default=True,
+    help="alternate control table CSV",
+    default="ControlTable_StreamCat.csv",
+)
+def run_stream_cat(control):
+    """Process landscape layers through NHDPlusV21 framework with
+    control CSV using the `run` column to determine processing layers.
+    Assumes landscape layer in desired projection with appropriate
+    pre-processing to deal with any reclassing of values or recoding of
+    NA, and directories of NHDPlusV2 data installed in standard directory
+    format.
+
+    \b
+    examples:
+        * `$ python StreamCat.py -c alt.csv`
+        * `$ python StreamCat.py -c rel/path/alt.csv`
+        * `$ python StreamCat.py -c /abs/path/alt.csv`
+    """
 
     # Load table of layers to be run...
-    ctl = pd.read_csv("ControlTable_StreamCat.csv")
+    ctl = pd.read_csv(control)
 
     # Load table of inter vpu connections
     inter_vpu = pd.read_csv("InterVPU.csv")
