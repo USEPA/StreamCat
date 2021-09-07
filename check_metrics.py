@@ -40,8 +40,8 @@ check_file_error = (
     is_flag=True,
     help="check against final tables, default is alloc/accum",
 )
-@click.argument("metric", nargs=-1)
-def compare(debug, metric, final, precision):
+@click.argument("metrics", nargs=-1)
+def compare(debug, metrics, final, precision):
     """Assert that values from another run of StreamCat align with
     the base run that we have on th O: drive. It is imperative that 
     the 'OUT_DIR` or `FINAL_DIR` paths in `stream_cat_config.py` 
@@ -68,11 +68,11 @@ def compare(debug, metric, final, precision):
                 "FINAL_DIR" if final else "OUT_DIR", check_dir))
         exit()
     INPUTS = np.load("accum_npy/vpu_inputs.npy", allow_pickle=True).item()
-    for m in metric:
-        print("Checking --", m)
+    for metric in metrics:
+        print("Checking --", metric)
         for zone in INPUTS:
             und = "" if final else "_"
-            fn = f"{m}{und}{zone}.csv"
+            fn = f"{metric}{und}{zone}.csv"
             if not (check_dir / fn).exists():
                 click.echo(check_file_error.format(fn, OUT_DIR))
                 exit()
