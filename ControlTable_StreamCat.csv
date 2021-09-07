@@ -6,11 +6,11 @@ CBNF,Continuous,CBNF,none,cbnf.tif,,AgriculturalNitrogen,Mean,1.0,0,0,0,,Yes
 Fert,Continuous,Fert,none,fert.tif,,AgriculturalNitrogen,Mean,1.0,0,0,0,,Yes
 Manure,Continuous,Manure,none,manure.tif,,AgriculturalNitrogen,Mean,1.0,0,0,0,,Yes
 Aquifers,Categorical,lookup/Aquifer_Table_lookup.csv,none,us_aquifers_two.tif,,Aquifers,Percent,1.0,0,0,0,,No
-bdh,Continuous,BDH,none,bdh.tif,,BDH,Mean,1.0,0,0,0,,
+bdh,Continuous,BDH,none,bdh.tif,,BDH,Mean,1.0,0,0,1,,
 bedrock_perm,Continuous,lookup/bedrock_perm_lookup.csv,none,bedrock_perm.tif,,bedrock_perm,Mean,1.0,0,0,0,,No
 BFI,Continuous,BFI,none,bfi.tif,,BFI,Mean,1.0,0,0,0,,Yes
 CanalDensity,Continuous,CanalDens,none,CanalsDitches.tif,,CanalDensity,Density,0.03,0,0,0,,Yes
-CoalMines,Point,CoalMineDens,none,USTRAT.shp,,CoalMines,Density,1.0,0,0,0,,Yes
+CoalMines,Point,CoalMineDens,none,USTRAT.shp,,CoalMines,Density,1.0,0,0,1,,Yes
 Phos_Ag_Balance,Continuous,Phos_Ag_Balance,none,Phos_Ag_Balance.tif,,Compton_Phos_Inputs,Mean,1.0,0,0,0,,No
 Phos_Crop_Uptake,Continuous,Phos_Crop_Uptake,none,Phos_Crop_Uptake.tif,,Compton_Phos_Inputs,Mean,1.0,0,0,0,,No
 Phos_Fert,Continuous,Phos_Fert,none,Phos_Fert.tif,,Compton_Phos_Inputs,Mean,1.0,0,0,0,,No
@@ -71,7 +71,7 @@ SiO2,Continuous,SiO2,none,si20mar14.tif,,GeoChemPhys1,Mean,1.0,0,0,0,,Yes
 N,Continuous,N,none,n20mar14.tif,,GeoChemPhys2,Mean,1.0,0,0,0,,Yes
 HydrlCond,Continuous,HydrlCond,none,perm20mar14.tif,,GeoChemPhys3,Mean,1.0,0,0,0,,Yes
 CompStrgth,Continuous,CompStrgth,none,ucs20mar14.tif,,GeoChemPhys4,Mean,1.0,0,0,0,,Yes
-geol_reedbush,Categorical,lookup/geol_reedbush_lookup.csv,none,geol_reedbush.tif,,geol_reedbush,Percent,1.0,0,0,0,,
+geol_reedbush,Categorical,lookup/geol_reedbush_lookup.csv,none,geol_reedbush.tif,,geol_reedbush,Percent,1.0,0,0,1,,
 PctImp2001,Continuous,PctImp2001,none,nlcd_2001_impervious_l48_20210604.tif,,ImperviousSurfaces,Mean,1.0,0,0,0,,Yes
 PctImp2001_HiSlp,Continuous,PctImp2001,Slp20,nlcd_2001_impervious_l48_20210604.tif,,ImperviousSurfacesHiSlope,Mean,1.0,0,3,0,,Yes
 PctImp2001_MidSlp,Continuous,PctImp2001,Slp10,nlcd_2001_impervious_l48_20210604.tif,,ImperviousSurfacesMidSlope,Mean,1.0,0,2,0,,Yes
