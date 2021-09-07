@@ -97,6 +97,8 @@ def run_stream_cat(control):
         else:
             mask_dir = ""
         summaryfield = None
+        layer = row.LandscapeLayer if os.sep in row.LandscapeLayer else (
+                f"{LYR_DIR}/{row.LandscapeLayer}") # use abspath
         # TODO: this could be just `if row.summaryfield:`???
         if type(row.summaryfield) == str:
             summaryfield = row.summaryfield.split(";")
@@ -106,7 +108,7 @@ def run_stream_cat(control):
             pct_full = pd.read_csv(
                 PCT_FULL_FILE if row.use_mask == 0 else PCT_FULL_FILE_RP100
             )
-            points = gpd.read_file(f"{LYR_DIR}/{row.LandscapeLayer}")
+            points = gpd.read_file(layer)
         # File string to store InterVPUs needed for adjustments
         Connector = f"{OUT_DIR}/{row.FullTableName}_connectors.csv"
         print(
@@ -126,7 +128,7 @@ def run_stream_cat(control):
                     )
                     cat = createCatStats(
                         row.accum_type,
-                        f"{LYR_DIR}/{row.LandscapeLayer}",
+                        layer,
                         izd,
                         OUT_DIR,
                         zone,
