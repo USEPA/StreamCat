@@ -38,6 +38,7 @@ def main():
 if __name__ =='__main__':
     main()
 
+# i don't know what i'm doing!
 
 #vpus = r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\StreamCat\FTP_Staging\StreamCat\HydroRegions'
 #states = r'L:\Priv\CORFiles\Geospatial_Library\Data\Project\StreamCat\FTP_Staging\StreamCat\States'
