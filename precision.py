@@ -72,9 +72,9 @@ def gather_stats(final):
             stats = build_stats(tbl, stats)
         print("done!")
         if not os.path.exists("stats.txt"):
-            with open("stats.txt", "w") as fifi:
+            with open("allocation_stats.txt", "w") as fifi:
                 pass
-        with open("stats.txt", 'a') as fifi:
+        with open("allocation_stats.txt", 'a') as fifi:
             fifi.write(f"{AST*49}\n")
             fifi.write(f"!{metric:=^{47}}!\n")
             fifi.write(f"{AST*49}\n")                                                                                                                                             
