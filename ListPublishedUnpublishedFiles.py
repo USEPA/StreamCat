@@ -1,14 +1,20 @@
 import os
-from ftplib import FTP
 
 import pandas as pd
+import requests
+import urllib3
+from bs4 import BeautifulSoup
 
-ftp = FTP("newftp.epa.gov")
-ftp.login()
-ftp.cwd("/EPADataCommons/ORD/NHDPlusLandscapeAttributes/StreamCat/HydroRegions/")
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+r = requests.get(
+    "https://gaftp.epa.gov/epadatacommons/ORD"
+    "/NHDPlusLandscapeAttributes/StreamCat/HydroRegions/",
+    verify=False,
+)
+soup = BeautifulSoup(r.text, features="lxml")
 
-published = ftp.nlst()
+published = [link.get("href") for link in soup.find_all("a")[5:]]
 
 local_list = os.listdir(
     "O:/PRIV/CPHEA/PESD/COR/CORFiles/"
@@ -30,8 +36,8 @@ control["Published"] = control.Final_Table_Name.isin(local_published).map(
 
 # not sure of the best way to deal with this? we could add a list of metrics
 # that we know we don't want published to this script and check against that?
-newly_published = orig.loc[orig.compare(control).index, "Final_Table_Name"]
-if not newly_published.empty:
+newly_published = orig.loc[orig.compare(control).index, "Final_Table_Name"].unique()
+if newly_published.any():
     print(
         "The following metrics have been recently published in StreamCat:\n\t->",
         ", ".join(newly_published.tolist()),
@@ -42,13 +48,20 @@ if not newly_published.empty:
     except PermissionError as e:
         print(f"You may have {control_file} open in Excel?\n", e)
 
-# move over to LakeCat directory for published zips
-ftp.cwd("/EPADataCommons/ORD/NHDPlusLandscapeAttributes/LakeCat/FinalTables/")
+# check what is published in LakeCat
+r = requests.get(
+    "https://gaftp.epa.gov/epadatacommons/ORD"
+    "/NHDPlusLandscapeAttributes/LakeCat/FinalTables/",
+    verify=False,
+)
+soup = BeautifulSoup(r.text, features="lxml")
+
+published_lkcat = [link.get("href") for link in soup.find_all("a")[5:]]
 
 # assuming that LakeCat repo is in same parent folder as StreamCat
 lk_control = pd.read_csv("../LakeCat/ControlTable_LakeCat.csv")
 
-lake_cat_ftp = [x.split(".zip")[0] for x in ftp.nlst() if x.endswith(".zip")]
+lake_cat_ftp = [x.split(".zip")[0] for x in published_lkcat if x.endswith(".zip")]
 # find zips that are published in StreamCat but not in LakeCat
 # remove mask metrics with `.str.contains` -- NO MASKS IN LKCAT
 lkcat_unpublished = (
