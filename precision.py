@@ -6,6 +6,8 @@ from pathlib import Path as P
 
 
 def longest_decimal(col):
+    if col.dtype.kind == "i":
+        return 0
     return col.astype(str).str.split(".", expand=True)[1].str.len().max()
 
 
@@ -36,11 +38,18 @@ def build_stats(tbl, stats):
 
 @click.command()
 @click.option(
-    "--final", "-f",
+    "--allocation", "-a",
     default=False,
     show_default=True,
     is_flag=True,
-    help="check against final tables, default is alloc/accum",
+    help="check against allocation tables, default is final",
+)
+@click.option(
+    "--out", "-o",
+    default=False,
+    show_default=True,
+    is_flag=True,
+    help="check against allocation tables, default is final",
 )
 def gather_stats(final):
     """Create stats for tables produced in StreamCat.
@@ -71,14 +80,14 @@ def gather_stats(final):
             tbl = pd.read_csv(alloc_dir / fn).set_index("COMID")
             stats = build_stats(tbl, stats)
         print("done!")
-        if not os.path.exists("stats.txt"):
+        if not os.path.exists("allocation_stats.txt"):
             with open("allocation_stats.txt", "w") as fifi:
                 pass
         with open("allocation_stats.txt", 'a') as fifi:
             fifi.write(f"{AST*49}\n")
             fifi.write(f"!{metric:=^{47}}!\n")
-            fifi.write(f"{AST*49}\n")                                                                                                                                             
-            for key, value in stats.items():  
+            fifi.write(f"{AST*49}\n")
+            for key, value in stats.items():
                 fifi.write(f"@ {key}\n")
                 for k, v in value.items():
                     fifi.write(f"\t- {k}: {v}\n")
@@ -87,3 +96,4 @@ def gather_stats(final):
 if __name__ == "__main__":
 
     gather_stats()
+
