@@ -37,8 +37,8 @@ from StreamCat_functions import (
     appendConnectors,
     createCatStats,
     interVPU,
-    mask_points,
     makeNumpyVectors,
+    mask_points,
     nhd_dict,
 )
 
@@ -97,8 +97,11 @@ def run_stream_cat(control):
             mask_dir = MASK_DIR_SLP20
         else:
             mask_dir = ""
-        layer = row.LandscapeLayer if os.sep in row.LandscapeLayer else (
-                f"{LYR_DIR}/{row.LandscapeLayer}") # use abspath
+        layer = (
+            row.LandscapeLayer
+            if os.sep in row.LandscapeLayer
+            else (f"{LYR_DIR}/{row.LandscapeLayer}")
+        )  # use abspath
         if isinstance(row.summaryfield, str):
             summary = row.summaryfield.split(";")
         else:
@@ -184,7 +187,7 @@ def run_stream_cat(control):
                     row.accum_type,
                     zone,
                     Connector,
-                    inter_vpu.copy()
+                    inter_vpu.copy(),
                 )
             upFinal = pd.merge(up, ws, on="COMID")
             final = pd.merge(cat, upFinal, on="COMID")

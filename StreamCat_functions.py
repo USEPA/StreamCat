@@ -21,6 +21,7 @@ import os
 import sys
 import time
 from collections import OrderedDict, defaultdict, deque
+from typing import Generator
 
 import numpy as np
 import pandas as pd
@@ -28,7 +29,6 @@ import rasterio
 from gdalconst import *
 from osgeo import gdal, ogr, osr
 from rasterio import transform
-from typing import Generator
 
 if rasterio.__version__[0] == "0":
     from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
@@ -560,12 +560,10 @@ def ProjectResamp(inras, outras, out_proj, resamp_type, out_res):
 
 ##############################################################################
 
+
 def get_raster_value_at_points(
-        points,
-        rasterfile,
-        fieldname=None,
-        val_name=None,
-        out_df=False):
+    points, rasterfile, fieldname=None, val_name=None, out_df=False
+):
     """
     Find value at point (x,y) for every point in points of the given
     rasterfile.
@@ -631,21 +629,12 @@ def mask_points(points, mask_dir, INPUTS, nodata_vals=[0, -2147483648.0]):
     temp = pd.DataFrame(index=points.index)
     for zone, hydroregion in INPUTS.items():
         pts = get_raster_value_at_points(points, f"{mask_dir}/{zone}.tif", out_df=True)
-        temp = temp.merge(~pts.isin(nodata_vals),
-                          left_index=True,
-                          right_index=True)
+        temp = temp.merge(~pts.isin(nodata_vals), left_index=True, right_index=True)
     xx = temp.sum(axis=1)
     return points.iloc[xx.loc[xx == 1].index]
 
 
-def PointInPoly(
-        points, 
-        vpu, 
-        catchments, 
-        pct_full, 
-        mask_dir, 
-        appendMetric, 
-        summary):
+def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summary):
     """
     Filter points to those that only lie within the mask.
 
@@ -667,27 +656,27 @@ def PointInPoly(
     summary: list
         strings that identify columns from the attribute table in the points
         GeoDataFrame to be summed in returned DataFrame if `summary` is defined
-        
+
     Returns
     ---------
     pd.DataFrame
-        Table with count of spatial points in every catchment feature 
+        Table with count of spatial points in every catchment feature
         optionally with the summary of attributes from the points attribute
         table
 
     """
-
 
     polys = gpd.GeoDataFrame.from_file(catchments)
     polys.to_crs(points.crs, inplace=True)
     if mask_dir:
         rat = dbf2DF(f"{mask_dir}/{vpu}.tif.vat.dbf")
         rat["AreaSqKM"] = ((rat.COUNT * 900) * 1e-6).fillna(0)
-        polys = pd.merge(polys.drop("AreaSqKM", axis=1),
-                         rat[["VALUE","AreaSqKM"]],
-                         left_on="GRIDCODE",
-                         right_on="VALUE",
-                         how="left"
+        polys = pd.merge(
+            polys.drop("AreaSqKM", axis=1),
+            rat[["VALUE", "AreaSqKM"]],
+            left_on="GRIDCODE",
+            right_on="VALUE",
+            how="left",
         )
 
     # Get list of lat/long fields in the table
