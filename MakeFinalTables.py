@@ -61,7 +61,6 @@ def finalize(control):
 
     ctl = pd.read_csv(control)
     print(ctl.query("run == 1").MetricName.head())
-    exit()
 
     inputs = np.load("accum_npy/vpu_inputs.npy", allow_pickle=True).item()
 
