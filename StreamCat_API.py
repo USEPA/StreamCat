@@ -138,7 +138,7 @@ def PopulateDBtable(config_file, table, file_loc, temp_file):
     files = [f for f in os.listdir(file_loc) if f.count(table) and not f.count('Archive') and not f.count('RipBuf')]
     
     counter=0
-    for file in files[1:len(files)]:
+    for file in files:
         infile = file_loc + '/' + file
         df = pd.read_csv(infile)
         counter+=len(df)
@@ -207,7 +207,6 @@ table_params = {"name": "Precip_Minus_EVT",
 test=CreateDBtable(config_file, table_params)
 print(test.headers)
 print(test)
-print(test.text)
 
 # Populate a table
 table='Precip_Minus_EVT'
