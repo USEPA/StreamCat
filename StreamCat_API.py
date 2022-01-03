@@ -14,6 +14,8 @@ import math
 from pprint import pprint
 from datetime import datetime as dt
 import csv
+import urllib3
+from bs4 import BeautifulSoup
 
 def DBtablesAsDF(config_file):
     """
@@ -181,6 +183,44 @@ def ShowHideDBtable(config_file, table, activate):
                             headers=config.defaults(), verify=False, data = data)
     return(response)
 
+def MissingAPImetrics(config_file):
+    """
+    __author__ =  "Marc Weber <weber.marc@epa.gov>"
+                  "Rick Debbout <debbout.rick@epa.gov>"
+    List metrics currently on StreamCat ftp site that do not yet
+    exist in the API database.
+    
+    Arguments
+    ---------
+    config_file             : configuration file with db configuration parameters
+    """
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    requests.urllib3.disable_warnings()
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    r = requests.get("https://gaftp.epa.gov/epadatacommons/ORD"
+    "/NHDPlusLandscapeAttributes/StreamCat/HydroRegions/",
+    verify=False)
+    soup = BeautifulSoup(r.text, features="lxml")
+
+    ftp_mets = [link.get("href") for link in soup.find_all("a")[5:]]
+    ftp_mets=list(set([x.split('_Region')[0] for x in ftp_mets]))
+    
+    r = requests.get(
+        f"{config['server']['URL']}/StreamCat/admin/manage/tables",
+        headers=config.defaults(),verify=False)
+    json_object = json.loads(r.text)
+    api_mets=pd.DataFrame.from_records(json_object)
+    
+    api_mets = list(api_mets['DSNAME'])
+    
+    published = [x for x in ftp_mets if x in api_mets]
+    not_published = [x for x in ftp_mets if not x in api_mets]
+    return(published, not_published)
+
+
+
 # Define config file        
 config_file='E:/GitProjects/NARS/NARS/api/api_config.ini'
 # List tables
@@ -224,3 +264,6 @@ ViewDBtable(config_file, table)
 # Show or hide a particular table
 table='Precip_Minus_EVT'
 ShowHideDBtable(config_file, table, activate=1)
+
+# list metrics on ftp site published and not published to API database
+published, unpublished = MissingAPImetrics(config_file)
