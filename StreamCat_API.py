@@ -62,7 +62,7 @@ def ViewDBtable(config_file, table):
     pprint(json.loads(r.text))
     
 
-def DeleteDBtable(config_file, table):
+def DeleteDBtable(config_file, table, just_data=False):
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
                   "Rick Debbout <debbout.rick@epa.gov>"
@@ -74,16 +74,20 @@ def DeleteDBtable(config_file, table):
     ---------
     config                 : configuration file with db configuration parameters
     table                  : database table name
+    just_data              : default=False. If True table structure will
+                             be kept but just an empty table; if just_data=False
+                             the entire table will be deleted
     """
     
     config = configparser.ConfigParser()
     config.read(config_file)
     requests.urllib3.disable_warnings()
-    requests.delete(
-    f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}",
-    headers=config.defaults(),
-    verify=False
-)
+    if just_data==False:
+        requests.delete(f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}",
+                        headers=config.defaults(),verify=False)
+    if just_data==True:
+        requests.delete(f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}/data",
+                        headers=config.defaults(),verify=False)
 
 
 def CreateDBtable(config_file, table_param):
@@ -227,15 +231,16 @@ config_file='E:/GitProjects/NARS/NARS/api/api_config.ini'
 test = DBtablesAsDF(config_file)
 test.head()
 test.tail()
-test['DSNAME'][0:20]
+test['DSNAME'][21:40]
 
 # View a particular table
-table='Precip_Minus_EVT'
+# table='Precip_Minus_EVT'
 # table='BFI'
+table='NLCD2001'
 ViewDBtable(config_file, table)
 
-# Delete a table
-DeleteDBtable(config_file, table)
+# Delete a tables
+DeleteDBtable(config_file, table, just_data =True)
 
 # Create a table
 table_params = {"name": "Precip_Minus_EVT",
@@ -249,7 +254,8 @@ print(test.headers)
 print(test)
 
 # Populate a table
-table='Precip_Minus_EVT'
+# table='Precip_Minus_EVT'
+table='NLCD2001'
 file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
 temp_file='E:/WorkingData/junk.csv'
 LoadTime = dt.now()
@@ -267,3 +273,4 @@ ShowHideDBtable(config_file, table, activate=1)
 
 # list metrics on ftp site published and not published to API database
 published, unpublished = MissingAPImetrics(config_file)
+
