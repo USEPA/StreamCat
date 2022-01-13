@@ -21,6 +21,7 @@ import os
 import sys
 import time
 from collections import OrderedDict, defaultdict, deque
+from typing import Generator
 
 import numpy as np
 import pandas as pd
@@ -560,31 +561,123 @@ def ProjectResamp(inras, outras, out_proj, resamp_type, out_res):
 ##############################################################################
 
 
-def PointInPoly(
-    points, zone, inZoneData, pct_full, mask_dir, appendMetric, summaryfield=None
+def get_raster_value_at_points(
+    points, rasterfile, fieldname=None, val_name=None, out_df=False
 ):
     """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Rick Debbout <debbout.rick@epa.gov>"
-    Returns either the count of spatial points feature in every polygon in a spatial polygons feature or the summary of
-    an attribute field for all the points in every polygon of a spatial polygons feature
+    Find value at point (x,y) for every point in points of the given
+    rasterfile.
 
     Arguments
     ---------
-    points        : input points geographic features as a GeoPandas GeoDataFrame
-    InZoneData    : input polygon shapefile as a string, i.e. 'C:/Temp/outshape.shp'
-    pct_full      : table that links COMIDs to pct_full, determined from catchments that are  not within the US Census border
-    summaryfield  : a list of the field/s in points feature to use for getting summary stats in polygons
+    points: str | gpd.GeoDataFrame | generator
+        path to point file, or point GeoDataFrame, or generator of (x,y) tuples
+    rasterfile: str
+        path to raster
+    fieldname: str
+        attribute in points that identifies name given to index
+    out_df: bool
+        return pd.DataFrame of values, index will match `fieldname` if used,
+        else the index will be equivalent to `range(len(points))`
+
+    Returns
+    ---------
+    list | pd.DataFrame
+        Values of rasterfile | if `out_df` True, dataframe of values.
+
     """
-    polys = gpd.GeoDataFrame.from_file(inZoneData)
-    points.to_crs(polys.crs, inplace=True)
+    if isinstance(points, str):
+        points = gpd.read_file(points)
+    if isinstance(points, gpd.GeoDataFrame):
+        assert points.geometry.type.all() == "Point"
+        if fieldname:
+            points.set_index(fieldname)
+        points = points.geometry.apply(lambda g: (g.x, g.y))
+    if isinstance(points, Generator):
+        pass
+
+    with rasterio.open(rasterfile) as src:
+        data = [s[0] for s in src.sample(points)]
+
+    if out_df:
+        return pd.DataFrame(index=points.index, data={val_name: data})
+    else:
+        return data
+
+
+def mask_points(points, mask_dir, INPUTS, nodata_vals=[0, -2147483648.0]):
+    """
+    Filter points to those that only lie within the mask.
+
+    Arguments
+    ---------
+    points: gpd.GeoDataFrame
+        point GeoDataFrame to be filtered
+    mask_dir: str
+        path to folder holding masked rasters for every VPU
+    INPUTS: collections.OrderedDict
+        dictionary of vector processing units and hydroregions from NHDPlusV21
+    nodata_vals: list
+        values of the raster that exist outside of the mask zone
+
+    Returns
+    ---------
+    gpd.GeoDataFrame
+        filtered points that only lie within the masked areas
+
+    """
+    temp = pd.DataFrame(index=points.index)
+    for zone, hydroregion in INPUTS.items():
+        pts = get_raster_value_at_points(points, f"{mask_dir}/{zone}.tif", out_df=True)
+        temp = temp.merge(~pts.isin(nodata_vals), left_index=True, right_index=True)
+    xx = temp.sum(axis=1)
+    return points.iloc[xx.loc[xx == 1].index]
+
+
+def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summary):
+    """
+    Filter points to those that only lie within the mask.
+
+    Arguments
+    ---------
+    points: gpd.GeoDataFrame
+        point GeoDataFrame
+    vpu: str
+        Vector Processing Unit from NHDPlusV21
+    catchments: collections.OrderedDict
+        dictionary of vector processing units and hydroregions from NHDPlusV21
+    pct_full: pd.DataFrame
+        DataFrame with `PCT_FULL` calculated from catchments that
+        intersect the US border from TIGER files
+    mask_dir: str
+        path to folder holding masked rasters for every VPU else empty
+    appendMetric: str
+        string to be appended to metrics from ControlTable_StreamCat.csv
+    summary: list
+        strings that identify columns from the attribute table in the points
+        GeoDataFrame to be summed in returned DataFrame if `summary` is defined
+
+    Returns
+    ---------
+    pd.DataFrame
+        Table with count of spatial points in every catchment feature
+        optionally with the summary of attributes from the points attribute
+        table
+
+    """
+
+    polys = gpd.GeoDataFrame.from_file(catchments)
+    polys.to_crs(points.crs, inplace=True)
     if mask_dir:
-        polys = polys.drop("AreaSqKM", axis=1)
-        tblRP = dbf2DF(f"{mask_dir}/{zone}.tif.vat.dbf")
-        tblRP["AreaSqKM"] = (tblRP.COUNT * 900) * 1e-6
-        tblRP["AreaSqKM"] = tblRP["AreaSqKM"].fillna(0)
-        polys = pd.merge(polys, tblRP, left_on="GRIDCODE", right_on="VALUE", how="left")
-        polys.crs = {"datum": "NAD83", "no_defs": True, "proj": "longlat"}
+        rat = dbf2DF(f"{mask_dir}/{vpu}.tif.vat.dbf")
+        rat["AreaSqKM"] = ((rat.COUNT * 900) * 1e-6).fillna(0)
+        polys = pd.merge(
+            polys.drop("AreaSqKM", axis=1),
+            rat[["VALUE", "AreaSqKM"]],
+            left_on="GRIDCODE",
+            right_on="VALUE",
+            how="left",
+        )
 
     # Get list of lat/long fields in the table
     points["latlon_tuple"] = tuple(
@@ -606,16 +699,15 @@ def PointInPoly(
     grouped = point_poly_join.groupby("FEATUREID")
     point_poly_count = grouped[fld].count()
     point_poly_count.name = "COUNT"
-    # Join Count column on to NHDCatchments table and keep only 'COMID','CatAreaSqKm','CatCount'
+    # Join Count column on to NHDCatchments table and keep only
+    # ['COMID','CatAreaSqKm','CatCount']
     final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
     final = final[["FEATUREID", "AreaSqKM", "COUNT"]].fillna(0)
     cols = ["COMID", f"CatAreaSqKm{appendMetric}", f"CatCount{appendMetric}"]
-    if (
-        not summaryfield == None
-    ):  # Summarize fields in list with gpd table including duplicates
+    if not summary == None:  # Summarize fields including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby("FEATUREID")
-        for x in summaryfield:  # Sum the field in summary field list for each catchment
+        for x in summary:  # Sum the field in summary field list for each catchment
             point_poly_stats = grouped2[x].sum()
             point_poly_stats.name = x
             final = final.join(point_poly_stats, on="FEATUREID", how="left").fillna(0)
@@ -624,10 +716,10 @@ def PointInPoly(
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on="COMID", how="left")
     if len(mask_dir) > 0:
-        if not summaryfield == None:
+        if not summary == None:
             final.columns = (
                 ["COMID", "CatAreaSqKmRp100", "CatCountRp100"]
-                + ["Cat" + y + appendMetric for y in summaryfield]
+                + ["Cat" + y + appendMetric for y in summary]
                 + ["CatPctFullRp100"]
             )
         else:
@@ -685,9 +777,8 @@ def rat_to_dict(inraster, old_val, new_val):
 ##############################################################################
 
 
-def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
+def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl):
     """
-    __author__ = "Rick Debbout <debbout.rick@epa.gov>"
     Loads watershed values for given COMIDs to be appended to catResults table for accumulation.
 
     Arguments
@@ -698,7 +789,6 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
     zone                  : an NHDPlusV2 VPU number, i.e. 10, 16, 17
     Connector             : Location of the connector file
     InterVPUtbl           : table of interVPU exchanges
-    summaryfield          : list of fields to summarize, only used when accum_type is 'Count'
     """
     # Create subset of the tbl with a COMID in interVPUtbl
     throughVPUs = (
@@ -740,9 +830,8 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl, summaryfield):
 ##############################################################################
 
 
-def AdjustCOMs(tbl, comid1, comid2, tbl2=None):  #  ,accum, summaryfield=None
+def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
     """
-    __author__ = "Rick Debbout <debbout.rick@epa.gov>"
     Adjusts values for COMIDs where values from one need to be subtracted from another.
     Depending on the type of accum, subtracts values for each column in the table other than COMID and Pct_Full
 
