@@ -224,7 +224,6 @@ def MissingAPImetrics(config_file):
     return(published, not_published)
 
 
-
 # Define config file        
 config_file='E:/GitProjects/NARS/NARS/api/api_config.ini'
 # List tables
@@ -234,28 +233,50 @@ test.tail()
 test['DSNAME'][21:40]
 
 # View a particular table
-# table='Precip_Minus_EVT'
+# table='ImperviousSurfaces2011'
 # table='BFI'
-table='NLCD2001'
+table='EPA_FRS'
+# table='NLCD2001'
 ViewDBtable(config_file, table)
 
 # Delete a tables
 DeleteDBtable(config_file, table, just_data =True)
-
+# DeleteDBtable(config_file, table, just_data =False)
 # Create a table
-table_params = {"name": "Precip_Minus_EVT",
-           "metrics":[{"name": "precip_minus_evt", 
-                       "display_name": "Precipitation Minus Evapotranspiration"}],
+# table_params = {"name": "Precip_Minus_EVT",
+#            "metrics":[{"name": "precip_minus_evt", 
+#                        "display_name": "Precipitation Minus Evapotranspiration"}],
+#            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+#                        {"name": "Precip_Minus_EVTCat", "type": "number"},{"name": "Precip_Minus_EVTWs","type": "number"}]}
+
+table_params = {"name": "ImperviousSurfaces",
+           "metrics":[{"name": "PctImp2001", "display_name": "Mean Imperviousness 2001"},
+                      {"name": "PctImp2004", "display_name": "Mean Imperviousness 2004"},
+                      {"name": "PctImp2006", "display_name": "Mean Imperviousness 2006"},
+                      {"name": "PctImp2008", "display_name": "Mean Imperviousness 2008"},
+                      {"name": "PctImp2011", "display_name": "Mean Imperviousness 2011"},
+                      {"name": "PctImp2013", "display_name": "Mean Imperviousness 2013"},
+                      {"name": "PctImp2016", "display_name": "Mean Imperviousness 2016"},
+                      {"name": "PctImp2019", "display_name": "Mean Imperviousness 2019"},],
            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
-                       {"name": "Precip_Minus_EVTCat", "type": "number"},{"name": "Precip_Minus_EVTWs","type": "number"}]}
+                       {"name": "PctImp2001Cat", "type": "number"},{"name": "PctImp2001Ws","type": "number"},
+                       {"name": "PctImp2004Cat", "type": "number"},{"name": "PctImp2004Ws","type": "number"},
+                       {"name": "PctImp2006Cat", "type": "number"},{"name": "PctImp2006Ws","type": "number"},
+                       {"name": "PctImp2008Cat", "type": "number"},{"name": "PctImp2008Ws","type": "number"},
+                       {"name": "PctImp2011Cat", "type": "number"},{"name": "PctImp2011Ws","type": "number"},
+                       {"name": "PctImp2013Cat", "type": "number"},{"name": "PctImp2013Ws","type": "number"},
+                       {"name": "PctImp2016Cat", "type": "number"},{"name": "PctImp2016Ws","type": "number"},
+                       {"name": "PctImp2019Cat", "type": "number"},{"name": "PctImp2009Ws","type": "number"}]}
+
 
 test=CreateDBtable(config_file, table_params)
 print(test.headers)
 print(test)
 
 # Populate a table
+table='EPA_FRS'
 # table='Precip_Minus_EVT'
-table='NLCD2001'
+# table='NLCD2001'
 file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
 temp_file='E:/WorkingData/junk.csv'
 LoadTime = dt.now()
@@ -263,8 +284,9 @@ PopulateDBtable(config_file, table, file_loc, temp_file)
 print("Table load complete in : " + str(dt.now() - LoadTime))
 
 # View a particular table
-table='Precip_Minus_EVT'
-table='dams'
+table='EPA_FRS'
+# table='Precip_Minus_EVT'
+# table='dams'
 ViewDBtable(config_file, table)
 
 # Show or hide a particular table
