@@ -141,7 +141,7 @@ def PopulateDBtable(config_file, table, file_loc, temp_file):
     config = configparser.ConfigParser()
     config.read(config_file)
     requests.urllib3.disable_warnings()
-    files = [f for f in os.listdir(file_loc) if f.count(table) and not f.count('Archive') and not f.count('RipBuf')]
+    files = [f for f in os.listdir(file_loc) if f.split('_Region')[0]==table and not f.count('Archive')]
     
     counter=0
     for file in files:
@@ -230,12 +230,14 @@ config_file='E:/GitProjects/NARS/NARS/api/api_config.ini'
 test = DBtablesAsDF(config_file)
 test.head()
 test.tail()
+test['DSNAME'][0:20]
 test['DSNAME'][21:40]
-
+test['DSNAME'][41:60]
 # View a particular table
-# table='ImperviousSurfaces2011'
-# table='BFI'
-table='EPA_FRS'
+table='RoadDensityRipBuf100'
+# table='ImperviousSurfaces'
+table='RoadStreamCrossings'
+# table='MinesRipBuf100'
 # table='NLCD2001'
 ViewDBtable(config_file, table)
 
@@ -250,14 +252,14 @@ DeleteDBtable(config_file, table, just_data =True)
 #                        {"name": "Precip_Minus_EVTCat", "type": "number"},{"name": "Precip_Minus_EVTWs","type": "number"}]}
 
 table_params = {"name": "ImperviousSurfaces",
-           "metrics":[{"name": "PctImp2001", "display_name": "Mean Imperviousness 2001"},
-                      {"name": "PctImp2004", "display_name": "Mean Imperviousness 2004"},
-                      {"name": "PctImp2006", "display_name": "Mean Imperviousness 2006"},
-                      {"name": "PctImp2008", "display_name": "Mean Imperviousness 2008"},
-                      {"name": "PctImp2011", "display_name": "Mean Imperviousness 2011"},
-                      {"name": "PctImp2013", "display_name": "Mean Imperviousness 2013"},
-                      {"name": "PctImp2016", "display_name": "Mean Imperviousness 2016"},
-                      {"name": "PctImp2019", "display_name": "Mean Imperviousness 2019"},],
+           "metrics":[{"name": "pctimp2001", "display_name": "Mean Imperviousness 2001"},
+                      {"name": "pctimp2004", "display_name": "Mean Imperviousness 2004"},
+                      {"name": "pctimp2006", "display_name": "Mean Imperviousness 2006"},
+                      {"name": "pctimp2008", "display_name": "Mean Imperviousness 2008"},
+                      {"name": "pctimp2011", "display_name": "Mean Imperviousness 2011"},
+                      {"name": "pctimp2013", "display_name": "Mean Imperviousness 2013"},
+                      {"name": "pctimp2016", "display_name": "Mean Imperviousness 2016"},
+                      {"name": "pctimp2019", "display_name": "Mean Imperviousness 2019"},],
            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
                        {"name": "PctImp2001Cat", "type": "number"},{"name": "PctImp2001Ws","type": "number"},
                        {"name": "PctImp2004Cat", "type": "number"},{"name": "PctImp2004Ws","type": "number"},
@@ -266,7 +268,7 @@ table_params = {"name": "ImperviousSurfaces",
                        {"name": "PctImp2011Cat", "type": "number"},{"name": "PctImp2011Ws","type": "number"},
                        {"name": "PctImp2013Cat", "type": "number"},{"name": "PctImp2013Ws","type": "number"},
                        {"name": "PctImp2016Cat", "type": "number"},{"name": "PctImp2016Ws","type": "number"},
-                       {"name": "PctImp2019Cat", "type": "number"},{"name": "PctImp2009Ws","type": "number"}]}
+                       {"name": "PctImp2019Cat", "type": "number"},{"name": "PctImp2019Ws","type": "number"}]}
 
 
 test=CreateDBtable(config_file, table_params)
@@ -274,9 +276,12 @@ print(test.headers)
 print(test)
 
 # Populate a table
-table='EPA_FRS'
+# table='MinesRipBuf100'
 # table='Precip_Minus_EVT'
 # table='NLCD2001'
+# table='GeoChemPhys2'
+table='RoadDensityRipBuf100'
+table='RoadStreamCrossings'
 file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
 temp_file='E:/WorkingData/junk.csv'
 LoadTime = dt.now()
@@ -290,7 +295,7 @@ table='EPA_FRS'
 ViewDBtable(config_file, table)
 
 # Show or hide a particular table
-table='Precip_Minus_EVT'
+table='ImperviousSurfaces'
 ShowHideDBtable(config_file, table, activate=1)
 
 # list metrics on ftp site published and not published to API database
