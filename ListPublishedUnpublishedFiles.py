@@ -34,6 +34,11 @@ control["Published"] = control.Final_Table_Name.isin(local_published).map(
     {True: "Yes", False: "No"}
 )
 
+try:
+    control.to_csv(control_file, index=False)
+except PermissionError as e:
+    print(f"You may have {control_file} open in Excel?\n", e)
+
 # not sure of the best way to deal with this? we could add a list of metrics
 # that we know we don't want published to this script and check against that?
 newly_published = orig.loc[orig.compare(control).index, "Final_Table_Name"].unique()
@@ -42,11 +47,6 @@ if newly_published.any():
         "The following metrics have been recently published in StreamCat:\n\t->",
         ", ".join(newly_published.tolist()),
     )
-
-    try:
-        control.to_csv(control_file, index=False)
-    except PermissionError as e:
-        print(f"You may have {control_file} open in Excel?\n", e)
 
 # check what is published in LakeCat
 r = requests.get(

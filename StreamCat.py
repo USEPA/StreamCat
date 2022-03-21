@@ -21,6 +21,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+
 from stream_cat_config import (
     LYR_DIR,
     MASK_DIR_RP100,
@@ -38,6 +39,7 @@ from StreamCat_functions import (
     createCatStats,
     interVPU,
     makeNumpyVectors,
+    mask_points,
     nhd_dict,
 )
 
@@ -96,12 +98,15 @@ def run_stream_cat(control):
             mask_dir = MASK_DIR_SLP20
         else:
             mask_dir = ""
-        summaryfield = None
-        layer = row.LandscapeLayer if os.sep in row.LandscapeLayer else (
-                f"{LYR_DIR}/{row.LandscapeLayer}") # use abspath
-        # TODO: this could be just `if row.summaryfield:`???
-        if type(row.summaryfield) == str:
-            summaryfield = row.summaryfield.split(";")
+        layer = (
+            row.LandscapeLayer
+            if os.sep in row.LandscapeLayer
+            else (f"{LYR_DIR}/{row.LandscapeLayer}")
+        )  # use abspath
+        if isinstance(row.summaryfield, str):
+            summary = row.summaryfield.split(";")
+        else:
+            summary = None
         if row.accum_type == "Point":
             # Load in point geopandas table and Pct_Full table
             # TODO: script to create this PCT_FULL_FILE
@@ -109,6 +114,8 @@ def run_stream_cat(control):
                 PCT_FULL_FILE if row.use_mask == 0 else PCT_FULL_FILE_RP100
             )
             points = gpd.read_file(layer)
+            if mask_dir:
+                points = mask_points(points, mask_dir, INPUTS)
         # File string to store InterVPUs needed for adjustments
         Connector = f"{OUT_DIR}/{row.FullTableName}_connectors.csv"
         print(
@@ -118,7 +125,7 @@ def run_stream_cat(control):
         )
         for zone, hydroregion in INPUTS.items():
             if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
-                print(zone, end=", ", flush=False)
+                print(zone, end=", ", flush=True)
                 pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
                 if not row.accum_type == "Point":
                     izd = (
@@ -141,7 +148,7 @@ def run_stream_cat(control):
                 if row.accum_type == "Point":
                     izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
                     cat = PointInPoly(
-                        points, zone, izd, pct_full, mask_dir, apm, summaryfield
+                        points, zone, izd, pct_full, mask_dir, apm, summary
                     )
                 cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
         print("done!")
@@ -182,7 +189,6 @@ def run_stream_cat(control):
                     zone,
                     Connector,
                     inter_vpu.copy(),
-                    summaryfield,
                 )
             upFinal = pd.merge(up, ws, on="COMID")
             final = pd.merge(cat, upFinal, on="COMID")
