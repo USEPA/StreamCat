@@ -4,17 +4,15 @@
   (__  ) /_/ /  /  __/ /_/ / / / / / / /__/ /_/ / /_
  /____/\__/_/   \___/\__,_/_/ /_/ /_/\___/\__,_/\__/
 
- Functions for standardizing landscape rasters, allocating landscape metrics
- to NHDPlusV2 catchments, accumulating metrics for upstream catchments, and
- writing final landscape metric tables
+ Functions for allocating landscape metrics for catchments, accumulating metrics 
+ for upstream catchments, andwriting final landscape metric tables
 
  Authors: Marc Weber<weber.marc@epa.gov>
           Ryan Hill<hill.ryan@epa.gov>
-          Darren Thornbrugh<thornbrugh.darren@epa.gov>
           Rick Debbout<debbout.rick@epa.gov>
-          Tad Larsen<laresn.tad@epa.gov>
 
- Date: October 2015
+
+ Date: March 2022
 """
 
 import os
@@ -1196,41 +1194,6 @@ def chkColumnLength(table, landscape_layer):
     return table
 
 
-def appendConnectors(cat, Connector, zone, interVPUtbl):
-    """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Ryan Hill <hill.ryan@epa.gov>"
-    Appends the connector file of inter VPU COMIDS to the cat table before going into accumulation process
-
-    Arguments
-    ---------
-    cat                   : Results table of catchment summarization
-    Connector             : string to file holding the table of inter VPU COMIDs
-    zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
-    interVPUtbl           : table of interVPU adjustments
-    """
-    con = pd.read_csv(Connector)
-    for comidx in con.COMID.values.astype(int):
-        if comidx in cat.COMID.values.astype(int):
-            cat = cat.drop(cat[cat.COMID == comidx].index)
-    con = con.loc[
-        con.COMID.isin(
-            np.append(
-                interVPUtbl.loc[interVPUtbl.ToZone.values == zone].thruCOMIDs.values,
-                interVPUtbl.loc[interVPUtbl.ToZone.values == zone].toCOMIDs.values[
-                    np.nonzero(
-                        interVPUtbl.loc[
-                            interVPUtbl.ToZone.values == zone
-                        ].toCOMIDs.values
-                    )
-                ],
-            )
-        )
-    ]
-
-    cat = cat.append(con)
-    return cat.reset_index(drop=True)
-
 
 ##############################################################################
 
@@ -1253,33 +1216,37 @@ def swapper(coms, upStream):
 
 
 ##############################################################################
-def make_all_cat_comids(nhd, inputs):
-    print("Making allFLOWCOMs numpy file, reading zones...", end="", flush=True)
-    all_comids = np.array([], dtype=np.int32)
-    for zone, hr in inputs.items():
-        print(zone, end=", ", flush=True)
-        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
-        all_comids = np.append(all_comids, cats.FEATUREID.values.astype(int))
-    np.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
+def make_all_reg_IDs(nhd, regs):
+    print("Making lookup table", end="", flush=True)
+    lookup = {}
+    for reg in regs:
+        print(reg, end=", ", flush=True)
+        cats = gpd.read_file(f"{nhd}/{reg}", driver='FileGDB',
+                             layer='NHDPlusCatchment_Gen',
+                             ignore_fields=["GridCode","SourceFC",
+                                            "SHAPE_Length","SHAPE_Area"]).drop("geometry", axis=1)
+        cats[['REG']]=reg
+        cats['NHDPlusID'] = cats['NHDPlusID'].astype('int64')
+        cats = pd.Series(cats.REG.values,index=cats.NHDPlusID).to_dict()
+        lookup.update(cats)
     print("...done!")
-    return set(all_comids)  # RETURN A SET!
+    return lookup # RETURN A DICT!
 
 
-def makeNumpyVectors(inter_tbl, nhd):
+def makeNumpyVectors(inter_tbl, nhd, flow):
     """
     Uses the NHD tables to create arrays of upstream catchments which are used
     in the Accumulation function
 
     Arguments
     ---------
-    inter_tbl   : table of inter-VPU connections
     nhd         : directory where NHD is stored
+    
     """
     os.mkdir("accum_npy")
     inputs = nhd_dict(nhd)
     all_comids = make_all_cat_comids(nhd, inputs)
-    print("Making numpy files in zone...", end="", flush=True)
+    print("Making numpy files specified inputs...", end="", flush=True)
     for zone, hr in inputs.items():
         print(zone, end=", ", flush=True)
         pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"

@@ -7,15 +7,12 @@
 
  Authors:  Marc Weber<weber.marc@epa.gov>,
            Ryan Hill<hill.ryan@epa.gov>,
-           Darren Thornbrugh<thornbrugh.darren@epa.gov>,
            Rick Debbout<debbout.rick@epa.gov>,
-           Tad Larsen<laresn.tad@epa.gov>
 
- Date: November 29, 2015
+ Date: March 2022
 """
 
 import os
-
 import click
 import geopandas as gpd
 import numpy as np
@@ -28,6 +25,7 @@ from stream_cat_config import (
     MASK_DIR_SLP10,
     MASK_DIR_SLP20,
     NHD_DIR,
+    REGS,
     OUT_DIR,
     PCT_FULL_FILE,
     PCT_FULL_FILE_RP100,
@@ -35,9 +33,7 @@ from stream_cat_config import (
 from StreamCat_functions import (
     Accumulation,
     PointInPoly,
-    appendConnectors,
     createCatStats,
-    interVPU,
     makeNumpyVectors,
     mask_points,
     nhd_dict,
