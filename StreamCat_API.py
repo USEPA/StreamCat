@@ -237,7 +237,7 @@ test['DSNAME'][41:60]
 table='RoadDensityRipBuf100'
 table='ImperviousSurfacesRipBuf100'
 table='WWTP'
-table='MTBS_Severity_1984'
+table='MTBS_Severity_2018'
 table='NLCD2006RipBuf100'
 ViewDBtable(config_file, table)
 # Delete a tables
@@ -257,7 +257,7 @@ table='RoadDensityRipBuf100'
 table='MTBS'
 table='NLCD2006RipBuf100'
 file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
-temp_file='E:/WorkingData/junk.csv'
+temp_file='E:/WorkingData/junk2.csv'
 LoadTime = dt.now()
 PopulateDBtable(config_file, table, file_loc, temp_file)
 print("Table load complete in : " + str(dt.now() - LoadTime))
@@ -287,22 +287,22 @@ table_params = {"name": "WWTP",
                         {"name": "WWTPAllDensCat", "type": "number"},{"name": "WWTPAllDensWs","type": "number"},]}
 
 
-table_params = {"name": "MTBS_Severity_1984",
-            "metrics":[{"name": "pctnofire1984", "display_name": "Percent No Fire Burn Class For Year"},
-                       {"name": "pctundsev1984", "display_name": "Percent Underburned to Low Burn Severity Class For Year"},
-                       {"name": "pctlowsev1984", "display_name": "Percent Low Burn Severity Class For Year"},
-                       {"name": "pctmodsev1984", "display_name": "Percent Moderate Burn Severity Class For Year"},
-                       {"name": "pcthighsev1984", "display_name": "Percent High Burn Severity Class For Year"},
-                       {"name": "pctincvegresp1984", "display_name": "Percent Increased Greenness and Veg Response Class For Year"},
-                       {"name": "pctnonprocmask1984", "display_name": "Percent Non Processing Mask Class For Year"}],
+table_params = {"name": "MTBS_Severity_2018",
+            "metrics":[{"name": "pctnofire2018", "display_name": "Percent No Fire Burn Class For Year"},
+                       {"name": "pctundsev2018", "display_name": "Percent Underburned to Low Burn Severity Class For Year"},
+                       {"name": "pctlowsev2018", "display_name": "Percent Low Burn Severity Class For Year"},
+                       {"name": "pctmodsev2018", "display_name": "Percent Moderate Burn Severity Class For Year"},
+                       {"name": "pcthighsev2018", "display_name": "Percent High Burn Severity Class For Year"},
+                       {"name": "pctincvegresp2018", "display_name": "Percent Increased Greenness and Veg Response Class For Year"},
+                       {"name": "pctnonprocmask2018", "display_name": "Percent Non Processing Mask Class For Year"}],
             "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
-                        {"name": "PctNoFireCat1984Cat", "type": "number"},{"name": "PctNoFire1984Ws","type": "number"},
-                        {"name": "PctUndSev1984Cat", "type": "number"},{"name": "PctUndSev1984Ws","type": "number"},
-                        {"name": "PctLowSev1984Cat", "type": "number"},{"name": "PctLowSev1984Ws","type": "number"},
-                        {"name": "PctModSev1984Cat", "type": "number"},{"name": "PctModSev1984Ws","type": "number"},
-                        {"name": "PctHighSev1984Cat", "type": "number"},{"name": "PctHighSev1984Ws","type": "number"},
-                        {"name": "PctIncVegResp1984Cat", "type": "number"},{"name": "PctIncVegResp1984Ws","type": "number"},
-                        {"name": "PctNonProcMask1984Cat", "type": "number"},{"name": "PctNonProcMask1984Ws","type": "number"}]}
+                        {"name": "PctNoFire2018Cat", "type": "number"},{"name": "PctNoFire2018Ws","type": "number"},
+                        {"name": "PctUndSev2018Cat", "type": "number"},{"name": "PctUndSev2018Ws","type": "number"},
+                        {"name": "PctLowSev2018Cat", "type": "number"},{"name": "PctLowSev2018Ws","type": "number"},
+                        {"name": "PctModSev2018Cat", "type": "number"},{"name": "PctModSev2018Ws","type": "number"},
+                        {"name": "PctHighSev2018Cat", "type": "number"},{"name": "PctHighSev2018Ws","type": "number"},
+                        {"name": "PctIncVegResp2018Cat", "type": "number"},{"name": "PctIncVegResp2018Ws","type": "number"},
+                        {"name": "PctNonProcMask2018Cat", "type": "number"},{"name": "PctNonProcMask2018Ws","type": "number"}]}
 
 
 table_params = {"name": "ImperviousSurfacesRipBuf100",
