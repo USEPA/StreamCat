@@ -236,9 +236,8 @@ test['DSNAME'][41:60]
 # View a particular table
 table='RoadDensityRipBuf100'
 table='ImperviousSurfacesRipBuf100'
+table='AgMidHiSlopes2011'
 table='Septic'
-table='AgMidHiSlopes2001'
-table='NLCD2006RipBuf100'
 ViewDBtable(config_file, table)
 # Delete a tables
 DeleteDBtable(config_file, table, just_data =True)
@@ -276,12 +275,12 @@ ShowHideDBtable(config_file, table, activate=1)
 published, unpublished = MissingAPImetrics(config_file)
 
 
-table_params = {"name": "AgMidHiSlopes2001",
-            "metrics":[{"name": "PctAg2001Slp10Cat", "display_name": "Percent of Agriculture of 10% Slope"},
-                       {"name": "PctAg2001Slp20Cat", "display_name": "Percent of Agriculture of 20% Slope"}],
+table_params = {"name": "AgMidHiSlopes2011",
+            "metrics":[{"name": "PctAg2011Slp10Cat", "display_name": "Percent of Agriculture of 10% Slope"},
+                       {"name": "PctAg2011Slp20Cat", "display_name": "Percent of Agriculture of 20% Slope"}],
             "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
-                        {"name": "PctAg2001Slp10Cat", "type": "number"},{"name": "PctAg2001Slp10Ws","type": "number"},
-                        {"name": "PctAg2001Slp20Cat", "type": "number"},{"name": "PctAg2001Slp200Ws","type": "number"},]}
+                        {"name": "PctAg2011Slp10Cat", "type": "number"},{"name": "PctAg2011Slp10Ws","type": "number"},
+                        {"name": "PctAg2011Slp20Cat", "type": "number"},{"name": "PctAg2011Slp20Ws","type": "number"},]}
 
 
 table_params = {"name": "WWTP",
