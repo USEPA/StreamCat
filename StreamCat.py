@@ -48,7 +48,7 @@ if not os.path.exists(OUT_DIR + "/DBF_stash"):
 
 if not os.path.exists("accum_npy"):
     # TODO: work out children OR bastards only
-    makeNumpyVectors(NHD_DIR)
+    makeNumpyVectors(NHD_DIR, REGS)
 
 already_processed = []
 

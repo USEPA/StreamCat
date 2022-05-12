@@ -1141,7 +1141,7 @@ def make_all_reg_IDs(nhd, regs):
     return lookup # RETURN A DICT!
 
 
-def makeNumpyVectors(inter_tbl, nhd, flow):
+def makeNumpyVectors(nhd, regs):
     """
     Uses the NHD tables to create arrays of upstream catchments which are used
     in the Accumulation function
@@ -1152,15 +1152,19 @@ def makeNumpyVectors(inter_tbl, nhd, flow):
     
     """
     os.mkdir("accum_npy")
-    inputs = nhd_dict(nhd)
+    # inputs = nhd_dict(nhd)
     all_comids = make_all_cat_comids(nhd, inputs)
     print("Making numpy files specified inputs...", end="", flush=True)
-    for zone, hr in inputs.items():
+    for zone in regs:
         print(zone, end=", ", flush=True)
-        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        flow = dbf2DF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
-        flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
-        fls = dbf2DF(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
+        pre = f"{nhd}/NHDPlusHRVFGen_{zone}_V2.gdb"
+        flow = gpd.read_file(f"{pre}", driver="FileGDB", layer="NHDPlusFlow")
+        
+        flow = dbf2DF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["FromNHDPID", "ToNHDPID",
+                                                                "FromVPUID","ToVPUID","VPUOUT"]]
+        flow = flow[(flow.ToNHDPID != 0) & (flow.FromNHDPID != 0)]
+        fls = gpd.read_file(f"{pre}", driver="FileGDB", layer="NHDFlowline",
+                            ignore_fields=["Shape_Length", "geometry"])
         coastfl = fls.COMID[fls.FTYPE == "Coastline"]
         flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
         # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs
