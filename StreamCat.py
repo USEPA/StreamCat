@@ -22,6 +22,7 @@ from stream_cat_config_vfgen import (
     CONTROL,
     LYR_DIR,
     NHD_DIR,
+    NUMPY_DIR,
     REGS,
     OUT_DIR,
     PCT_FULL_FILE,
@@ -46,14 +47,14 @@ if not os.path.exists(OUT_DIR):
 if not os.path.exists(OUT_DIR + "/DBF_stash"):
     os.mkdir(OUT_DIR + "/DBF_stash")
 
-if not os.path.exists("accum_npy"):
+if not os.path.exists(f"{NUMPY_DIR}/accum_npy"):
     # TODO: work out children OR bastards only
-    makeNumpyVectors(NHD_DIR, REGS)
+    makeNumpyVectors(NHD_DIR, NUMPY_DIR, REGS)
 
 already_processed = []
 
 for _, row in ctl.query("run == 1").iterrows():
-
+    print(row)
     layer = (
         row.LandscapeLayer
         if os.sep in row.LandscapeLayer
@@ -75,7 +76,11 @@ for _, row in ctl.query("run == 1").iterrows():
         flush=True,
     )
     for REG in REGS:
-        if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
+        if isinstance(REG, list):
+            REG=REG[0]
+        else:
+            pass
+        if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{REG}.csv"):
             print(REG, end=", ", flush=True)
             if not row.accum_type == "Point":
                 izd = (f"{NHD_DIR}/NHDPlusHRVFGen_01_V2.gdb/cat")
@@ -87,25 +92,30 @@ for _, row in ctl.query("run == 1").iterrows():
                     REG,
                     NHD_DIR,)
             if row.accum_type == "Point":
-                izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
+                izd = f"{NHD_DIR}/NHDPlusCatchment/Catchment.shp"
                 cat = PointInPoly(
-                    points, zone, izd, pct_full, mask_dir, apm, summary
+                    points, REG, izd, pct_full, mask_dir, apm, summary
                 )
-            cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+            cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{REG}.csv", index=False)
     print("done!")
     print("Accumulating...", end="", flush=True)
-    for zone in INPUTS:
-        fn = f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"
+    for REG in REGS:
+        for REG in REGS:
+            if isinstance(REG, list):
+                REG=REG[0]
+                else:
+                    pass
+        fn = f"{OUT_DIR}/{row.FullTableName}_{REG}.csv"
         cat = pd.read_csv(fn)
         processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().bool()
         if processed:
             print("skipping!")
             already_processed.append(row.FullTableName)
             break
-        print(zone, end=", ", flush=True)
+        print(REG, end=", ", flush=True)
 
-        if zone in inter_vpu.ToZone.values:
-            cat = appendConnectors(cat, Connector, zone, inter_vpu)
+        # if zone in inter_vpu.ToZone.values:
+        #     cat = appendConnectors(cat, Connector, zone, inter_vpu)
         accum = np.load(f"accum_npy/accum_{zone}.npz")
 
         cat.COMID = cat.COMID.astype(accum["comids"].dtype)

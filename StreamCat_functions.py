@@ -947,6 +947,7 @@ def createCatStats(
     inZoneData            : string to the NHD catchment grid
     out_dir               : string to directory where output is being stored
     zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
+    nhd_dir
     """
 
     try:
@@ -997,26 +998,29 @@ def createCatStats(
         table["AREA"] = table[table.columns.tolist()[1:]].sum(axis=1)
     nhdTable = gpd.read_file(NHD_DIR +'/NHDPlusHRVFGen_' + REG + '_V2.gdb', 
                     driver='FileGDB', 
-                    layer='NHDPlusCatchment').loc[:, ["Dissolve_NHDPlusID"]]
+                    layer='NHDPlusCatchment')
+    # calc area sqkm
+    nhdTable = nhdTable.to_crs({'epsg:5070'})
+    nhdTable["AreaSqKm"] = nhdTable['geometry'].area/ 10**6
     nhdTable = nhdTable.rename(
         columns={"Dissolve_NHDPlusID": "NHDPlusID"})
     result = pd.merge(
         nhdTable, table, how="left", left_on="NHDPlusID", right_on="VALUE"
     )
-    if LandscapeLayer.split("/")[-1].split(".")[0] == "rdstcrs":
-        slptbl = dbf2DF(
-            "%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf"
-            % (NHD_dir, hydroregion, zone)
-        ).loc[:, ["COMID", "SLOPE"]]
-        slptbl.loc[slptbl["SLOPE"] == -9998.0, "SLOPE"] = 0
-        result = pd.merge(result, slptbl, on="COMID", how="left")
-        result.SLOPE = result.SLOPE.fillna(0)
-        result["SlpWtd"] = result["Sum"] * result["SLOPE"]
-        result = result.drop(["SLOPE"], axis=1)
+    # if LandscapeLayer.split("/")[-1].split(".")[0] == "rdstcrs":
+    #     slptbl = dbf2DF(
+    #         "%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf"
+    #         % (NHD_dir, hydroregion, zone)
+    #     ).loc[:, ["COMID", "SLOPE"]]
+    #     slptbl.loc[slptbl["SLOPE"] == -9998.0, "SLOPE"] = 0
+    #     result = pd.merge(result, slptbl, on="COMID", how="left")
+    #     result.SLOPE = result.SLOPE.fillna(0)
+    #     result["SlpWtd"] = result["Sum"] * result["SLOPE"]
+    #     result = result.drop(["SLOPE"], axis=1)
     result["PctFull"] = (
         ((result.AREA * 1e-6) / result.AreaSqKm.astype("float")) * 100
     ).fillna(0)
-    result = result.drop(["GRIDCODE", "VALUE", "AREA"], axis=1)
+    result = result.drop(["GridCode", "SHAPE_Length", "SHAPE_Area","VALUE", "AREA"], axis=1)
     cols = result.columns[1:]
     result.columns = np.append("COMID", "Cat" + cols.values)
     return result  # ALL NAs need to be filled w/ zero here for Accumulation!!
@@ -1129,19 +1133,19 @@ def make_all_reg_IDs(nhd, regs):
     lookup = {}
     for reg in regs:
         print(reg, end=", ", flush=True)
-        cats = gpd.read_file(f"{nhd}/{reg}", driver='FileGDB',
-                             layer='NHDPlusCatchment_Gen',
-                             ignore_fields=["GridCode","SourceFC",
-                                            "SHAPE_Length","SHAPE_Area"]).drop("geometry", axis=1)
+        cats = gpd.read_file(f"{nhd}/NHDPlusHRVFGen_{reg}_V2.gdb", driver='FileGDB',
+                             layer='NHDPlusCatchment',
+                             ignore_fields=["GridCode","SHAPE_Length",
+                                            "SHAPE_Area"]).drop("geometry", axis=1)
         cats[['REG']]=reg
-        cats['NHDPlusID'] = cats['NHDPlusID'].astype('int64')
+        cats['NHDPlusID'] = cats['Dissolve_NHDPlusID'].astype('int64')
         cats = pd.Series(cats.REG.values,index=cats.NHDPlusID).to_dict()
         lookup.update(cats)
     print("...done!")
-    return lookup # RETURN A DICT!
+    return set(lookup) # RETURN A DICT!
 
 
-def makeNumpyVectors(nhd, regs):
+def makeNumpyVectors(nhd, numpy_dir, regs):
     """
     Uses the NHD tables to create arrays of upstream catchments which are used
     in the Accumulation function
@@ -1149,58 +1153,51 @@ def makeNumpyVectors(nhd, regs):
     Arguments
     ---------
     nhd         : directory where NHD is stored
-    
+    numpy_dir   : directory to create zipped numpy arrays
+    regs        : NHD regions to process
     """
-    os.mkdir("accum_npy")
+    os.mkdir(f"{numpy_dir}/accum_npy")
     # inputs = nhd_dict(nhd)
-    all_comids = make_all_cat_comids(nhd, inputs)
+    all_reg_ids = make_all_reg_IDs(nhd, regs)
     print("Making numpy files specified inputs...", end="", flush=True)
     for zone in regs:
         print(zone, end=", ", flush=True)
         pre = f"{nhd}/NHDPlusHRVFGen_{zone}_V2.gdb"
         flow = gpd.read_file(f"{pre}", driver="FileGDB", layer="NHDPlusFlow")
         
-        flow = dbf2DF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["FromNHDPID", "ToNHDPID",
-                                                                "FromVPUID","ToVPUID","VPUOUT"]]
         flow = flow[(flow.ToNHDPID != 0) & (flow.FromNHDPID != 0)]
-        fls = gpd.read_file(f"{pre}", driver="FileGDB", layer="NHDFlowline",
-                            ignore_fields=["Shape_Length", "geometry"])
-        coastfl = fls.COMID[fls.FTYPE == "Coastline"]
-        flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
-        # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs
-        # here that won't get filtered out any other way
-        flow = flow[~flow.FROMCOMID.isin(inter_tbl.removeCOMs)]
-        # find values that are coming from other zones and remove the ones that
-        # aren't in the interVPU table
-        out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
+        fls = gpd.read_file(f"{pre}", driver="FileGDB", layer="NHDFlowline")
+        coastfl = fls.NHDPlusID[fls.FType == 566]
+        flow = flow[~flow.ToNHDPID.isin(coastfl.values)]
+        out = np.setdiff1d(flow.FromNHDPID.values, fls.NHDPlusID.values)
         out = out[
             np.nonzero(out)
         ]  # this should be what combines zones and above^, but we force connections with inter_tbl
-        flow = flow[
-            ~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))
-        ]
+        # flow = flow[
+        #     ~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))
+        # ]
         # Table is ready for processing and flow connection dict can be created
         flow_dict = defaultdict(list)
         for _, row in flow.iterrows():
-            flow_dict[row.TOCOMID].append(row.FROMCOMID)
+            flow_dict[row.ToNHDPID].append(row.FromNHDPID)
         # add IDs from UpCOMadd column if working in ToZone, forces the flowtable connection though not there
-        for interLine in inter_tbl.values:
-            if interLine[6] > 0 and interLine[2] == zone:
-                flow_dict[int(interLine[6])].append(int(interLine[0]))
-        out_of_vpus = inter_tbl.loc[
-            (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
-        ].thruCOMIDs.values
-        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf").set_index("FEATUREID")
-        comids = cats.index.values
-        comids = np.append(comids, out_of_vpus)
+        # for interLine in inter_tbl.values:
+        #     if interLine[6] > 0 and interLine[2] == zone:
+        #         flow_dict[int(interLine[6])].append(int(interLine[0]))
+        # out_of_vpus = inter_tbl.loc[
+        #     (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
+        # ].thruCOMIDs.values
+        cats = gpd.read_file(f"{pre}",driver="FileGDB", layer="NHDPlusCatchment").set_index("Dissolve_NHDPlusID").drop("geometry", axis=1)
+        IDs = cats.index.values
+        # comids = np.append(comids, out_of_vpus)
         # list of upstream lists, filter comids in all_comids
-        ups = [list(all_comids.intersection(bastards(x, flow_dict))) for x in comids]
+        ups = [list(all_reg_ids.intersection(bastards(x, flow_dict))) for x in IDs]
         lengths = np.array([len(u) for u in ups])
         upstream = np.hstack(ups).astype(np.int32)  # Convert to 1d vector
-        assert len(ups) == len(lengths) == len(comids)
+        assert len(ups) == len(lengths) == len(IDs)
         np.savez_compressed(
-            f"./accum_npy/accum_{zone}.npz",
-            comids=comids,
+            f"{numpy_dir}/accum_npy/accum_{zone}.npz",
+            IDs=IDs,
             lengths=lengths,
             upstream=upstream,
         )
