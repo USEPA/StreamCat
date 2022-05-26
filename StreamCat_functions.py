@@ -850,7 +850,7 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
 ##############################################################################
 
 
-def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
+def Accumulation(tbl, IDs, lengths, upstream, tbl_type, icol="IDs"):
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
                   "Ryan Hill <hill.ryan@epa.gov>"
@@ -860,21 +860,21 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     Arguments
     ---------
     arr                   : table containing watershed values
-    comids                : numpy array of all zones comids
-    lengths               : numpy array with lengths of upstream comids
-    upstream              : numpy array of all upstream arrays for each COMID
+    IDs                   : numpy array of all zones IDs
+    lengths               : numpy array with lengths of upstream IDs
+    upstream              : numpy array of all upstream arrays for each ID
     tbl_type              : string value of table metrics to be returned
     icol                  : column in arr object to index
     """
     # RuntimeWarning: invalid value encountered in double_scalars
     np.seterr(all="ignore")
-    coms = tbl[icol].values.astype("int32")  # Read in comids
-    indices = swapper(coms, upstream)  # Get indices that will be used to map values
+    IDs = tbl[icol].values.astype('float64')  # Read in IDs
+    indices = swapper(IDs, upstream)  # Get indices that will be used to map values
     del upstream  # a and indices are big - clean up to minimize RAM
     cols = tbl.columns[1:]  # Get column names that will be accumulated
-    z = np.zeros(comids.shape)  # Make empty vector for placing values
-    data = np.zeros((len(comids), len(tbl.columns)))
-    data[:, 0] = comids  # Define first column as comids
+    z = np.zeros(IDs.shape)  # Make empty vector for placing values
+    data = np.zeros((len(IDs), len(tbl.columns)))
+    data[:, 0] = IDs  # Define first column as comids
     accumulated_indexes = np.add.accumulate(lengths)[:-1]
     # Loop and accumulate values
     for index, column in enumerate(cols, 1):
@@ -910,7 +910,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
         else:
             values = np.array([np.nansum(val) for val in all_values])
         data[:, index] = values
-    data = data[np.in1d(data[:, 0], coms), :]  # Remove the extra comids
+    data = data[np.in1d(data[:, 0], IDs), :]  # Remove the extra IDss
     outDF = pd.DataFrame(data)
     prefix = "UpCat" if tbl_type == "Up" else "Ws"
     outDF.columns = [icol] + [c.replace("Cat", prefix) for c in cols.tolist()]
@@ -1005,7 +1005,7 @@ def createCatStats(
     nhdTable = nhdTable.rename(
         columns={"Dissolve_NHDPlusID": "NHDPlusID"})
     result = pd.merge(
-        nhdTable, table, how="left", left_on="NHDPlusID", right_on="VALUE"
+        nhdTable, table, how="left", left_on="GridCode", right_on="VALUE"
     )
     # if LandscapeLayer.split("/")[-1].split(".")[0] == "rdstcrs":
     #     slptbl = dbf2DF(
@@ -1020,9 +1020,10 @@ def createCatStats(
     result["PctFull"] = (
         ((result.AREA * 1e-6) / result.AreaSqKm.astype("float")) * 100
     ).fillna(0)
-    result = result.drop(["GridCode", "SHAPE_Length", "SHAPE_Area","VALUE", "AREA"], axis=1)
+    result = pd.DataFrame(result)
+    result = result.drop(["GridCode", "geometry", "SHAPE_Length", "SHAPE_Area","VALUE", "AREA"], axis=1)
     cols = result.columns[1:]
-    result.columns = np.append("COMID", "Cat" + cols.values)
+    result.columns = np.append("NHDPlusID", "Cat" + cols.values)
     return result  # ALL NAs need to be filled w/ zero here for Accumulation!!
 
 
@@ -1110,7 +1111,7 @@ def chkColumnLength(table, landscape_layer):
 ##############################################################################
 
 
-def swapper(coms, upStream):
+def swapper(IDs, upStream):
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
                   "Ryan Hill <hill.ryan@epa.gov>"
@@ -1118,11 +1119,11 @@ def swapper(coms, upStream):
 
     Arguments
     ---------
-    coms                  : numpy array of all COMIDs in the zone
-    upstream              : numpy array of all upstream COMIDs for each local catchment
+    IDs                  : numpy array of all IDss in the zone
+    upstream              : numpy array of all upstream IDss for each local catchment
     """
-    bsort = np.argsort(coms)
-    apos = np.searchsorted(coms[bsort], upStream)
+    bsort = np.argsort(IDs)
+    apos = np.searchsorted(IDs[bsort], upStream)
     indices = bsort[apos]
     return indices
 

@@ -103,8 +103,8 @@ for _, row in ctl.query("run == 1").iterrows():
         for REG in REGS:
             if isinstance(REG, list):
                 REG=REG[0]
-                else:
-                    pass
+            else:
+                pass
         fn = f"{OUT_DIR}/{row.FullTableName}_{REG}.csv"
         cat = pd.read_csv(fn)
         processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().bool()
@@ -116,33 +116,35 @@ for _, row in ctl.query("run == 1").iterrows():
 
         # if zone in inter_vpu.ToZone.values:
         #     cat = appendConnectors(cat, Connector, zone, inter_vpu)
-        accum = np.load(f"accum_npy/accum_{zone}.npz")
-
-        cat.COMID = cat.COMID.astype(accum["comids"].dtype)
-        cat.set_index("COMID", inplace=True)
-        cat = cat.loc[accum["comids"]].reset_index().copy()
+        accum = np.load(f"{NUMPY_DIR}/accum_npy/accum_{REG}.npz")
+        
+        cat = cat.rename(
+            columns={"NHDPlusID": "IDs"})
+        cat.IDs = cat.IDs.astype(accum["IDs"].dtype)
+        cat.set_index("IDs", inplace=True)
+        cat = cat.loc[accum["IDs"]].reset_index().copy()
 
         up = Accumulation(
-            cat, accum["comids"], accum["lengths"], accum["upstream"], "Up"
+            cat, accum["IDs"], accum["lengths"], accum["upstream"], "Up"
         )
 
         ws = Accumulation(
-            cat, accum["comids"], accum["lengths"], accum["upstream"], "Ws"
+            cat, accum["IDs"], accum["lengths"], accum["upstream"], "Ws"
         )
 
-        if zone in inter_vpu.ToZone.values:
-            cat = pd.read_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv")
-        if zone in inter_vpu.FromZone.values:
-            interVPU(
-                ws,
-                cat.columns[1:],
-                row.accum_type,
-                zone,
-                Connector,
-                inter_vpu.copy(),
-            )
-        upFinal = pd.merge(up, ws, on="COMID")
-        final = pd.merge(cat, upFinal, on="COMID")
+        # if zone in inter_vpu.ToZone.values:
+        #     cat = pd.read_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv")
+        # if zone in inter_vpu.FromZone.values:
+        #     interVPU(
+        #         ws,
+        #         cat.columns[1:],
+        #         row.accum_type,
+        #         zone,
+        #         Connector,
+        #         inter_vpu.copy(),
+        #     )
+        upFinal = pd.merge(up, ws, on="IDs")
+        final = pd.merge(cat, upFinal, on="IDs")
         final.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
     print(end="") if processed else print("done!")
 if already_processed:
