@@ -8,12 +8,12 @@ import sys
 import click
 import zipfile
 from pathlib import Path
-
+from os.path import exists
 import numpy as np
 import pandas as pd
 
-from stream_cat_config import FINAL_DIR, LENGTHS, OUT_DIR
-
+# from stream_cat_config import FINAL_DIR, LENGTHS, OUT_DIR
+from stream_cat_config_vfgen import FINAL_DIR, OUT_DIR, REGS
 
 def build_stats(tbl, stats):
     if not stats:
@@ -71,11 +71,17 @@ def finalize(control):
     missing = []
     fn = "{}_{}.csv"
     for table, metrics in tables.items():  # make sure all tables exist
-        for vpu in inputs:
-            for metric in metrics:
-                accumulated_file = OUT_DIR / fn.format(metric, vpu)
-                if not accumulated_file.exists():
-                    missing.append(accumulated_file)
+        print(metrics)
+        print(tables)
+        for REG in REGS:
+            if isinstance(REG, list):
+                REG=REG[0]
+            else:
+                pass
+        for metric in metrics:
+            accumulated_file = f"{OUT_DIR}/{metric}_{REG}.csv"
+            if not exists(accumulated_file):
+                missing.append(accumulated_file)
 
     if len(missing) > 0:
         for miss in missing:
@@ -89,7 +95,7 @@ def finalize(control):
         "data"
     ].item()
 
-    STATES_DIR = FINAL_DIR.parents[0] / "States"
+    STATES_DIR = Path(FINAL_DIR).parents[0] / "States"
     if not FINAL_DIR.exists():
         FINAL_DIR.mkdir(parents=True)
     if not (FINAL_DIR / "zips").exists():
@@ -106,23 +112,25 @@ def finalize(control):
         # this will print stats for every final table, used for metadata
         stats = dict()
         # Looop through NHD Hydro-regions
-        for vpu in inputs:
-            out_file = FINAL_DIR / region_fn.format(table, vpu)
-            zip_file = FINAL_DIR / "zips" / "_Region{}.zip".format(table, vpu)
+        for REG in REGS:
+            out_file = f"{FINAL_DIR}/{metric}_{REG}.csv"
+            zip_file = f"{FINAL_DIR}/{metric}_{REG}.zip"
 
             # Check if output tables exist before writing
-            if not out_file.exists():
+            if not exists(out_file):
                 for metric_count, metric in enumerate(metrics):
+                    print(metric_count)
+                    print(metric)
                     idx = ctl.loc[ctl.FullTableName == metric].index.item()
                     row = ctl.iloc[idx].copy()
 
                     a_m = "" if row.AppendMetric == "none" else row.AppendMetric
                     # Read in the StreamCat allocation and accumulation table
-                    tbl = pd.read_csv(OUT_DIR / fn.format(metric, vpu))
+                    tbl = pd.read_csv(f"{OUT_DIR}/{metric}_{REG}.csv")
                     front_cols = [
                         title
                         for title in tbl.columns
-                        for x in ["COMID", "AreaSqKm", "PctFull"]
+                        for x in ["IDs", "AreaSqKm", "PctFull"]
                         if x in title and not "Up" in title
                     ]
                     _, catArea, catPct, wsArea, wsPct = front_cols
@@ -198,10 +206,10 @@ def finalize(control):
                             final = tbl[front_cols + end_cols].copy()
                         else:
                             tbl = tbl[["COMID"] + end_cols]
-                            final = pd.merge(final, tbl, on="COMID")
+                            final = pd.merge(final, tbl, on="IDs")
 
                     if row.MetricType == "Percent":
-                        lookup = pd.read_csv(row.MetricName)
+                        lookup = pd.read_csv(f'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/ControlTables/{row.MetricName}')
                         cat_named = [
                             "Pct{}Cat{}".format(x, a_m) for x in lookup.final_val.values
                         ]
@@ -220,21 +228,21 @@ def finalize(control):
                             final = tbl[front_cols + catcols + wscols]
                             final.columns = front_cols + cat_named + ws_named
                         else:
-                            final2 = tbl[["COMID"] + catcols + wscols]
-                            final2.columns = ["COMID"] + cat_named + ws_named
-                            final = pd.merge(final, final2, on="COMID")
+                            final2 = tbl[["IDs"] + catcols + wscols]
+                            final2.columns = ["IDs"] + cat_named + ws_named
+                            final = pd.merge(final, final2, on="IDs")
 
-                final = final.set_index("COMID")
+                final = final.set_index("IDs")
                 if len(final[np.isinf(final)].stack().dropna()) > 0:
                     # inf values in dams layer - vpu 01 remove
                     final = final.replace([np.inf, -np.inf], np.nan)
-                if vpu == "04":
-                    rmtbl = pd.read_csv(
-                        "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat"
-                        "/FTP_Staging/Documentation/DataProcessingAndQualityAssurance/"
-                        "QA_Files/ProblemStreamsR04.csv"
-                    )[["COMID"]]
-                    final = final.drop(rmtbl.COMID.tolist())
+                # if vpu == "04":
+                #     rmtbl = pd.read_csv(
+                #         "L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat"
+                #         "/FTP_Staging/Documentation/DataProcessingAndQualityAssurance/"
+                #         "QA_Files/ProblemStreamsR04.csv"
+                #     )[["COMID"]]
+                #     final = final.drop(rmtbl.COMID.tolist())
 
                 stats = build_stats(final, stats)
                 final = final.fillna("NA")
@@ -248,8 +256,8 @@ def finalize(control):
                     droppers = [col for col in final.columns if "NoData" in col]
                     final.drop(droppers, axis=1, inplace=True)
 
-                if not LENGTHS[vpu] == len(final):
-                    print(LENGTH_ERROR_MESSAGE.format(table, vpu))
+                # if not LENGTHS[REG] == len(final):
+                #     print(LENGTH_ERROR_MESSAGE.format(table, vpu))
                 final.to_csv(out_file)
 
             # ZIP up every region as we write them out
