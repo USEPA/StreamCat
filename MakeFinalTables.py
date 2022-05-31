@@ -209,7 +209,7 @@ def finalize(control):
                             final = pd.merge(final, tbl, on="IDs")
 
                     if row.MetricType == "Percent":
-                        lookup = pd.read_csv(f'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/ControlTables/{row.MetricName}')
+                        lookup = pd.read_csv(f'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/ControlTables/{metric}_lookup.csv')
                         cat_named = [
                             "Pct{}Cat{}".format(x, a_m) for x in lookup.final_val.values
                         ]
