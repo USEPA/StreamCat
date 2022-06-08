@@ -233,14 +233,16 @@ test.tail()
 test['DSNAME'][0:20]
 test['DSNAME'][21:40]
 test['DSNAME'][41:60]
+test['DSNAME'][61:80]
+test['DSNAME'][81:120]
 # View a particular table
-table='RoadDensityRipBuf100'
-table='ImperviousSurfacesRipBuf100'
-table='AgMidHiSlopes2011'
-table='Septic'
+table='FirePerimeters'
+table='NLCD2001'
+table='Slope'
+table='KFFACT'
 ViewDBtable(config_file, table)
 # Delete a tables
-DeleteDBtable(config_file, table, just_data =True)
+# DeleteDBtable(config_file, table, just_data =True)
 # DeleteDBtable(config_file, table, just_data =False)
 # Create a table
 test = CreateDBtable(config_file, table_params)
@@ -254,9 +256,9 @@ print(test)
 table='ImperviousSurfacesRipBuf100'
 table='RoadDensityRipBuf100'
 table='MTBS'
-table='NLCD2006RipBuf100'
+table='WWTP'
 file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
-temp_file='E:/WorkingData/junk.csv'
+temp_file='E:/WorkingData/junk2.csv'
 LoadTime = dt.now()
 PopulateDBtable(config_file, table, file_loc, temp_file)
 print("Table load complete in : " + str(dt.now() - LoadTime))
@@ -281,6 +283,25 @@ table_params = {"name": "AgMidHiSlopes2011",
             "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
                         {"name": "PctAg2011Slp10Cat", "type": "number"},{"name": "PctAg2011Slp10Ws","type": "number"},
                         {"name": "PctAg2011Slp20Cat", "type": "number"},{"name": "PctAg2011Slp20Ws","type": "number"},]}
+
+table_params = {"name": "WaterInput",
+            "metrics":[{"name": "waterinput", "display_name": "Water Input"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "WaterInputCat", "type": "number"},{"name": "WaterInputWs","type": "number"}]}
+
+table_params = {"name": "AgDrain",
+            "metrics":[{"name": "pctagdrainage", "display_name": "Agricultural Drainage"},
+                       {"name": "pctno_agdrainage", "display_name": "Non Agricultural Drainage"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "PctAgDrainageCat", "type": "number"},{"name": "PctAgDrainageWs","type": "number"},
+                        {"name": "PctNo_AgDrainageCat", "type": "number"},{"name": "PctNo_AgDrainageWs","type": "number"},]}
+
+table_params = {"name": "Nsurp_NANI",
+            "metrics":[{"name": "nsurp", "display_name": "Nitrogen Surplus"},
+                       {"name": "nani", "display_name": "Anthropogenic Nitrogen"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "NsurpCat", "type": "number"},{"name": "NsurpWs","type": "number"},
+                        {"name": "NANICat", "type": "number"},{"name": "NANIWs","type": "number"},]}
 
 
 table_params = {"name": "WWTP",
