@@ -236,10 +236,10 @@ test['DSNAME'][41:60]
 test['DSNAME'][61:80]
 test['DSNAME'][81:120]
 # View a particular table
-table='FirePerimeters'
+table='EPA_FRS'
 table='NLCD2001'
-table='Slope'
-table='KFFACT'
+table='GeoChemPhys1'
+table='Lithology'
 ViewDBtable(config_file, table)
 # Delete a tables
 # DeleteDBtable(config_file, table, just_data =True)
