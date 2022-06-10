@@ -996,14 +996,14 @@ def createCatStats(
     if accum_type == "Categorical":
         table = chkColumnLength(table, LandscapeLayer)
         table["AREA"] = table[table.columns.tolist()[1:]].sum(axis=1)
-    nhdTable = gpd.read_file(NHD_DIR +'/NHDPlusHRVFGen_' + REG + '_V2.gdb', 
+    nhdTable = gpd.read_file(NHD_DIR +'/NHDPlusHRVFGen' + REG + '_V5.gdb', 
                     driver='FileGDB', 
                     layer='NHDPlusCatchment')
     # calc area sqkm
     nhdTable = nhdTable.to_crs({'epsg:5070'})
     nhdTable["AreaSqKm"] = nhdTable['geometry'].area/ 10**6
     nhdTable = nhdTable.rename(
-        columns={"Dissolve_NHDPlusID": "NHDPlusID"})
+        columns={"NHDPlusID": "NHDPlusID"})
     result = pd.merge(
         nhdTable, table, how="left", left_on="GridCode", right_on="VALUE"
     )
@@ -1134,12 +1134,12 @@ def make_all_reg_IDs(nhd, regs):
     lookup = {}
     for reg in regs:
         print(reg, end=", ", flush=True)
-        cats = gpd.read_file(f"{nhd}/NHDPlusHRVFGen_{reg}_V2.gdb", driver='FileGDB',
+        cats = gpd.read_file(f"{nhd}/NHDPlusHRVFGen{reg}_V5.gdb", driver='FileGDB',
                              layer='NHDPlusCatchment',
                              ignore_fields=["GridCode","SHAPE_Length",
                                             "SHAPE_Area"]).drop("geometry", axis=1)
         cats[['REG']]=reg
-        cats['NHDPlusID'] = cats['Dissolve_NHDPlusID'].astype('int64')
+        cats['NHDPlusID'] = cats['NHDPlusID'].astype('int64')
         cats = pd.Series(cats.REG.values,index=cats.NHDPlusID).to_dict()
         lookup.update(cats)
     print("...done!")
@@ -1163,7 +1163,7 @@ def makeNumpyVectors(nhd, numpy_dir, regs):
     print("Making numpy files specified inputs...", end="", flush=True)
     for zone in regs:
         print(zone, end=", ", flush=True)
-        pre = f"{nhd}/NHDPlusHRVFGen_{zone}_V2.gdb"
+        pre = f"{nhd}/NHDPlusHRVFGen{zone}_V5.gdb"
         flow = gpd.read_file(f"{pre}", driver="FileGDB", layer="NHDPlusFlow")
         
         flow = flow[(flow.ToNHDPID != 0) & (flow.FromNHDPID != 0)]
@@ -1188,7 +1188,7 @@ def makeNumpyVectors(nhd, numpy_dir, regs):
         # out_of_vpus = inter_tbl.loc[
         #     (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
         # ].thruCOMIDs.values
-        cats = gpd.read_file(f"{pre}",driver="FileGDB", layer="NHDPlusCatchment").set_index("Dissolve_NHDPlusID").drop("geometry", axis=1)
+        cats = gpd.read_file(f"{pre}",driver="FileGDB", layer="NHDPlusCatchment").set_index("NHDPlusID").drop("geometry", axis=1)
         IDs = cats.index.values
         # comids = np.append(comids, out_of_vpus)
         # list of upstream lists, filter comids in all_comids
