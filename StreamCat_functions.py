@@ -23,15 +23,6 @@ from typing import Generator
 
 import numpy as np
 import pandas as pd
-import rasterio
-from gdalconst import *
-from osgeo import gdal, ogr, osr
-from rasterio import transform
-
-if rasterio.__version__[0] == "0":
-    from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
-if rasterio.__version__[0] == "1":
-    from rasterio.warp import calculate_default_transform, reproject, Resampling
 
 import fiona
 import geopandas as gpd
@@ -44,98 +35,15 @@ from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 
 ##############################################################################
 
-
 class LicenseError(Exception):
     pass
 
-
 ##############################################################################
-
-
-def UpcomDict(nhd, interVPUtbl, zone):
-    """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
-
-    Creates a dictionary of all catchment connections in a major NHDPlus basin.
-    For example, the function combines all from-to typology tables in the Mississippi
-    Basin if 'MS' is provided as 'hydroregion' argument.
-
-    Arguments
-    ---------
-    nhd             : the directory contining NHDPlus data
-    interVPUtbl     : the table that holds the inter-VPU connections to manage connections and anomalies in the NHD
-    """
-    # Returns UpCOMs dictionary for accumulation process
-    # Provide either path to from-to tables or completed from-to table
-    flow = dbf2DF(f"{nhd}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
-    flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
-    # check to see if out of zone values have FTYPE = 'Coastline'
-    fls = dbf2DF(f"{nhd}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
-    coastfl = fls.COMID[fls.FTYPE == "Coastline"]
-    flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
-    # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs here
-    # that won't get filtered out
-    remove = interVPUtbl.removeCOMs.values[interVPUtbl.removeCOMs.values != 0]
-    flow = flow[~flow.FROMCOMID.isin(remove)]
-    # find values that are coming from other zones and remove the ones that
-    # aren't in the interVPU table
-    out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
-    out = out[np.nonzero(out)]
-    flow = flow[~flow.FROMCOMID.isin(np.setdiff1d(out, interVPUtbl.thruCOMIDs.values))]
-    # Now table is ready for processing and the UpCOMs dict can be created
-    fcom, tcom = flow.FROMCOMID.values, flow.TOCOMID.values
-    UpCOMs = defaultdict(list)
-    for i in range(0, len(flow), 1):
-        from_comid = fcom[i]
-        if from_comid == 0:
-            continue
-        else:
-            UpCOMs[tcom[i]].append(from_comid)
-    # add IDs from UpCOMadd column if working in ToZone, forces the flowtable connection though not there
-    for interLine in interVPUtbl.values:
-        if interLine[6] > 0 and interLine[2] == zone:
-            UpCOMs[int(interLine[6])].append(int(interLine[0]))
-    return UpCOMs
-
-
-##############################################################################
-
-
-def children(token, tree, chkset=None):
-    """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
-    returns a list of every child
-
-    Arguments
-    ---------
-    token           : a single COMID
-    tree            : Full dictionary of list of upstream COMIDs for each COMID in the zone
-    chkset          : set of all the NHD catchment COMIDs used to remove flowlines with no associated catchment
-    """
-    visited = set()
-    to_crawl = deque([token])
-    while to_crawl:
-        current = to_crawl.popleft()
-        if current in visited:
-            continue
-        visited.add(current)
-        node_children = set(tree[current])
-        to_crawl.extendleft(node_children - visited)
-    # visited.remove(token)
-    if chkset != None:
-        visited = visited.intersection(chkset)
-    return list(visited)
-
-
-##############################################################################
-
 
 def bastards(token, tree):
     """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
+    __author__ = "Marc Weber <weber.marc@epa.gov>"
+                 "Ryan Hill <hill.ryan@epa.gov>"
     returns a list of every child w/ out father (key) included
 
     Arguments
@@ -156,35 +64,6 @@ def bastards(token, tree):
     visited.remove(token)
     return list(visited)
 
-
-##############################################################################
-
-
-def getRasterInfo(FileName):
-    """
-    __author__ =   "Marc Weber <weber.marc@epa.gov>"
-                   "Ryan Hill <hill.ryan@epa.gov>"
-    returns basic raster information for a given raster
-
-    Arguments
-    ---------
-    FileName        : a raster file
-    """
-    SourceDS = gdal.Open(FileName, GA_ReadOnly)
-    NDV = SourceDS.GetRasterBand(1).GetNoDataValue()
-    stats = SourceDS.GetRasterBand(1).GetStatistics(True, True)
-    xsize = SourceDS.RasterXSize
-    ysize = SourceDS.RasterYSize
-    GeoT = SourceDS.GetGeoTransform()
-    prj = SourceDS.GetProjection()
-    Projection = osr.SpatialReference(wkt=prj)
-    Proj_projcs = Projection.GetAttrValue("projcs")
-    #    if Proj_projcs == None:
-    #        Proj_projcs = 'Not Projected'
-    Proj_geogcs = Projection.GetAttrValue("geogcs")
-    DataType = SourceDS.GetRasterBand(1).DataType
-    DataType = gdal.GetDataTypeName(DataType)
-    return (NDV, stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType)
 
 
 ##############################################################################
@@ -228,409 +107,8 @@ def GetRasterValueAtPoints(rasterfile, shapefile, fieldname):
     return df
 
 
-##############################################################################
-
-
-def Reclass(inras, outras, reclass_dict, dtype=None):
-    """
-    __author__ =   "Marc Weber <weber.marc@epa.gov>"
-                   "Ryan Hill <hill.ryan@epa.gov>"
-    reclass a set of values in a raster to another value
-
-    Arguments
-    ---------
-    inras           : an input raster file
-    outras          : an output raster file
-    reclass_dict    : dictionary of lookup values read in from lookup csv file
-    in_nodata       : Returned no data values from
-    out_dtype       : the data type of the raster, i.e. 'float32', 'uint8' (string)
-    """
-
-    with rasterio.open(inras) as src:
-        # Set dtype and nodata values
-        if dtype is None:  # If no dtype defined, use input dtype
-            nd = src.meta["nodata"]
-            dtype = src.meta["dtype"]
-        else:
-            try:
-                nd = eval("np.iinfo(np." + dtype + ").max")
-            except:
-                nd = eval("np.finfo(np." + dtype + ").max")
-            # exec 'nd = np.iinfo(np.'+out_dtype+').max'
-        kwargs = src.meta.copy()
-        kwargs.update(
-            driver="GTiff",
-            count=1,
-            compress="lzw",
-            nodata=nd,
-            dtype=dtype,
-            bigtiff="YES",  # Output will be larger than 4GB
-        )
-
-        windows = src.block_windows(1)
-
-        with rasterio.open(outras, "w", **kwargs) as dst:
-            for idx, window in windows:
-                src_data = src.read(1, window=window)
-                # Convert values
-                # src_data = np.where(src_data == in_nodata, nd, src_data).astype(dtype)
-                for inval, outval in reclass_dict.iteritems():
-                    if np.isnan(outval).any():
-                        # src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
-                        src_data = np.where(src_data == inval, nd, src_data).astype(
-                            dtype
-                        )
-                    else:
-                        src_data = np.where(src_data == inval, outval, src_data).astype(
-                            dtype
-                        )
-                # src_data = np.where(src_data == inval, outval, src_data)
-                dst_data = src_data
-                dst.write_band(1, dst_data, window=window)
-
 
 ##############################################################################
-
-
-def rasterMath(inras, outras, expression=None, out_dtype=None):
-    """
-    __author__ =   "Marc Weber <weber.marc@epa.gov>"
-                   "Ryan Hill<hill.ryan@epa.gov>"
-    Applies arithmetic operation to a raster by a given value and returns raster
-    in a specified data type - ideas from https://sgillies.net/page3.html
-
-    Arguments
-    ---------
-    inras           : an input raster file (string)
-    outras          : an output raster file (string)
-    expression      : string of mathematical expression to be used that includes the input raster
-                      as variable. If no expression provided, raster is copied. Function can be
-                      used to change dtype of original raster.
-                      Example:
-                      inras = 'C:/some_locat_raster.tif'
-                      expression = 'log(' + inras + '+1)' or inras + ' * 100'
-    out_dtype       : the data type of the raster, i.e. 'float32', 'uint8' (string)
-    """
-    expression = expression.replace(inras, "src_data")
-
-    with rasterio.drivers():
-        with rasterio.open(inras) as src:
-            # Set dtype and nodata values
-            if out_dtype is None:  # If no dtype defined, use input dtype
-                nd = src.meta["nodata"]
-                dt = src.meta["dtype"]
-            else:
-                try:
-                    nd = eval("np.iinfo(np." + out_dtype + ").max")
-                except:
-                    nd = eval("np.finfo(np." + out_dtype + ").max")
-                # exec 'nd = np.iinfo(np.'+out_dtype+').max'
-                dt = out_dtype
-            kwargs = src.meta.copy()
-            kwargs.update(driver="GTiff", count=1, compress="lzw", dtype=dt, nodata=nd)
-
-            windows = src.block_windows(1)
-
-            with rasterio.open(outras, "w", **kwargs) as dst:
-                for idx, window in windows:
-                    src_data = src.read(1, window=window)
-                    # Where src not eq to orig nodata, multiply by val, else set to new nodata. Set dtype
-                    if expression == None:
-                        # No expression produces copy of original raster (can use new data type)
-                        dst_data = np.where(
-                            src_data != src.meta["nodata"], src_data, kwargs["nodata"]
-                        ).astype(dt)
-                    else:
-                        dst_data = np.where(
-                            src_data != src.meta["nodata"],
-                            eval(expression),
-                            kwargs["nodata"],
-                        ).astype(dt)
-                    dst.write_band(1, dst_data, window=window)
-
-
-##############################################################################
-
-
-def Project(inras, outras, dst_crs, template_raster, nodata):
-    """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Ryan Hill <hill.ryan@epa.gov>"
-    reprojects and resamples a raster using rasterio
-
-    Arguments
-    ---------
-    inras           : an input raster with full path name
-    outras          : an output raster with full path name
-    outproj         : projection to apply to output raster in EPSG format, i.e. EPSG:5070
-    resamp          : resampling method to use - either nearest or bilinear
-    """
-    with rasterio.open(inras) as src:
-        with rasterio.open(template_raster) as tmp:
-            affine, width, height = calculate_default_transform(
-                src.crs, dst_crs, src.width, src.height, *tmp.bounds
-            )
-            kwargs = src.meta.copy()
-            kwargs.update(
-                {
-                    "crs": dst_crs,
-                    "transform": affine,
-                    "affine": affine,
-                    "width": width,
-                    "height": height,
-                    "driver": "GTiff",
-                }
-            )
-
-            with rasterio.open(outras, "w", **kwargs) as dst:
-                reproject(
-                    source=rasterio.band(src, 1),
-                    destination=rasterio.band(dst, 1),
-                    src_transform=src.affine,
-                    src_crs=src.crs,
-                    src_nodata=nodata,
-                    dst_transform=affine,
-                    dst_crs=dst_crs,
-                )
-
-
-##############################################################################
-
-
-def ShapefileProject(InShp, OutShp, CRS):
-    """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-    reprojects a shapefile with Fiona
-
-    Arguments
-    ---------
-    InShp           : an input shapefile as a string, i.e. 'C:/Temp/inshape.shp'
-    OutShp          : an output shapefile as a string, i.e. 'C:/Temp/outshape.shp'
-    CRS             : the output CRS in Fiona format
-    """
-    # Open a file for reading
-    with fiona.open(InShp, "r") as source:
-        sink_schema = source.schema.copy()
-        sink_schema["geometry"] = "Point"
-
-        # Open an output file, using the same format driver and passing the desired
-        # coordinate reference system
-        with fiona.open(
-            OutShp,
-            "w",
-            crs=CRS,
-            driver=source.driver,
-            schema=sink_schema,
-        ) as sink:
-            for f in source:
-                # Write the record out.
-                sink.write(f)
-
-        # The sink's contents are flushed to disk and the file is closed
-        # when its ``with`` block ends. This effectively executes
-        # ``sink.flush(); sink.close()``.
-
-
-##############################################################################
-
-
-def Resample(inras, outras, resamp_type, resamp_res):
-    """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Ryan Hill <hill.ryan@epa.gov>"
-    Resamples a raster using rasterio
-
-    Arguments
-    ---------
-    inras           : an input raster with full path name
-    outras          : an output raster with full path name
-    resamp_type     : resampling method to use - either nearest or bilinear
-    resamp_res      : resolution to apply to output raster
-    """
-    with rasterio.open(inras) as src:
-        affine, width, height = calculate_default_transform(
-            src.crs, src.crs, src.width, src.height, *src.bounds, resolution=resamp_res
-        )
-        kwargs = src.meta.copy()
-        kwargs.update(
-            {
-                "crs": src.crs,
-                "transform": affine,
-                "affine": affine,
-                "width": width,
-                "height": height,
-                "driver": "GTiff",
-            }
-        )
-        with rasterio.open(outras, "w", **kwargs) as dst:
-            if resamp_type == "bilinear":
-                reproject(
-                    source=rasterio.band(src, 1),
-                    destination=rasterio.band(dst, 1),
-                    src_transform=src.affine,
-                    src_crs=src.crs,
-                    dst_transform=src.affine,
-                    dst_crs=dst_crs,
-                    resampling=RESAMPLING.bilinear,
-                    compress="lzw",
-                )
-            elif resamp_type == "nearest":
-                reproject(
-                    source=rasterio.band(src, 1),
-                    destination=rasterio.band(dst, 1),
-                    src_transform=affine,
-                    src_crs=src.crs,
-                    dst_transform=affine,
-                    dst_crs=src.crs,
-                    resampling=RESAMPLING.nearest,
-                    compress="lzw",
-                )
-
-
-##############################################################################
-
-
-def ProjectResamp(inras, outras, out_proj, resamp_type, out_res):
-    """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Ryan Hill <hill.ryan@epa.gov>"
-    reprojects and resamples a raster using rasterio
-
-    Arguments
-    ---------
-    inras           : an input raster with full path name
-    outras          : an output raster with full path name
-    outproj         : projection to apply to output raster in EPSG format, i.e. EPSG:5070
-    resamp          : resampling method to use - either nearest or bilinear
-    """
-    with rasterio.drivers():
-        with rasterio.open(inras) as src:
-            affine, width, height = calculate_default_transform(
-                src.crs, out_proj, src.width, src.height, *src.bounds
-            )
-            kwargs = src.meta.copy()
-            kwargs.update(
-                {
-                    "crs": out_proj,
-                    "transform": affine,
-                    "affine": affine,
-                    "width": width,
-                    "height": height,
-                    "driver": "GTiff",
-                }
-            )
-
-            windows = src.block_windows(1)
-
-            with rasterio.open(outras, "w", **kwargs) as dst:
-                for idx, window in windows:
-                    if resamp_type == "bilinear":
-                        reproject(
-                            source=rasterio.band(src, 1),
-                            destination=rasterio.band(dst, 1),
-                            src_transform=src.affine,
-                            src_crs=src.crs,
-                            dst_transform=transform.from_origin(
-                                affine[2],
-                                affine[5],
-                                dist.transform[0],
-                                dst.transform[0],
-                            ),
-                            dst_crs=dst_crs,
-                            resampling=RESAMPLING.bilinear,
-                        )
-                    elif resamp_type == "nearest":
-                        reproject(
-                            source=rasterio.band(src, 1),
-                            destination=rasterio.band(dst, 1),
-                            src_transform=src.transform,
-                            src_crs=src.crs,
-                            dst_transform=transform.from_origin(
-                                dst.transform[0],
-                                dst.transform[3],
-                                dst.transform[1],
-                                dst.transform[1],
-                            ),
-                            dst_crs=dst.crs,
-                            resampling=RESAMPLING.nearest,
-                        )
-
-
-##############################################################################
-
-
-def get_raster_value_at_points(
-    points, rasterfile, fieldname=None, val_name=None, out_df=False
-):
-    """
-    Find value at point (x,y) for every point in points of the given
-    rasterfile.
-
-    Arguments
-    ---------
-    points: str | gpd.GeoDataFrame | generator
-        path to point file, or point GeoDataFrame, or generator of (x,y) tuples
-    rasterfile: str
-        path to raster
-    fieldname: str
-        attribute in points that identifies name given to index
-    out_df: bool
-        return pd.DataFrame of values, index will match `fieldname` if used,
-        else the index will be equivalent to `range(len(points))`
-
-    Returns
-    ---------
-    list | pd.DataFrame
-        Values of rasterfile | if `out_df` True, dataframe of values.
-
-    """
-    if isinstance(points, str):
-        points = gpd.read_file(points)
-    if isinstance(points, gpd.GeoDataFrame):
-        assert points.geometry.type.all() == "Point"
-        if fieldname:
-            points.set_index(fieldname)
-        points = points.geometry.apply(lambda g: (g.x, g.y))
-    if isinstance(points, Generator):
-        pass
-
-    with rasterio.open(rasterfile) as src:
-        data = [s[0] for s in src.sample(points)]
-
-    if out_df:
-        return pd.DataFrame(index=points.index, data={val_name: data})
-    else:
-        return data
-
-
-def mask_points(points, mask_dir, INPUTS, nodata_vals=[0, -2147483648.0]):
-    """
-    Filter points to those that only lie within the mask.
-
-    Arguments
-    ---------
-    points: gpd.GeoDataFrame
-        point GeoDataFrame to be filtered
-    mask_dir: str
-        path to folder holding masked rasters for every VPU
-    INPUTS: collections.OrderedDict
-        dictionary of vector processing units and hydroregions from NHDPlusV21
-    nodata_vals: list
-        values of the raster that exist outside of the mask zone
-
-    Returns
-    ---------
-    gpd.GeoDataFrame
-        filtered points that only lie within the masked areas
-
-    """
-    temp = pd.DataFrame(index=points.index)
-    for zone, hydroregion in INPUTS.items():
-        pts = get_raster_value_at_points(points, f"{mask_dir}/{zone}.tif", out_df=True)
-        temp = temp.merge(~pts.isin(nodata_vals), left_index=True, right_index=True)
-    xx = temp.sum(axis=1)
-    return points.iloc[xx.loc[xx == 1].index]
-
 
 def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summary):
     """
@@ -737,118 +215,32 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
 
 ##############################################################################
 
-
-def rat_to_dict(inraster, old_val, new_val):
+def mask_points(points, mask_dir, INPUTS, nodata_vals=[0, -2147483648.0]):
     """
-    __author__ =  "Matt Gregory <matt.gregory@oregonstate.edu>"
-                  "Marc Weber <weber.marc@epa.gov>"
-
-    Given a GDAL raster attribute table, convert to a pandas DataFrame.  Idea from
-    Matt Gregory's gist: https://gist.github.com/grovduck/037d815928b2a9fe9516
+    Filter points to those that only lie within the mask.
     Arguments
     ---------
-    in_rat      : input raster
-    old_val     : current value in raster
-    new_val     : lookup value to use to replace current value
-    """
-    # Open the raster and get a handle on the raster attribute table
-    # Assume that we want the first band's RAT
-    ds = gdal.Open(inraster)
-    rb = ds.GetRasterBand(1)
-    rat = rb.GetDefaultRAT()
-    # Read in each column from the RAT and convert it to a series infering
-    # data type automatically
-    s = [
-        pd.Series(rat.ReadAsArray(i), name=rat.GetNameOfCol(i))
-        for i in xrange(rat.GetColumnCount())
-    ]
-    # Convert the RAT to a pandas dataframe
-    df = pd.concat(s, axis=1)
-    # Close the dataset
-    ds = None
-
-    # Write out the lookup dictionary
-    reclass_dict = pd.Series(df[new_val].values, index=df[old_val]).to_dict()
-    return reclass_dict
-
-
-##############################################################################
-
-
-def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl):
-    """
-    Loads watershed values for given COMIDs to be appended to catResults table for accumulation.
-
-    Arguments
+    points: gpd.GeoDataFrame
+        point GeoDataFrame to be filtered
+    mask_dir: str
+        path to folder holding masked rasters for every VPU
+    INPUTS: collections.OrderedDict
+        dictionary of vector processing units and hydroregions from NHDPlusV21
+    nodata_vals: list
+        values of the raster that exist outside of the mask zone
+    Returns
     ---------
-    tbl                   : Watershed Results table
-    cols                  : list of columns from Cat Results table needed to overwrite onto Connector table
-    accum_type            : type metric to be accumulated, i.e. 'Categorical', 'Continuous', 'Count'
-    zone                  : an NHDPlusV2 VPU number, i.e. 10, 16, 17
-    Connector             : Location of the connector file
-    InterVPUtbl           : table of interVPU exchanges
+    gpd.GeoDataFrame
+        filtered points that only lie within the masked areas
     """
-    # Create subset of the tbl with a COMID in interVPUtbl
-    throughVPUs = (
-        tbl[tbl.COMID.isin(interVPUtbl.thruCOMIDs.values)].set_index("COMID").copy()
-    )
-    # Create subset of InterVPUtbl that identifies the zone we are working on
-    interVPUtbl = interVPUtbl.loc[interVPUtbl.FromZone.values == zone]
-    throughVPUs.columns = cols
-
-    # COMIDs in the toCOMID column need to swap values with COMIDs in other
-    # zones, those COMIDS are then sorted in toVPUS
-    if any(interVPUtbl.toCOMIDs.values > 0):
-        interAlloc = "%s_%s.csv" % (
-            Connector[: Connector.find("_connectors")],
-            interVPUtbl.ToZone.values[0],
-        )
-        tbl = pd.read_csv(interAlloc).set_index("COMID")
-        toVPUs = tbl[tbl.index.isin([x for x in interVPUtbl.toCOMIDs if x > 0])].copy()
-    for _, row in interVPUtbl.iterrows():
-        # Loop through sub-setted interVPUtbl to make adjustments to COMIDS listed in the table
-        if row.toCOMIDs > 0:
-            AdjustCOMs(toVPUs, int(row.toCOMIDs), int(row.thruCOMIDs), throughVPUs)
-        if row.AdjustComs > 0:
-            AdjustCOMs(throughVPUs, int(row.AdjustComs), int(row.thruCOMIDs), None)
-        if row.DropCOMID > 0:
-            throughVPUs = throughVPUs.drop(int(row.DropCOMID))
-    if any(interVPUtbl.toCOMIDs.values > 0):
-        con = pd.read_csv(Connector).set_index("COMID")
-        con.columns = map(str, con.columns)
-        toVPUs = toVPUs.append(con)
-        toVPUs.to_csv(Connector)
-    if os.path.exists(Connector):  # if Connector already exists, read it in and append
-        con = pd.read_csv(Connector).set_index("COMID")
-        con.columns = map(str, con.columns)
-        throughVPUs = throughVPUs.append(con)
-    throughVPUs.to_csv(Connector)
-
+    temp = pd.DataFrame(index=points.index)
+    for zone, hydroregion in INPUTS.items():
+        pts = get_raster_value_at_points(points, f"{mask_dir}/{zone}.tif", out_df=True)
+        temp = temp.merge(~pts.isin(nodata_vals), left_index=True, right_index=True)
+    xx = temp.sum(axis=1)
+    return points.iloc[xx.loc[xx == 1].index]
 
 ##############################################################################
-
-
-def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
-    """
-    Adjusts values for COMIDs where values from one need to be subtracted from another.
-    Depending on the type of accum, subtracts values for each column in the table other than COMID and Pct_Full
-
-    Arguments
-    ---------
-    tbl                   : throughVPU table from InterVPU function
-    comid1                : COMID which will be adjusted
-    comid2                : COMID whose values will be subtracted from comid1
-    tbl2                  : toVPU table from InterVPU function in the case where a COMID comes from a different zone
-    """
-
-    if tbl2 is None:  # might be able to fix this in the arguments
-        tbl2 = tbl.copy()
-    for idx in tbl.columns[:-1]:
-        tbl.loc[comid1, idx] = tbl.loc[comid1, idx] - tbl2.loc[comid2, idx]
-
-
-##############################################################################
-
 
 def Accumulation(tbl, IDs, lengths, upstream, tbl_type, icol="IDs"):
     """
@@ -932,7 +324,7 @@ def createCatStats(
     inZoneData,
     out_dir,
     zone,
-    NHD_dir):
+    nhd_dir):
 
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
@@ -952,7 +344,7 @@ def createCatStats(
 
     try:
         arcpy.env.cellSize = "30"
-        arcpy.env.snapRaster = inZoneData
+        # arcpy.env.snapRaster = inZoneData
         if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
             outTable = "%s/DBF_stash/zonalstats_%s%s.dbf" % (
                 out_dir,
@@ -968,11 +360,11 @@ def createCatStats(
         if not os.path.exists(outTable):
             if accum_type == "Categorical":
                 TabulateArea(
-                    inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
+                    inZoneData, "OBJECTID", LandscapeLayer, "Value", outTable, "30"
                 )
             if accum_type == "Continuous":
                 ZonalStatisticsAsTable(
-                    inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
+                    inZoneData, "OBJECTID", LandscapeLayer, outTable, "DATA", "ALL"
                 )
         try:
             table = dbf2DF(outTable)
@@ -989,23 +381,24 @@ def createCatStats(
         print(arcpy.GetMessages(2))
 
     
-    # TODO: `table` here is referenced as `tbl` above -- confusing
     if accum_type == "Continuous":
-        table = table[["VALUE", "AREA", "COUNT", "SUM"]]
+        table = table[["OBJECTID", "AREA", "COUNT", "SUM"]]
         table = table.rename(columns={"COUNT": "Count", "SUM": "Sum"})
     if accum_type == "Categorical":
         table = chkColumnLength(table, LandscapeLayer)
         table["AREA"] = table[table.columns.tolist()[1:]].sum(axis=1)
-    nhdTable = gpd.read_file(NHD_DIR +'/NHDPlusHRVFGen' + REG + '_V5.gdb', 
+    nhdTable = gpd.read_file(nhd_dir +'/NHDPlusHRVFGen' + zone + '_V5.gdb', 
                     driver='FileGDB', 
                     layer='NHDPlusCatchment')
     # calc area sqkm
-    nhdTable = nhdTable.to_crs({'epsg:5070'})
+    nhdTable = nhdTable.to_crs('EPSG:5070')
     nhdTable["AreaSqKm"] = nhdTable['geometry'].area/ 10**6
     nhdTable = nhdTable.rename(
-        columns={"NHDPlusID": "NHDPlusID"})
+        columns={"Gen_NHDPlusID": "NHDPlusID"})
+    # ObjectID is a hidden field in nhdTable so add back in dummy variable
+    nhdTable['GridCode'] = np.arange(len(nhdTable))+2
     result = pd.merge(
-        nhdTable, table, how="left", left_on="GridCode", right_on="VALUE"
+        nhdTable, table, how="left", left_on="GridCode", right_on="OBJECTID"
     )
     # if LandscapeLayer.split("/")[-1].split(".")[0] == "rdstcrs":
     #     slptbl = dbf2DF(
@@ -1021,38 +414,12 @@ def createCatStats(
         ((result.AREA * 1e-6) / result.AreaSqKm.astype("float")) * 100
     ).fillna(0)
     result = pd.DataFrame(result)
-    result = result.drop(["GridCode", "geometry", "SHAPE_Length", "SHAPE_Area","VALUE", "AREA"], axis=1)
+    result = result.drop(["GridCode", "geometry", "SHAPE_Length", "SHAPE_Area","OBJECTID", "Gen_AreaSQKM","AREA"], axis=1)
     cols = result.columns[1:]
     result.columns = np.append("NHDPlusID", "Cat" + cols.values)
     return result  # ALL NAs need to be filled w/ zero here for Accumulation!!
 
 
-def get_rat_vals(raster):
-    """
-    Build the raster attribute table and extract distinct values. Assume that
-    it has only one band.
-
-    WARNING!: this has only been used with GEOTIFF and ERDAS IMAGINE (IMG)
-    formatted rasters, results may vary with other formats.
-
-    Parameters
-    ---------
-    raster : str
-        Absolute path to raster
-
-    Returns
-    ---------
-    list
-        Integer values that exist in the raster with `Opacity > 0`
-    """
-    ds = gdal.Open(raster)
-    rb = ds.GetRasterBand(1)
-    rat = rb.GetDefaultRAT()
-    df = pd.DataFrame.from_dict(
-        {rat.GetNameOfCol(i): rat.ReadAsArray(i) for i in range(rat.GetColumnCount())}
-    )
-    ds = None
-    return df.loc[(df.Opacity > 0) & (df.Histogram > 0)].index.tolist()
 
 
 def chkColumnLength(table, landscape_layer):
@@ -1139,8 +506,8 @@ def make_all_reg_IDs(nhd, regs):
                              ignore_fields=["GridCode","SHAPE_Length",
                                             "SHAPE_Area"]).drop("geometry", axis=1)
         cats[['REG']]=reg
-        cats['NHDPlusID'] = cats['NHDPlusID'].astype('int64')
-        cats = pd.Series(cats.REG.values,index=cats.NHDPlusID).to_dict()
+        cats['Gen_NHDPlusID'] = cats['Gen_NHDPlusID'].astype('int64')
+        cats = pd.Series(cats.REG.values,index=cats.Gen_NHDPlusID).to_dict()
         lookup.update(cats)
     print("...done!")
     return set(lookup) # RETURN A DICT!
@@ -1188,7 +555,7 @@ def makeNumpyVectors(nhd, numpy_dir, regs):
         # out_of_vpus = inter_tbl.loc[
         #     (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
         # ].thruCOMIDs.values
-        cats = gpd.read_file(f"{pre}",driver="FileGDB", layer="NHDPlusCatchment").set_index("NHDPlusID").drop("geometry", axis=1)
+        cats = gpd.read_file(f"{pre}",driver="FileGDB", layer="NHDPlusCatchment").set_index("Gen_NHDPlusID").drop("geometry", axis=1)
         IDs = cats.index.values
         # comids = np.append(comids, out_of_vpus)
         # list of upstream lists, filter comids in all_comids

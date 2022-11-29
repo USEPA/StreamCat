@@ -76,14 +76,14 @@ for _, row in ctl.query("run == 1").iterrows():
         flush=True,
     )
     for REG in REGS:
-        if isinstance(REG, list):
-            REG=REG[0]
+        if isinstance(REGS, list):
+             REG=REGS[i]
         else:
             pass
         if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{REG}.csv"):
             print(REG, end=", ", flush=True)
             if not row.accum_type == "Point":
-                izd = (f"{NHD_DIR}/NHDPlusHRVFGen_01_V2.gdb/cat")
+                izd = (f"{NHD_DIR}/NHDPlusHRVFGen{REG}_V5.gdb/NHDPlusCatchment")
                 cat = createCatStats(
                     row.accum_type,
                     layer,
@@ -97,14 +97,9 @@ for _, row in ctl.query("run == 1").iterrows():
                     points, REG, izd, pct_full, mask_dir, apm, summary
                 )
             cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{REG}.csv", index=False)
-    print("done!")
-    print("Accumulating...", end="", flush=True)
-    for REG in REGS:
-        for REG in REGS:
-            if isinstance(REG, list):
-                REG=REG[0]
-            else:
-                pass
+          print("done!")
+          print("Accumulating...", end="", flush=True)
+
         fn = f"{OUT_DIR}/{row.FullTableName}_{REG}.csv"
         cat = pd.read_csv(fn)
         processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().bool()
@@ -114,15 +109,16 @@ for _, row in ctl.query("run == 1").iterrows():
             break
         print(REG, end=", ", flush=True)
 
-        # if zone in inter_vpu.ToZone.values:
-        #     cat = appendConnectors(cat, Connector, zone, inter_vpu)
+        
         accum = np.load(f"{NUMPY_DIR}/accum_npy/accum_{REG}.npz")
         
         cat = cat.rename(
             columns={"NHDPlusID": "IDs"})
-        cat.IDs = cat.IDs.astype(accum["IDs"].dtype)
+        new = dict(accum)
+        new['IDs']=new['IDs'].astype('i')
+        cat.IDs = cat.IDs.astype(new["IDs"].dtype)
         cat.set_index("IDs", inplace=True)
-        cat = cat.loc[accum["IDs"]].reset_index().copy()
+        cat = cat.loc[new["IDs"]].reset_index().copy()
 
         up = Accumulation(
             cat, accum["IDs"], accum["lengths"], accum["upstream"], "Up"
@@ -132,20 +128,10 @@ for _, row in ctl.query("run == 1").iterrows():
             cat, accum["IDs"], accum["lengths"], accum["upstream"], "Ws"
         )
 
-        # if zone in inter_vpu.ToZone.values:
-        #     cat = pd.read_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv")
-        # if zone in inter_vpu.FromZone.values:
-        #     interVPU(
-        #         ws,
-        #         cat.columns[1:],
-        #         row.accum_type,
-        #         zone,
-        #         Connector,
-        #         inter_vpu.copy(),
-        #     )
         upFinal = pd.merge(up, ws, on="IDs")
         final = pd.merge(cat, upFinal, on="IDs")
-        final.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+        final.to_csv(f"{OUT_DIR}/{row.FullTableName}_{REG}.csv", index=False)
+        
     print(end="") if processed else print("done!")
 if already_processed:
     print(

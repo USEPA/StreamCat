@@ -63,21 +63,18 @@ def finalize(control):
     print(ctl.query("run == 1").MetricName.head())
     exit()
 
-    inputs = np.load("accum_npy/vpu_inputs.npy", allow_pickle=True).item()
+    # inputs = np.load("accum_npy/vpu_inputs.npy", allow_pickle=True).item()
 
     runners = ctl.query("run == 1").groupby("Final_Table_Name")
     tables = runners["FullTableName"].unique().to_dict()
     # check that all accumulated files are present
     missing = []
     fn = "{}_{}.csv"
+    i=0   
     for table, metrics in tables.items():  # make sure all tables exist
         print(metrics)
         print(tables)
-        for REG in REGS:
-            if isinstance(REG, list):
-                REG=REG[0]
-            else:
-                pass
+        
         for metric in metrics:
             accumulated_file = f"{OUT_DIR}/{metric}_{REG}.csv"
             if not exists(accumulated_file):
@@ -95,7 +92,7 @@ def finalize(control):
         "data"
     ].item()
 
-    STATES_DIR = Path(FINAL_DIR).parents[0] / "States"
+    STATES_DIR = Path(FINAL_DIR).parents[1] / "States"
     if not FINAL_DIR.exists():
         FINAL_DIR.mkdir(parents=True)
     if not (FINAL_DIR / "zips").exists():
@@ -113,6 +110,10 @@ def finalize(control):
         stats = dict()
         # Looop through NHD Hydro-regions
         for REG in REGS:
+            if isinstance(REG, list):
+                REG=REG[i]
+            else:
+                pass
             out_file = f"{FINAL_DIR}/{metric}_{REG}.csv"
             zip_file = f"{FINAL_DIR}/{metric}_{REG}.zip"
 
