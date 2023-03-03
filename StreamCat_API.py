@@ -15,6 +15,7 @@ from pprint import pprint
 from datetime import datetime as dt
 import csv
 import urllib3
+from io import StringIO
 from bs4 import BeautifulSoup
 
 def DBtablesAsDF(config_file):
@@ -62,6 +63,51 @@ def ViewDBtable(config_file, table):
     pprint(json.loads(r.text))
     
 
+def ViewDBtable(config_file, table):
+    """
+    __author__ =  "Marc Weber <weber.marc@epa.gov>"
+                  "Rick Debbout <debbout.rick@epa.gov>"
+    List table info for a specific StreamCat API database
+    table, using a config file that contains db url,username, 
+    password, and server
+    
+    Arguments
+    ---------
+    config_file            : configuration file with db configuration parameters
+    table                  : database table name
+    """
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    r = requests.get(
+    f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}",
+    headers=config.defaults(),
+    verify=False
+    )
+    pprint(json.loads(r.text))
+    
+def ViewMetadatatable(config_file, table):
+    """
+    __author__ =  "Marc Weber <weber.marc@epa.gov>"
+                  "Rick Debbout <debbout.rick@epa.gov>"
+    List table info for a specific StreamCat API database
+    table, using a config file that contains db url,username, 
+    password, and server
+    
+    Arguments
+    ---------
+    config_file            : configuration file with db configuration parameters
+    table                  : database table name
+    """
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    r = requests.get(
+    f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}/variable_info",
+    headers=config.defaults(),
+    verify=False
+    )
+    df = pd.read_csv(StringIO(r.content.decode("utf8" , errors="ignore")))
+    return(df)
+    
 def DeleteDBtable(config_file, table, just_data=False):
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
@@ -224,8 +270,37 @@ def MissingAPImetrics(config_file):
     return(published, not_published)
 
 
+def UpdateMetricMetadata(config_file, table, infile, temp_file):
+    """
+    __author__ =  "Marc Weber <weber.marc@epa.gov>"
+    Modify metric information in the StreamCat API database, 
+    using a config file that contains db url,username, password, 
+    and server.  You must provide a fresh list of all variable 
+    info entries for this resource, as it clears out the 
+    existing list and substitutes a new one.
+    
+    Arguments
+    ---------
+    config                 : configuration file with db configuration parameters
+    table                 : name of table metadata to load
+    infile                 : pandas data frame from ViewMetadatatable function     
+    """
+    
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    requests.urllib3.disable_warnings()
+    infile.to_csv(f'{temp_file}', index=False)
+    filedata = open(f'{temp_file}', "rb")
+    response = requests.put(f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}/variable_info", 
+                            headers=config.defaults(), verify=False, data=filedata)
+    return(response)
+
+###############
+
 # Define config file        
 config_file='E:/GitProjects/NARS/NARS/api/api_config.ini'
+# config_file='E:/GitProjects/NARS/NARS/api/api_config_postgres.ini'
+
 # List tables
 test = DBtablesAsDF(config_file)
 test.head()
@@ -233,16 +308,19 @@ test.tail()
 test['DSNAME'][0:20]
 test['DSNAME'][21:40]
 test['DSNAME'][41:60]
+test['DSNAME'][61:70]
 # View a particular table
 table='RoadDensityRipBuf100'
 table='ImperviousSurfacesRipBuf100'
-table='WWTP'
+table='Dams'
 table='MTBS_Severity_1984'
-table='NLCD2006RipBuf100'
+table='BFI'
 ViewDBtable(config_file, table)
+
 # Delete a tables
 DeleteDBtable(config_file, table, just_data =True)
 # DeleteDBtable(config_file, table, just_data =False)
+
 # Create a table
 test = CreateDBtable(config_file, table_params)
 print(test)
@@ -254,7 +332,7 @@ print(test)
 # table='GeoChemPhys2'
 table='ImperviousSurfacesRipBuf100'
 table='RoadDensityRipBuf100'
-table='MTBS'
+table='Dams'
 table='NLCD2006RipBuf100'
 file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
 temp_file='E:/WorkingData/junk.csv'
@@ -275,7 +353,27 @@ ShowHideDBtable(config_file, table, activate=1)
 # list metrics on ftp site published and not published to API database
 published, unpublished = MissingAPImetrics(config_file)
 
+# View metadata for a table
+table = 'NADP'
+df = ViewMetadatatable(config_file, table)
 
+# Update metadata for a table
+# make any adjustments to metrics in table and update
+df['SOURCE_URL'].values[0]
+df['SOURCE_URL'] = 'https://nadp.slh.wisc.edu/maps-data/ntn-gradient-maps/'
+df['SOURCE_URL'].values[0]
+
+# View metadata for a table
+table = 'WetIndex'
+df = ViewMetadatatable(config_file, table)
+
+# Update metadata for a table
+# make any adjustments to metrics in table and update
+df['SOURCE_URL'].values[0]
+df['SOURCE_URL'] = 'https://enviroatlas.epa.gov/enviroatlas/DataFactSheets/pdf/Supplemental/PotentialWetlandArea.pdf'
+df['SOURCE_URL'].values[0]
+temp_file='E:/WorkingData/junk.csv'
+UpdateMetricMetadata(config_file, table, df, temp_file)
 
 table_params = {"name": "WWTP",
             "metrics":[{"name": "wwtpmajordens", "display_name": "Major Wastewater Treatment Density"},
