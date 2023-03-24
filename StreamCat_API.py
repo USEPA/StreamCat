@@ -191,6 +191,7 @@ def PopulateDBtable(config_file, table, file_loc, temp_file):
     
     counter=0
     for file in files:
+        print(file)
         infile = file_loc + '/' + file
         df = pd.read_csv(infile)
         counter+=len(df)
@@ -312,14 +313,14 @@ test['DSNAME'][61:70]
 # View a particular table
 table='RoadDensityRipBuf100'
 table='ImperviousSurfacesRipBuf100'
-table='Dams'
+table='RockN'
 table='MTBS_Severity_1984'
-table='BFI'
+table='ForestLossByYear0013'
 ViewDBtable(config_file, table)
 
 # Delete a tables
-DeleteDBtable(config_file, table, just_data =True)
-# DeleteDBtable(config_file, table, just_data =False)
+# DeleteDBtable(config_file, table, just_data =True)
+DeleteDBtable(config_file, table, just_data =False)
 
 # Create a table
 test = CreateDBtable(config_file, table_params)
@@ -333,12 +334,14 @@ print(test)
 table='ImperviousSurfacesRipBuf100'
 table='RoadDensityRipBuf100'
 table='Dams'
-table='NLCD2006RipBuf100'
-file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
+table='predicted_channel_widths_depths'
+# file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
+file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/predicted-values/widths-depths_v2'
 temp_file='E:/WorkingData/junk.csv'
 LoadTime = dt.now()
 PopulateDBtable(config_file, table, file_loc, temp_file)
 print("Table load complete in : " + str(dt.now() - LoadTime))
+
 
 # View a particular table
 table='EPA_FRS'
@@ -354,8 +357,18 @@ ShowHideDBtable(config_file, table, activate=1)
 published, unpublished = MissingAPImetrics(config_file)
 
 # View metadata for a table
-table = 'NADP'
+table = 'WWTP'
 df = ViewMetadatatable(config_file, table)
+df.loc[df.METRIC_NAME == 'WWTPAllDens[AOI]', 'METRIC_UNITS'] = "number/ km2"
+
+# Read in .csv file of metadata
+table='predicted_channel_widths_depths'
+met = pd.read_csv('O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/MetaData/StreamCatMetrics.csv', encoding='cp1252')
+met = met.loc[met['final_table'] == table]
+met.columns = met.columns.str.upper()
+met = met[df.columns]
+temp_file='E:/WorkingData/junk.csv'
+UpdateMetricMetadata(config_file, table, met, temp_file)
 
 # Update metadata for a table
 # make any adjustments to metrics in table and update
@@ -364,7 +377,7 @@ df['SOURCE_URL'] = 'https://nadp.slh.wisc.edu/maps-data/ntn-gradient-maps/'
 df['SOURCE_URL'].values[0]
 
 # View metadata for a table
-table = 'WetIndex'
+table = 'RefStreamTempPred'
 df = ViewMetadatatable(config_file, table)
 
 # Update metadata for a table
@@ -374,6 +387,19 @@ df['SOURCE_URL'] = 'https://enviroatlas.epa.gov/enviroatlas/DataFactSheets/pdf/S
 df['SOURCE_URL'].values[0]
 temp_file='E:/WorkingData/junk.csv'
 UpdateMetricMetadata(config_file, table, df, temp_file)
+
+
+
+
+table_params = {"name": "predicted_channel_widths_depths",
+            "metrics":[{"name": "wetted_width_m", "display_name": "Predicted wetted width"},
+                       {"name": "thalweg_depth_cm", "display_name": "Predicted Thalweg Depth"},
+                       {"name": "bankfull_width_m", "display_name": "Predicted Bankfull Widthy"},
+                       {"name": "bankfull_depth_m", "display_name": "Predicted Bankfull Depth"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "wetted_width_m", "type": "number"},{"name": "thalweg_depth_cm","type": "number"},
+                        {"name": "bankfull_width_m", "type": "number"},{"name": "bankfull_depth_m","type": "number"},]}
+
 
 table_params = {"name": "WWTP",
             "metrics":[{"name": "wwtpmajordens", "display_name": "Major Wastewater Treatment Density"},
