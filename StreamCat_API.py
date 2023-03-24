@@ -15,6 +15,7 @@ from pprint import pprint
 from datetime import datetime as dt
 import csv
 import urllib3
+from io import StringIO
 from bs4 import BeautifulSoup
 
 def DBtablesAsDF(config_file):
@@ -39,6 +40,7 @@ def DBtablesAsDF(config_file):
     df=pd.DataFrame.from_records(json_object)
     return df
 
+
 def ViewDBtable(config_file, table):
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
@@ -59,7 +61,33 @@ def ViewDBtable(config_file, table):
     headers=config.defaults(),
     verify=False
     )
+    #json_object = json.loads(r.text)
+    #df=pd.DataFrame.from_records(json_object)
+    #return df
     pprint(json.loads(r.text))
+    
+def ViewMetadatatable(config_file, table):
+    """
+    __author__ =  "Marc Weber <weber.marc@epa.gov>"
+                  "Rick Debbout <debbout.rick@epa.gov>"
+    List table info for a specific StreamCat API database
+    table, using a config file that contains db url,username, 
+    password, and server
+    
+    Arguments
+    ---------
+    config_file            : configuration file with db configuration parameters
+    table                  : database table name
+    """
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    r = requests.get(
+    f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}/variable_info",
+    headers=config.defaults(),
+    verify=False
+    )
+    df = pd.read_csv(StringIO(r.content.decode("utf8" , errors="ignore")))
+    return(df)
     
 
 def DeleteDBtable(config_file, table, just_data=False):
@@ -145,6 +173,7 @@ def PopulateDBtable(config_file, table, file_loc, temp_file):
     
     counter=0
     for file in files:
+        print(file)
         infile = file_loc + '/' + file
         df = pd.read_csv(infile)
         counter+=len(df)
@@ -224,8 +253,37 @@ def MissingAPImetrics(config_file):
     return(published, not_published)
 
 
+def UpdateMetricMetadata(config_file, table, infile, temp_file):
+    """
+    __author__ =  "Marc Weber <weber.marc@epa.gov>"
+    Modify metric information in the StreamCat API database, 
+    using a config file that contains db url,username, password, 
+    and server.  You must provide a fresh list of all variable 
+    info entries for this resource, as it clears out the 
+    existing list and substitutes a new one.
+    
+    Arguments
+    ---------
+    config                 : configuration file with db configuration parameters
+    table                 : name of table metadata to load
+    infile                 : pandas data frame from ViewMetadatatable function     
+    """
+    
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    requests.urllib3.disable_warnings()
+    infile.to_csv(f'{temp_file}', index=False)
+    filedata = open(f'{temp_file}', "rb")
+    response = requests.put(f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}/variable_info", 
+                            headers=config.defaults(), verify=False, data=filedata)
+    return(response)
+
+###############
+
 # Define config file        
 config_file='E:/GitProjects/NARS/NARS/api/api_config.ini'
+# config_file='E:/GitProjects/NARS/NARS/api/api_config_postgres.ini'
+
 # List tables
 test = DBtablesAsDF(config_file)
 test.head()
@@ -233,6 +291,7 @@ test.tail()
 test['DSNAME'][0:20]
 test['DSNAME'][21:40]
 test['DSNAME'][41:60]
+test['DSNAME'][61:70]
 test['DSNAME'][61:80]
 test['DSNAME'][81:120]
 # View a particular table
@@ -244,6 +303,7 @@ ViewDBtable(config_file, table)
 # Delete a tables
 DeleteDBtable(config_file, table, just_data =True)
 # DeleteDBtable(config_file, table, just_data =False)
+
 # Create a table
 test = CreateDBtable(config_file, table_params)
 print(test)
@@ -255,10 +315,17 @@ print(test)
 # table='GeoChemPhys2'
 table='ImperviousSurfacesRipBuf100'
 table='RoadDensityRipBuf100'
+table='Dams'
+table='predicted_channel_widths_depths'
+# file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
+file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/predicted-values/widths-depths_v2'
+temp_file='E:/WorkingData/junk.csv'
+
 table='MTBS'
 table='WWTP'
 file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
 temp_file='E:/WorkingData/junk2.csv'
+
 LoadTime = dt.now()
 PopulateDBtable(config_file, table, file_loc, temp_file)
 print("Table load complete in : " + str(dt.now() - LoadTime))
@@ -275,6 +342,51 @@ ShowHideDBtable(config_file, table, activate=1)
 
 # list metrics on ftp site published and not published to API database
 published, unpublished = MissingAPImetrics(config_file)
+
+
+# View metadata for a table
+table = 'WWTP'
+df = ViewMetadatatable(config_file, table)
+df.loc[df.METRIC_NAME == 'WWTPAllDens[AOI]', 'METRIC_UNITS'] = "number/ km2"
+
+# Read in .csv file of metadata
+table='predicted_channel_widths_depths'
+met = pd.read_csv('O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/MetaData/StreamCatMetrics.csv', encoding='cp1252')
+met = met.loc[met['final_table'] == table]
+met.columns = met.columns.str.upper()
+met = met[df.columns]
+temp_file='E:/WorkingData/junk.csv'
+UpdateMetricMetadata(config_file, table, met, temp_file)
+
+# Update metadata for a table
+# make any adjustments to metrics in table and update
+df['SOURCE_URL'].values[0]
+df['SOURCE_URL'] = 'https://nadp.slh.wisc.edu/maps-data/ntn-gradient-maps/'
+df['SOURCE_URL'].values[0]
+
+# View metadata for a table
+table = 'RefStreamTempPred'
+df = ViewMetadatatable(config_file, table)
+
+# Update metadata for a table
+# make any adjustments to metrics in table and update
+df['SOURCE_URL'].values[0]
+df['SOURCE_URL'] = 'https://enviroatlas.epa.gov/enviroatlas/DataFactSheets/pdf/Supplemental/PotentialWetlandArea.pdf'
+df['SOURCE_URL'].values[0]
+temp_file='E:/WorkingData/junk.csv'
+UpdateMetricMetadata(config_file, table, df, temp_file)
+
+
+
+
+table_params = {"name": "predicted_channel_widths_depths",
+            "metrics":[{"name": "wetted_width_m", "display_name": "Predicted wetted width"},
+                       {"name": "thalweg_depth_cm", "display_name": "Predicted Thalweg Depth"},
+                       {"name": "bankfull_width_m", "display_name": "Predicted Bankfull Widthy"},
+                       {"name": "bankfull_depth_m", "display_name": "Predicted Bankfull Depth"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "wetted_width_m", "type": "number"},{"name": "thalweg_depth_cm","type": "number"},
+                        {"name": "bankfull_width_m", "type": "number"},{"name": "bankfull_depth_m","type": "number"},]}
 
 
 table_params = {"name": "AgMidHiSlopes2011",
@@ -313,6 +425,24 @@ table_params = {"name": "WWTP",
                         {"name": "WWTPMinorDensCat", "type": "number"},{"name": "WWTPMinorDensWs","type": "number"},
                         {"name": "WWTPAllDensCat", "type": "number"},{"name": "WWTPAllDensWs","type": "number"},]}
 
+
+
+table_params = {"name": "MTBS_Severity_1984",
+            "metrics":[{"name": "pctnofire1984", "display_name": "Percent No Fire Burn Class For Year"},
+                       {"name": "pctundsev1984", "display_name": "Percent Underburned to Low Burn Severity Class For Year"},
+                       {"name": "pctlowsev1984", "display_name": "Percent Low Burn Severity Class For Year"},
+                       {"name": "pctmodsev1984", "display_name": "Percent Moderate Burn Severity Class For Year"},
+                       {"name": "pcthighsev1984", "display_name": "Percent High Burn Severity Class For Year"},
+                       {"name": "pctincvegresp1984", "display_name": "Percent Increased Greenness and Veg Response Class For Year"},
+                       {"name": "pctnonprocmask1984", "display_name": "Percent Non Processing Mask Class For Year"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "PctNoFireCat1984Cat", "type": "number"},{"name": "PctNoFire1984Ws","type": "number"},
+                        {"name": "PctUndSev1984Cat", "type": "number"},{"name": "PctUndSev1984Ws","type": "number"},
+                        {"name": "PctLowSev1984Cat", "type": "number"},{"name": "PctLowSev1984Ws","type": "number"},
+                        {"name": "PctModSev1984Cat", "type": "number"},{"name": "PctModSev1984Ws","type": "number"},
+                        {"name": "PctHighSev1984Cat", "type": "number"},{"name": "PctHighSev1984Ws","type": "number"},
+                        {"name": "PctIncVegResp1984Cat", "type": "number"},{"name": "PctIncVegResp1984Ws","type": "number"},
+                        {"name": "PctNonProcMask1984Cat", "type": "number"},{"name": "PctNonProcMask1984Ws","type": "number"}]}
 
 table_params = {"name": "MTBS_Severity_2018",
             "metrics":[{"name": "pctnofire2018", "display_name": "Percent No Fire Burn Class For Year"},
@@ -475,3 +605,4 @@ table_params = {"name": "NLCD2019RipBuf100",
                         {"name": "PctUrbMd2019CatRp100", "type": "number"},{"name": "PctUrbMd2019WsRp100","type": "number"},
                         {"name": "PctUrbOp2019CatRp100", "type": "number"},{"name": "PctUrbOp2019WsRp100","type": "number"},
                         {"name": "PctWdWet2019CatRp100", "type": "number"},{"name": "PctWdWet2019WsRp100","type": "number"}]}
+

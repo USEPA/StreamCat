@@ -144,8 +144,8 @@ MTBS_2015,Continuous,MTBS_2015,none,MTBS_2015.tif,,MTBS,Mean,100,0,0,0,,Yes,,Yes
 MTBS_2016,Continuous,MTBS_2016,none,MTBS_2016.tif,,MTBS,Mean,100,0,0,0,,Yes,,Yes
 MTBS_2017,Continuous,MTBS_2017,none,MTBS_2017.tif,,MTBS,Mean,100,0,0,0,,Yes,,Yes
 MTBS_2018,Continuous,MTBS_2018,none,MTBS_2018.tif,,MTBS,Mean,100,0,0,0,,Yes,,Yes
-MTBS_Severity_1984,Categorical,lookup/MTBS_severity1984_lookup.csv,none,MTBS_Severity_1984.tif,,MTBS_Severity_1984,Percent,1,0,0,0,,Yes,,Yes
-MTBS_Severity_1985,Categorical,lookup/MTBS_severity1985_lookup.csv,none,MTBS_Severity_1985.tif,,MTBS_Severity_1985,Percent,1,0,0,0,,Yes,,Yes
+MTBS_Severity_1984,Categorical,lookup/MTBS_severity1984_lookup.csv,none,MTBS_Severity_1984.tif,,MTBS_Severity_1984,Percent,1,0,0,0,,Yes,,
+MTBS_Severity_1985,Categorical,lookup/MTBS_severity1985_lookup.csv,none,MTBS_Severity_1985.tif,,MTBS_Severity_1985,Percent,1,0,0,0,,Yes,,
 MTBS_Severity_1986,Categorical,lookup/MTBS_severity1986_lookup.csv,none,MTBS_Severity_1986.tif,,MTBS_Severity_1986,Percent,1,0,0,0,,Yes,,
 MTBS_Severity_1987,Categorical,lookup/MTBS_severity1987_lookup.csv,none,MTBS_Severity_1987.tif,,MTBS_Severity_1987,Percent,1,0,0,0,,Yes,,
 MTBS_Severity_1988,Categorical,lookup/MTBS_severity1988_lookup.csv,none,MTBS_Severity_1988.tif,,MTBS_Severity_1988,Percent,1,0,0,0,,Yes,,
@@ -293,7 +293,7 @@ RdDens_RipBuf100,Continuous,RdDens,Rp100,roadden.tif,,RoadDensityRipBuf100,Mean,
 RdCrs,Continuous,RdCrs,none,rdstcrs.tif,SlpWtd,RoadStreamCrossings,Density,0.03,0,0,0,,Yes,,Yes
 RockN,Continuous,RockN,none,RockN_USA_USGSproj_1km_kgkm2.tif,,RockN,Mean,1,0,0,0,,Yes,,Yes
 Runoff,Continuous,Runoff,none,runoff.tif,,Runoff,Mean,1,0,0,0,,Yes,,Yes
-Septic,Continuous,Septic,none,septic1990.tif,,Septic,Mean,0.001,0,0,0,,Yes,,Yes
+Septic,Continuous,Septic,none,septic1990.tif,,Septic,Mean,1,0,0,0,,Yes,,Yes
 Clay,Continuous,Clay,none,clay.tif,,STATSGO_Set1,Mean,0.01,0,0,0,,Yes,,Yes
 Sand,Continuous,Sand,none,sand.tif,,STATSGO_Set1,Mean,0.01,0,0,0,,Yes,,Yes
 Om,Continuous,Om,none,om.tif,,STATSGO_Set2,Mean,0.01,0,0,0,,Yes,,Yes
