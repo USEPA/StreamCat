@@ -25,7 +25,7 @@ def main():
             if f.count('.') ==2:
                 fn = f.split('.')[0] + '.' + f.split('.')[1]
             if not os.path.exists('%s/zips/%s.zip' % (home,fn)):
-                print 'zipping......  %s' % fn
+                print('zipping......  %s') % fn
                 zf = zipfile.ZipFile('%s/zips/%s.zip' % (home,fn), mode='w')
 #                zf.write('%s/%s'%(home,f),
 #                         compress_type=zipfile.ZIP_DEFLATED)

@@ -40,28 +40,6 @@ def DBtablesAsDF(config_file):
     df=pd.DataFrame.from_records(json_object)
     return df
 
-def ViewDBtable(config_file, table):
-    """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Rick Debbout <debbout.rick@epa.gov>"
-    List table info for a specific StreamCat API database
-    table, using a config file that contains db url,username, 
-    password, and server
-    
-    Arguments
-    ---------
-    config_file            : configuration file with db configuration parameters
-    table                  : database table name
-    """
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    r = requests.get(
-    f"{config['server']['URL']}/StreamCat/admin/manage/tables/{table}",
-    headers=config.defaults(),
-    verify=False
-    )
-    pprint(json.loads(r.text))
-    
 
 def ViewDBtable(config_file, table):
     """
@@ -83,6 +61,9 @@ def ViewDBtable(config_file, table):
     headers=config.defaults(),
     verify=False
     )
+    #json_object = json.loads(r.text)
+    #df=pd.DataFrame.from_records(json_object)
+    #return df
     pprint(json.loads(r.text))
     
 def ViewMetadatatable(config_file, table):
@@ -108,6 +89,7 @@ def ViewMetadatatable(config_file, table):
     df = pd.read_csv(StringIO(r.content.decode("utf8" , errors="ignore")))
     return(df)
     
+
 def DeleteDBtable(config_file, table, just_data=False):
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
@@ -310,17 +292,17 @@ test['DSNAME'][0:20]
 test['DSNAME'][21:40]
 test['DSNAME'][41:60]
 test['DSNAME'][61:70]
+test['DSNAME'][61:80]
+test['DSNAME'][81:120]
 # View a particular table
-table='RoadDensityRipBuf100'
-table='ImperviousSurfacesRipBuf100'
-table='RockN'
-table='MTBS_Severity_1984'
-table='ForestLossByYear0013'
+table='ICI_IWI_v1'
+table='NLCD2006'
+table='NLCD2001HiSlope'
+table='NLCD2019RipBuf100'
 ViewDBtable(config_file, table)
-
 # Delete a tables
-# DeleteDBtable(config_file, table, just_data =True)
-DeleteDBtable(config_file, table, just_data =False)
+DeleteDBtable(config_file, table, just_data =True)
+# DeleteDBtable(config_file, table, just_data =False)
 
 # Create a table
 test = CreateDBtable(config_file, table_params)
@@ -338,10 +320,15 @@ table='predicted_channel_widths_depths'
 # file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
 file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/predicted-values/widths-depths_v2'
 temp_file='E:/WorkingData/junk.csv'
+
+table='MTBS'
+table='WWTP'
+file_loc='O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions'
+temp_file='E:/WorkingData/junk2.csv'
+
 LoadTime = dt.now()
 PopulateDBtable(config_file, table, file_loc, temp_file)
 print("Table load complete in : " + str(dt.now() - LoadTime))
-
 
 # View a particular table
 table='EPA_FRS'
@@ -355,6 +342,7 @@ ShowHideDBtable(config_file, table, activate=1)
 
 # list metrics on ftp site published and not published to API database
 published, unpublished = MissingAPImetrics(config_file)
+
 
 # View metadata for a table
 table = 'WWTP'
@@ -401,6 +389,33 @@ table_params = {"name": "predicted_channel_widths_depths",
                         {"name": "bankfull_width_m", "type": "number"},{"name": "bankfull_depth_m","type": "number"},]}
 
 
+table_params = {"name": "AgMidHiSlopes2011",
+            "metrics":[{"name": "PctAg2011Slp10Cat", "display_name": "Percent of Agriculture on 10% Slope"},
+                       {"name": "PctAg2011Slp20Cat", "display_name": "Percent of Agriculture on 20% Slope"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "PctAg2011Slp10Cat", "type": "number"},{"name": "PctAg2011Slp10Ws","type": "number"},
+                        {"name": "PctAg2011Slp20Cat", "type": "number"},{"name": "PctAg2011Slp20Ws","type": "number"},]}
+
+table_params = {"name": "WaterInput",
+            "metrics":[{"name": "waterinput", "display_name": "Water Input"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "WaterInputCat", "type": "number"},{"name": "WaterInputWs","type": "number"}]}
+
+table_params = {"name": "AgDrain",
+            "metrics":[{"name": "pctagdrainage", "display_name": "Agricultural Drainage"},
+                       {"name": "pctno_agdrainage", "display_name": "Non Agricultural Drainage"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "PctAgDrainageCat", "type": "number"},{"name": "PctAgDrainageWs","type": "number"},
+                        {"name": "PctNo_AgDrainageCat", "type": "number"},{"name": "PctNo_AgDrainageWs","type": "number"},]}
+
+table_params = {"name": "Nsurp_NANI",
+            "metrics":[{"name": "nsurp", "display_name": "Nitrogen Surplus"},
+                       {"name": "nani", "display_name": "Anthropogenic Nitrogen"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "NsurpCat", "type": "number"},{"name": "NsurpWs","type": "number"},
+                        {"name": "NANICat", "type": "number"},{"name": "NANIWs","type": "number"},]}
+
+
 table_params = {"name": "WWTP",
             "metrics":[{"name": "wwtpmajordens", "display_name": "Major Wastewater Treatment Density"},
                        {"name": "wwtpminordens", "display_name": "Minor Wastewater Treatment Density"},
@@ -409,6 +424,7 @@ table_params = {"name": "WWTP",
                         {"name": "WWTPMajorDensCat", "type": "number"},{"name": "WWTPMajorDensWs","type": "number"},
                         {"name": "WWTPMinorDensCat", "type": "number"},{"name": "WWTPMinorDensWs","type": "number"},
                         {"name": "WWTPAllDensCat", "type": "number"},{"name": "WWTPAllDensWs","type": "number"},]}
+
 
 
 table_params = {"name": "MTBS_Severity_1984",
@@ -427,6 +443,23 @@ table_params = {"name": "MTBS_Severity_1984",
                         {"name": "PctHighSev1984Cat", "type": "number"},{"name": "PctHighSev1984Ws","type": "number"},
                         {"name": "PctIncVegResp1984Cat", "type": "number"},{"name": "PctIncVegResp1984Ws","type": "number"},
                         {"name": "PctNonProcMask1984Cat", "type": "number"},{"name": "PctNonProcMask1984Ws","type": "number"}]}
+
+table_params = {"name": "MTBS_Severity_2018",
+            "metrics":[{"name": "pctnofire2018", "display_name": "Percent No Fire Burn Class For Year"},
+                       {"name": "pctundsev2018", "display_name": "Percent Underburned to Low Burn Severity Class For Year"},
+                       {"name": "pctlowsev2018", "display_name": "Percent Low Burn Severity Class For Year"},
+                       {"name": "pctmodsev2018", "display_name": "Percent Moderate Burn Severity Class For Year"},
+                       {"name": "pcthighsev2018", "display_name": "Percent High Burn Severity Class For Year"},
+                       {"name": "pctincvegresp2018", "display_name": "Percent Increased Greenness and Veg Response Class For Year"},
+                       {"name": "pctnonprocmask2018", "display_name": "Percent Non Processing Mask Class For Year"}],
+            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
+                        {"name": "PctNoFire2018Cat", "type": "number"},{"name": "PctNoFire2018Ws","type": "number"},
+                        {"name": "PctUndSev2018Cat", "type": "number"},{"name": "PctUndSev2018Ws","type": "number"},
+                        {"name": "PctLowSev2018Cat", "type": "number"},{"name": "PctLowSev2018Ws","type": "number"},
+                        {"name": "PctModSev2018Cat", "type": "number"},{"name": "PctModSev2018Ws","type": "number"},
+                        {"name": "PctHighSev2018Cat", "type": "number"},{"name": "PctHighSev2018Ws","type": "number"},
+                        {"name": "PctIncVegResp2018Cat", "type": "number"},{"name": "PctIncVegResp2018Ws","type": "number"},
+                        {"name": "PctNonProcMask2018Cat", "type": "number"},{"name": "PctNonProcMask2018Ws","type": "number"}]}
 
 
 table_params = {"name": "ImperviousSurfacesRipBuf100",
@@ -504,6 +537,41 @@ table_params = {"name": "NLCD2019",
 
 
 table_params = {"name": "NLCD2001HiSlope",
+            "metrics":[{"name": "pctbl2019Slp20", "display_name": "Bedrock and Similar Earthen Material Percentage 2019 "},
+                      {"name": "pctconif2019Slp20", "display_name": "Evergreeen Forest Percentage 2019"},
+                      {"name": "pctcrop2019Slp20", "display_name": "Row Crop Percentage 2019"},
+                      {"name": "pctdecid2019Slp20", "display_name": "Deciduous Forest Percentage 2019"},
+                      {"name": "pctgrs2019Slp20", "display_name": "Grassland/Herbaceous Percentage 2019"},
+                      {"name": "pcthay2019Slp20", "display_name": "Pasture/Hay Percentage 2019"},
+                      {"name": "pcthbwet2019Slp20", "display_name": "Herbaceous Wetland Percentage 2019"},
+                      {"name": "pctice2019Slp20", "display_name": "Ice/Snow Cover Percentage 2019"},
+                      {"name": "pctmxfst2019Slp20", "display_name": "Mixed Deciduous/Evergreen Forest"},
+                      {"name": "pctow2019Slp20", "display_name": "Open Water Percentage 2019"},
+                      {"name": "pctshrb2019Slp20", "display_name": "Shrub/Scrub Percentage 2019"},
+                      {"name": "pcturbhi2019Slp20", "display_name": "Developed, High Intensity Land Use"},
+                      {"name": "pcturblo2019Slp20", "display_name": "Developed, Low Intensity Land Use"},
+                      {"name": "pcturbmd2019Slp20", "display_name": "Developed, Medium Intensity Land Use"},
+                      {"name": "pcturbop2019Slp20", "display_name": "Developed, Open Space Land Use Percentage"},
+                      {"name": "pctwdwet2019Slp20", "display_name": "Woody Wetland Percentage 2019"}],
+            "columns": [{"name": "CatPctFullSlp20", "type": "number"},{"name": "WsPctFullSlp20", "type": "number"},
+                        {"name": "PctBl2019Slp20Cat", "type": "number"},{"name": "PctBl2019Slp20Ws","type": "number"},
+                        {"name": "PctConif2019Cat", "type": "number"},{"name": "PctConif2019Slp20Ws","type": "number"},
+                        {"name": "PctCrop2019Slp20Cat", "type": "number"},{"name": "PctCrop2019Slp20Ws","type": "number"},
+                        {"name": "PctDecid2019Slp20Cat", "type": "number"},{"name": "PctDecid2019Slp20Ws","type": "number"},
+                        {"name": "PctGrs2019Slp20Cat", "type": "number"},{"name": "PctGrs2019Slp20Ws","type": "number"},
+                        {"name": "PctHay2019Slp20Cat", "type": "number"},{"name": "PctHay2019Slp20Ws","type": "number"},
+                        {"name": "PctHbWet2019Slp20Cat", "type": "number"},{"name": "PctHbWet2019Slp20Ws","type": "number"},
+                        {"name": "PctIce2019Slp20Cat", "type": "number"},{"name": "PctIce2019Slp20Ws","type": "number"},
+                        {"name": "PctMxFst2019Slp20Cat", "type": "number"},{"name": "PctMxFst2019Slp20Ws","type": "number"},
+                        {"name": "PctOw2019Slp20Cat", "type": "number"},{"name": "PctOw2019Slp20Ws","type": "number"},
+                        {"name": "PctShrb2019Slp20Cat", "type": "number"},{"name": "PctShrb2019Slp20Ws","type": "number"},
+                        {"name": "PctUrbHi2019Slp20Cat", "type": "number"},{"name": "PctUrbHi2019Slp20Ws","type": "number"},
+                        {"name": "PctUrbLo2019Slp20Cat", "type": "number"},{"name": "PctUrbLo2019Slp20Ws","type": "number"},
+                        {"name": "PctUrbMd2019Slp20Cat", "type": "number"},{"name": "PctUrbMd2019Slp20Ws","type": "number"},
+                        {"name": "PctUrbOp2019Slp20Cat", "type": "number"},{"name": "PctUrbOp2019Slp20Ws","type": "number"},
+                        {"name": "PctWdWet2019Slp20Cat", "type": "number"},{"name": "PctWdWet2019Slp20Ws","type": "number"}]}
+
+table_params = {"name": "NLCD2019RipBuf100",
             "metrics":[{"name": "pctbl2019", "display_name": "Bedrock and Similar Earthen Material Percentage 2019"},
                       {"name": "pctconif2019", "display_name": "Evergreeen Forest Percentage 2019"},
                       {"name": "pctcrop2019", "display_name": "Row Crop Percentage 2019"},
@@ -520,21 +588,21 @@ table_params = {"name": "NLCD2001HiSlope",
                       {"name": "pcturbmd2019", "display_name": "Developed, Medium Intensity Land Use"},
                       {"name": "pcturbop2019", "display_name": "Developed, Open Space Land Use Percentage"},
                       {"name": "pctwdwet2019", "display_name": "Woody Wetland Percentage 2019"}],
-            "columns": [{"name": "CatPctFull", "type": "number"},{"name": "WsPctFull", "type": "number"},
-                        {"name": "PctBl2019Cat", "type": "number"},{"name": "PctBl2019Ws","type": "number"},
-                        {"name": "PctConif2019Cat", "type": "number"},{"name": "PctConif2019Ws","type": "number"},
-                        {"name": "PctCrop2019Cat", "type": "number"},{"name": "PctCrop2019Ws","type": "number"},
-                        {"name": "PctDecid2019Cat", "type": "number"},{"name": "PctDecid2019Ws","type": "number"},
-                        {"name": "PctGrs2019Cat", "type": "number"},{"name": "PctGrs2019Ws","type": "number"},
-                        {"name": "PctHay2019Cat", "type": "number"},{"name": "PctHay2019Ws","type": "number"},
-                        {"name": "PctHbWet2019Cat", "type": "number"},{"name": "PctHbWet2019Ws","type": "number"},
-                        {"name": "PctIce2019Cat", "type": "number"},{"name": "PctIce2019Ws","type": "number"},
-                        {"name": "PctMxFst2019Cat", "type": "number"},{"name": "PctMxFst2019Ws","type": "number"},
-                        {"name": "PctOw2019Cat", "type": "number"},{"name": "PctOw2019Ws","type": "number"},
-                        {"name": "PctShrb2019Cat", "type": "number"},{"name": "PctShrb2019Ws","type": "number"},
-                        {"name": "PctUrbHi2019Cat", "type": "number"},{"name": "PctUrbHi2019Ws","type": "number"},
-                        {"name": "PctUrbLo2019Cat", "type": "number"},{"name": "PctUrbLo2019Ws","type": "number"},
-                        {"name": "PctUrbMd2019Cat", "type": "number"},{"name": "PctUrbMd2019Ws","type": "number"},
-                        {"name": "PctUrbOp2019Cat", "type": "number"},{"name": "PctUrbOp2019Ws","type": "number"},
-                        {"name": "PctWdWet2019Cat", "type": "number"},{"name": "PctWdWet2019Ws","type": "number"}]}
+            "columns": [{"name": "CatPctFullRp100", "type": "number"},{"name": "WsPctFullRp100", "type": "number"},
+                        {"name": "PctBl2019CatRp100", "type": "number"},{"name": "PctBl2019WsRp100","type": "number"},
+                        {"name": "PctConif2019CatRp100", "type": "number"},{"name": "PctConif2019WsRp100","type": "number"},
+                        {"name": "PctCrop2019CatRp100", "type": "number"},{"name": "PctCrop2019WsRp100","type": "number"},
+                        {"name": "PctDecid2019CatRp100", "type": "number"},{"name": "PctDecid2019WsRp100","type": "number"},
+                        {"name": "PctGrs2019CatRp100", "type": "number"},{"name": "PctGrs2019WsRp100","type": "number"},
+                        {"name": "PctHay2019CatRp100", "type": "number"},{"name": "PctHay2019WsRp100","type": "number"},
+                        {"name": "PctHbWet2019CatRp100", "type": "number"},{"name": "PctHbWet2019WsRp100","type": "number"},
+                        {"name": "PctIce2019CatRp100", "type": "number"},{"name": "PctIce2019WsRp100","type": "number"},
+                        {"name": "PctMxFst2019CatRp100", "type": "number"},{"name": "PctMxFst2019WsRp100","type": "number"},
+                        {"name": "PctOw2019CatRp100", "type": "number"},{"name": "PctOw2019WsRp100","type": "number"},
+                        {"name": "PctShrb2019CatRp100", "type": "number"},{"name": "PctShrb2019WsRp100","type": "number"},
+                        {"name": "PctUrbHi2019CatRp100", "type": "number"},{"name": "PctUrbHi2019WsRp100","type": "number"},
+                        {"name": "PctUrbLo2019CatRp100", "type": "number"},{"name": "PctUrbLo2019WsRp100","type": "number"},
+                        {"name": "PctUrbMd2019CatRp100", "type": "number"},{"name": "PctUrbMd2019WsRp100","type": "number"},
+                        {"name": "PctUrbOp2019CatRp100", "type": "number"},{"name": "PctUrbOp2019WsRp100","type": "number"},
+                        {"name": "PctWdWet2019CatRp100", "type": "number"},{"name": "PctWdWet2019WsRp100","type": "number"}]}
 
