@@ -1,3 +1,5 @@
+[![DOI Badge](https://zenodo.org/badge/45130222.svg)](https://zenodo.org/badge/45130222.svg)
+
 # StreamCat
 
 ## Description: 
