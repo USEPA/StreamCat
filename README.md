@@ -1,4 +1,4 @@
-[![DOI Badge](https://zenodo.org/badge/45130222.svg)](https://zenodo.org/badge/45130222.svg)
+[![DOI Badge](https://zenodo.org/badge/45130222.svg)](https://zenodo.org/record/8141137)
 
 # StreamCat
 
