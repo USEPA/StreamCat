@@ -1,5 +1,5 @@
 FullTableName,accum_type,MetricName,AppendMetric,LandscapeLayer,summaryfield,Final_Table_Name,MetricType,Conversion,by_RPU,use_mask,run,notes,Published,Metadata Published,InAPIDatabase
-AgDrain,Categorical,lookup/AgDrain_lookup.csv,none,AgDrain_stlvl_FINAL.tif,,AgDrain,Percent,1,0,0,0,,No,,
+AgDrain,Categorical,lookup/AgDrain_lookup.csv,none,AgDrain_stlvl_FINAL.tif,,AgDrain,Percent,1,0,0,0,,Yes,No,
 Ag2006HiSlp,Categorical,lookup/Ag2006HiSlp_lookup.csv,none,Ag2006HiSlp.tif,,AgMidHiSlopes,Percent,1,0,0,0,,Yes,,
 Ag2006MidSlp,Categorical,lookup/Ag2006MidSlp_lookup.csv,none,Ag2006MidSlp.tif,,AgMidHiSlopes,Percent,1,0,0,0,,Yes,,
 awch,Continuous,awch,none,awch.tif,,awch,Mean,1,0,0,0,,No,,
@@ -243,10 +243,10 @@ Precip,Continuous,Precip,none,precip.tif,,PRISM,Mean,1,0,0,0,,No,,
 Tmax,Continuous,Tmax,none,tmax.tif,,PRISM,Mean,1,0,0,0,,No,,
 Tmean,Continuous,Tmean,none,tmean.tif,,PRISM,Mean,1,0,0,0,,No,,
 Tmin,Continuous,Tmin,none,tmin.tif,,PRISM,Mean,1,0,0,0,,No,,
-PRISMtmean_2008,Continuous,Tmean08,none,PRISMtmean_2008.tif,,PRISM_0809,Mean,1,0,0,1,,Yes,,
-PRISMtmean_2009,Continuous,Tmean09,none,PRISMtmean_2009.tif,,PRISM_0809,Mean,1,0,0,1,,Yes,,Yes
-PRISMppt_2008,Continuous,Precip08,none,PRISMppt_2008.tif,,PRISM_0809,Mean,1,0,0,1,,Yes,,Yes
-PRISMppt_2009,Continuous,Precip09,none,PRISMppt_2009.tif,,PRISM_0809,Mean,1,0,0,1,,Yes,,Yes
+PRISMtmean_2008,Continuous,Tmean08,none,PRISMtmean_2008.tif,,PRISM_0809,Mean,1,0,0,0,,Yes,,
+PRISMtmean_2009,Continuous,Tmean09,none,PRISMtmean_2009.tif,,PRISM_0809,Mean,1,0,0,0,,Yes,,Yes
+PRISMppt_2008,Continuous,Precip08,none,PRISMppt_2008.tif,,PRISM_0809,Mean,1,0,0,0,,Yes,,Yes
+PRISMppt_2009,Continuous,Precip09,none,PRISMppt_2009.tif,,PRISM_0809,Mean,1,0,0,0,,Yes,,Yes
 TMEAN_PW_2004,Continuous,TMEAN_PW_2004,none,PRISMtmean_2004_PW.tif,,FlowMetrics,Mean,1,0,0,0,,No,,
 TMEAN_PW_2005,Continuous,TMEAN_PW_2005,none,PRISMtmean_2005_PW.tif,,FlowMetrics,Mean,1,0,0,0,,No,,
 TMEAN_PW_2008,Continuous,TMEAN_PW_2008,none,PRISMtmean_2008_PW.tif,,FlowMetrics,Mean,1,0,0,0,,No,,
@@ -391,3 +391,13 @@ SOLAR_JUN2012,Continuous,SOLAR_JUN2012,none,O:\\PRIV\\CPHEA\\PESD\\COR\\CORFILES
 SOLAR_JUL2012,Continuous,SOLAR_JUL2012,none,O:\\PRIV\\CPHEA\\PESD\\COR\\CORFILES\\Geospatial_Library_Projects\\StreamCat\\LandscapeRasters\\OriginalDownloads\\USGS_Pesticides_Partnership\\Solar\\Solar_jul2012,,SOLAR,Mean,1,0,0,0,,No,,
 SOLAR_AUG2012,Continuous,SOLAR_AUG2012,none,O:\\PRIV\\CPHEA\\PESD\\COR\\CORFILES\\Geospatial_Library_Projects\\StreamCat\\LandscapeRasters\\OriginalDownloads\\USGS_Pesticides_Partnership\\Solar\\Solar_aug2012,,SOLAR,Mean,1,0,0,0,,No,,
 SOLAR_SEP2012,Continuous,SOLAR_SEP2012,none,O:\\PRIV\\CPHEA\\PESD\\COR\\CORFILES\\Geospatial_Library_Projects\\StreamCat\\LandscapeRasters\\OriginalDownloads\\USGS_Pesticides_Partnership\\Solar\\Solar_sep2012,,SOLAR,Mean,1,0,0,0,,No,,
+GrazingPotential,Continuous,GrazingPotential,none,PCH.tif,,Grazing,Mean,1,0,0,0,,No,,
+Legacy_P,Continuous,Legacy_P,none,PCH.tif,,NutrientInv_1,Mean,1,0,0,1,,No,,
+N_Fert_Farm,Continuous,N_Fert_Farm,none,PCH.tif,,NutrientInv_1,Mean,1,0,0,1,,No,,
+N_Fert_Urban,Continuous,N_Fert_Urban,none,PCH.tif,,NutrientInv_1,Mean,1,0,0,1,,No,,
+N_Human_Waste,Continuous,N_Human_Waste,none,PCH.tif,,NutrientInv_1,Mean,1,0,0,1,,No,,
+N_Livestock_Waste,Continuous,N_Livestock_Waste,none,PCH.tif,,NutrientInv_2,Mean,1,0,0,1,,No,,
+P_f_fertilizer,Continuous,P_f_fertilizer,none,PCH.tif,,NutrientInv_2,Mean,1,0,0,1,,No,,
+P_human_waste,Continuous,P_human_waste,none,PCH.tif,,NutrientInv_2,Mean,1,0,0,1,,No,,
+P_livestock_Waste,Continuous,P_livestock_Waste,none,PCH.tif,,NutrientInv_2,Mean,1,0,0,1,,No,,
+P_nf_fertilizer,Continuous,P_nf_fertilizer,none,PCH.tif,,NutrientInv_2,Mean,1,0,0,1,,No,,

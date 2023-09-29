@@ -72,7 +72,7 @@ for _, row in tbl.iterrows():
                  '(e.g., soils and geology) and anthropogenic (e.g, urban areas '
                  'and agriculture) landscape information.'),
 			 'format': '.csv',
-             'describedBy: ('https://gaftp.epa.gov/epadatacommons/ORD/NHDPlusLandscapeAttributes/StreamCat/Documentation/DataDictionary.html'),
+             'describedBy': ('https://gaftp.epa.gov/epadatacommons/ORD/NHDPlusLandscapeAttributes/StreamCat/Documentation/DataDictionary.html'),
              'describedByType': 'text/html'
              },
             {'@type': 'dcat:Distribution',
