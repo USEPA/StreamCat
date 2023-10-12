@@ -26,7 +26,7 @@ from typing import Generator
 import numpy as np
 import pandas as pd
 import rasterio
-from gdalconst import *
+#from gdalconst import *
 from osgeo import gdal, ogr, osr
 from rasterio import transform
 
