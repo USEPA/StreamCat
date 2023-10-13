@@ -53,7 +53,7 @@ for _, row in tbl.iterrows():
          'title': title + row.title,                                           #made title variable
          'description': row.description,
          'keyword': KEYWORDS,
-         'modified': dt.now().strftime('%Y_%m_%d'),
+         'modified': dt.now().strftime('%Y-%m-%d'),
          'publisher':
              {'@type': 'org:Organization',
               'name': organization                                             # made organization variable
