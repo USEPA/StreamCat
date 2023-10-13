@@ -26,7 +26,7 @@ from typing import Generator
 import numpy as np
 import pandas as pd
 import rasterio
-from gdalconst import *
+#from gdalconst import *
 from osgeo import gdal, ogr, osr
 from rasterio import transform
 
@@ -882,7 +882,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     for index, column in enumerate(cols, 1):
         col_values = tbl[column].values.astype("float")
         all_values = np.split(col_values[indices], accumulated_indexes)
-        if tbl_type is "Ws":
+        if tbl_type == "Ws":
             # add identity value to each array for full watershed
             all_values = np.array(
                 [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
@@ -891,7 +891,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
             # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
 
-        if index is 1:
+        if index == 1:
             area = all_values.copy()
         if "PctFull" in column:
             values = [
@@ -988,7 +988,7 @@ def createCatStats(
             except fiona.errors.DriverError as e:
                 # arc occassionally doesn't release the file and fails here
                 print(e, "\n\n!EXCEPTION CAUGHT! TRYING AGAIN!")
-                time.sleep(4)
+                time.sleep(10)
                 table = dbf2DF(outTable)
         if by_RPU == 1:
             hydrodir = "/".join(inZoneData.split("/")[:-2]) + "/NEDSnapshot"
