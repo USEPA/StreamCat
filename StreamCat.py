@@ -192,7 +192,3 @@ if already_processed:
         f"\n\t> {OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
         f"output used in 'Continuous' and 'Categorical' metrics!!!"
     )
-
-
-if __name__ == "__main__":
-    run_stream_cat()

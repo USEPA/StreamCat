@@ -988,7 +988,7 @@ def createCatStats(
             except fiona.errors.DriverError as e:
                 # arc occassionally doesn't release the file and fails here
                 print(e, "\n\n!EXCEPTION CAUGHT! TRYING AGAIN!")
-                time.sleep(10)
+                time.sleep(60)
                 table = dbf2DF(outTable)
         if by_RPU == 1:
             hydrodir = "/".join(inZoneData.split("/")[:-2]) + "/NEDSnapshot"
