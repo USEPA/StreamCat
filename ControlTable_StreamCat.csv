@@ -239,10 +239,10 @@ Pmax,Continuous,PMAX,none,pmax_usgs.tif,,pmax,Mean,1,0,0,0,,No,no,
 Pmin,Continuous,PMIN,none,pmin_usgs.tif,,pmin,Mean,1,0,0,0,,No,no,
 PointN,Point,PointNSum,none,PointN_usgs.shp,kgn_new,PointN,Density,1,0,0,0,,No,no,
 Precip_Minus_EVT,Continuous,Precip_Minus_EVT,none,USAavgPeriod_pptSurp_1994to2016.tif,,Precip_Minus_EVT,Mean,1,0,0,0,,Yes,yes,Yes
-Precip8110,Continuous,Precip8110,none,precip.tif,,PRISM_1981_2010,Mean,1,0,0,0,,No,no,
-Tmax8110,Continuous,Tmax8110,none,tmax.tif,,PRISM_1981_2010,Mean,1,0,0,0,,No,no,
-Tmean8110,Continuous,Tmean8110,none,tmean.tif,,PRISM_1981_2010,Mean,1,0,0,0,,No,no,
-Tmin8110,Continuous,Tmin8110,none,tmin.tif,,PRISM_1981_2010,Mean,1,0,0,0,,No,no,
+Precip8110,Continuous,Precip8110,none,PRISM_ppt_81_10.tif,,PRISM_1981_2010,Mean,1,0,0,0,,No,no,
+Tmax8110,Continuous,Tmax8110,none,PRISM_tmax_81_10.tif,,PRISM_1981_2010,Mean,1,0,0,0,,No,no,
+Tmean8110,Continuous,Tmean8110,none,PRISM_tmean_81_10.tif,,PRISM_1981_2010,Mean,1,0,0,0,,No,no,
+Tmin8110,Continuous,Tmin8110,none,PRISM_tmin_81_10.tif,,PRISM_1981_2010,Mean,1,0,0,0,,No,no,
 PRISMtmean_2008,Continuous,Tmean08,none,PRISMtmean_2008.tif,,PRISM_0809,Mean,1,0,0,0,,Yes,yes,
 PRISMtmean_2009,Continuous,Tmean09,none,PRISMtmean_2009.tif,,PRISM_0809,Mean,1,0,0,0,,Yes,yes,Yes
 PRISMppt_2008,Continuous,Precip08,none,PRISMppt_2008.tif,,PRISM_0809,Mean,1,0,0,0,,Yes,yes,Yes
