@@ -80,46 +80,6 @@ Once [StreamCat.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat.py)
 2. These final tables will show up in the OUT_DIR from [stream_cat_config.py](https://github.com/USEPA/StreamCat/blob/master/stream_cat_config.py.template)
 3. Run [Make_Final_Tables.py](https://github.com/USEPA/StreamCat/blob/master/Make_Final_Tables.py)
 
-## [How to create metadata for new StreamCat layers](https://github.com/USEPA/StreamCat/wiki/3.-Creating-Metadata)
-
-We are using the [EPA Open Data Metadata Editor](https://edg.epa.gov/epa-open-data-metadata-editor/) now to edit metadata as non-spatial metadata records. Make sure to sign in with your EPA credentials. Go through the following steps to create metadata for any new metric:
-
-1. Add metric details to [StreamCatMetrics.csv](https://github.com/USEPA/StreamCat/blob/master/StreamCatMetrics.csv)
-2. Generate UUID for the metric [here](https://www.uuidtools.com/v4) or at a UUID generator site
-3. Add metric information to O:\PRIV\CPHEA\PESD\COR\CORFILES\Geospatial_Library_Projects\StreamCat\MetaData\submit_metadata_StreamCat.csv, replacing any records currently in the file with new metrics to submit (pulled from StreamCat_metrics.csv in the same folder). 
-
-Ensure that the title and final table name fields contain human-readable text for acceptance into the editor.
-
-Note that a maximum of five metrics can be loaded into the EPA Open Metadata Editor at a time. Do not exceed five metrics in the submit_metadata.csv. This includes:
-
-    a. uuid
-
-    b. title
-    
-    c. final table name
-
-    d. contact
-
-    e. contact Email
-
-    f. description
-
-4. Run [StreamCat_write_edg_json.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat_write_edg_json.py)
-   
-5. Open the [EPA Open Data Metadata Editor](https://edg.epa.gov/epa-open-data-metadata-editor/) in a browser
-    * Log in with EPA credentials
-    * Click on EPA icon in upper left and choose 'Load' > 'from local file'
-    * Select O:\PRIV\CPHEA\PESD\COR\CORFILES\Geospatial_Library_Projects\StreamCat\MetaData\completed_metadata\StreamCat_metadata_**"Date Run"**.json
-6. Add a 'Yes' to 'MetadataPublished' column in StreamCat [Control table](https://github.com/USEPA/StreamCat/blob/master/ControlTable_StreamCat.csv)
-7. Add metric information to O:\PRIV\CPHEA\PESD\COR\CORFILES\Geospatial_Library_Projects\StreamCat\MetaData\StreamCat_Metadata_Archive.csv
-   
-Once the editor is filled out completely, none of the required fields should be highlighted with a red 'X'.
-Click on the paper airplane icon at the bottom right hand side of the page.  This icon will be highlighted in green
-if all of the information is valid. 
-
-You will receive a message that the Metadata has been submitted succesfully. 
-
-
 
 ## EPA Disclaimer
 The United States Environmental Protection Agency (EPA) GitHub project code is provided on an "as is" basis and the user assumes responsibility for its use.  EPA has relinquished control of the information and no longer has responsibility to protect the integrity , confidentiality, or availability of the information.  Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA.  The EPA seal and logo shall not be used in any manner to imply endorsement of any commercial product or activity by EPA or the United States Government.
