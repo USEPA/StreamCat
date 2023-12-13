@@ -11,7 +11,14 @@ Users will need the following programs installed in order to run the code in the
 **Programs:**
 Python,  ArcPro (used to run ZonalStatisticsAsTable and TabulateArea tools with arcpy)
 
-Specific Python packages needed in the StreamCat code are listed in the [StreamCat.yml](https://github.com/USEPA/StreamCat/blob/master/StreamCat.yml) in the StreamCat GitHub repository.  Users can use this .yml file to create an environment with the necessary Python libraries by running the following lines at a conda prompt:
+We recommend using the specific conda package management that comes with ArcGIS Pro. You can use the package manager in ArcGIS Pro or conda package management available via the python command prompt with ArcGIS Pro (Start > ArcGIS > Python command prompt). Using either approach clone the base ArcGIS Pro environment, then install geopandas and rasterio (and optionally spyder) to the new environment. In the python command prompt use the following steps: 
+
+     1. conda create --name myclone --clone arcgispro-py3
+     2. activate myclone
+     3. conda install geopandas rasterio 
+          * optional: conda install spyder
+     
+We list these specific Python packages needed in the StreamCat code are listed in the [StreamCat.yml](https://github.com/USEPA/StreamCat/blob/master/StreamCat.yml) in the StreamCat GitHub repository.  Users can use this .yml file to create an environment with the necessary Python libraries by running the following lines at a conda prompt:
 
 1.  Change directory to where you have downloaded the [StreamCat.yml](https://github.com/USEPA/StreamCat/blob/master/StreamCat.yml) file:
      - for instance: cd C:/UserName/StreamCat
