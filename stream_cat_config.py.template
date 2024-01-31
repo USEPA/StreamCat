@@ -1,3 +1,6 @@
+#Local directory
+LOCAL_DIR = "/path/to/local/repository"
+
 # location of the landscape layers to perform statistics on
 LYR_DIR = "/path/to/landscape/layers"
 # ("O:/PRIV/CPHEA/PESD/COR/CORFiles/Geospatial_Library_Projects"
@@ -10,8 +13,11 @@ NHD_DIR = "/path/to/NHDPlusV21"
 # metrics as well as organizing the final tables into separate files for states.
 # TODO: get the URL of this file
 STATES_FILE = "/path/to/file/tl_2008_us_state.shp"
-# STATES_FILE = ("L:/Priv/CORFiles/Geospatial_Library_Resource"
-#                 "/POLITICAL/BOUNDARIES/NATIONAL/tl_2008_us_state.shp")
+# ("L:/Priv/CORFiles/Geospatial_Library_Resource"
+# "/POLITICAL/BOUNDARIES/NATIONAL/tl_2008_us_state.shp")
+
+ACCUM_DIR = "path/to/local/repository/accump_npy/"
+
 
 # location to write out accumulated StreamCat data <- this is intermediate
 OUT_DIR = "/path/to/write/out/files/to"
@@ -20,10 +26,8 @@ OUT_DIR = "/path/to/write/out/files/to"
 
 # location for the  final tables
 FINAL_DIR = "/path/to/where/you/want/final/tables"
-# FINAL_DIR = (
-#     "O:/PRIV/CPHEA/PESD/COR/CORFiles/Geospatial_Library_Projects"
-#     "/StreamCat/FTP_Staging/HydroRegions"
-# )
+# ("O:/PRIV/CPHEA/PESD/COR/CORFiles/Geospatial_Library_Projects"
+# "/StreamCat/FTP_Staging/HydroRegions")
 
 # below are the directories that hold the mask rasters by VPU
 # TODO: need to figure a better way to handle this

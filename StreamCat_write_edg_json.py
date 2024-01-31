@@ -41,7 +41,7 @@ gaft = 'https://gaftp.epa.gov/EPADataCommons/ORD/NHDPlusLandscapeAttributes/Stre
 
 tbl = pd.read_csv(
     "O:/PRIV/CPHEA/PESD/COR/CORFiles/Geospatial_Library_Projects"
-    "/StreamCat/MetaData/submit_metadata_revised.csv" 
+    "/StreamCat/MetaData/submit_metadata_StreamCat.csv" 
 )
 
 records = []

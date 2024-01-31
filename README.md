@@ -3,105 +3,91 @@
 # StreamCat
 
 ## Description: 
-The StreamCat Dataset (https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset) provides summaries of natural and anthropogenic landscape features for ~2.65 million streams, and their associated catchments, within the conterminous USA. This repo contains code used in StreamCat to process a suite of landscape rasters to watersheds for streams and their associated catchments (local reach contributing area) within the conterminous USA using the [NHDPlus Version 2](https://www.epa.gov/waterdata/nhdplus-national-hydrography-dataset-plus) as the geospatial framework.
+[The StreamCat Dataset](https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset) provides summaries of natural and anthropogenic landscape features for ~2.65 million streams, and their associated catchments, within the conterminous USA. This repo contains code used in StreamCat to process a suite of landscape rasters to watersheds for streams and their associated catchments (local reach contributing area) within the conterminous USA using the [NHDPlus Version 2](https://www.epa.gov/waterdata/nhdplus-national-hydrography-dataset-plus) as the geospatial framework.
 
-## Necessary Python Packages and Installation Tips
-The scripts for StreamCat rely on several python modules a user will need to install such as numpy, gdal, rasterio, geopandas, shapely and ArcPy with an ESRI license (minimal steps still using ArcPy).  We used the conda package manager to install necessary python modules. Note that package configurations and dependencies are sensitive and can change - in particular, setting up an environment with a working version of both `geopandas` and `arcpy` can be challenging. Our working version of the conda environment is contained in the StreamCat.yml file in the repository, and our essential packages and versions when code was last used are listed below - note that other configurations may work, we simply have verified this particular combination (Windows 64 and Python 3.7.10):
+## [Getting Started](https://github.com/USEPA/StreamCat/wiki)
+Users will need the following programs installed in order to run the code in the StreamCat GitHub repository:
 
-| Package       | Version       | 
-| ------------- |--------------:|
-| python        | 3.7.10        | 
-| fiona         | 1.8.18        | 
-| gdal          | 3.1.4=py37    | 
-| geopandas     | 0.9.0         |  
-| geos          | 3.9.1         |
-| libgdal       | 3.1.4         |
-| numpy         | 1.19.5        |
-| pandas        | 1.2.5         |
-| pyproj        | 3.1.0         |
-| rasterio      | 1.2.1=py37    |
-| shapely       | 1.7.1         |
+**Programs:**
+Python,  ArcGIS Pro (used to run ZonalStatisticsAsTable and TabulateArea tools with arcpy)
 
-If you are using Anaconda, creating a new, clean 'StreamCat' environment with these needed packages can be done one of several ways:
+We recommend using the specific conda package management that comes with ArcGIS Pro. You can use the package manager in ArcGIS Pro or conda package management available via the python command prompt with ArcGIS Pro (Start > ArcGIS > Python command prompt). Using either approach, clone the base ArcGIS Pro environment, then install geopandas and rasterio (and optionally spyder) to the new environment. *NOTE - the following steps have been verified to work using ArcGIS Pro 3.2.1*.  In the python command prompt use the following steps (replacing 'myclone' with the environment name of your choice): 
 
-* In your conda shell, add one necessary channel and then download the streamcat environment from the Anaconda cloud:
-  + conda config --add channels conda-forge
-  + conda env create mweber36/StreamCat
-  
-* Alternatively, using the streamcat.yml file in this repository, in your conda shell cd to the directory where your streamcat.yml file is located and run:
-  + conda env create -f StreamCat.yml
-  
-* To build environment yourself, we [followed the steps suggest here](https://www.e-education.psu.edu/geog489/node/2348) which are:
-  + conda create -n StreamCat -c conda-forge python=3.7 anaconda gdal=3.1.4  jupyter pandas geopandas matplotlib cartopy shapely rasterio numpy=1.19.5 spyder
+     1. conda create --clone arcgispro-py3 -p %localappdata%\esri\conda\envs\myclone --pinned
+     2. activate myclone
+     3. conda install geopandas rasterio 
+          * optional: conda install spyder
+     
+We list these specific Python packages needed in the StreamCat code are listed in the [spec-file.txt](https://github.com/USEPA/StreamCat/blob/master/spec-file.txt) in the StreamCat GitHub repository.  Users can use this .txt file to create an environment with the necessary Python libraries by running the following lines at a conda prompt:
 
-* Activate the new environment:
+1.  Change directory to where you have downloaded the [spec-file.txt](https://github.com/USEPA/StreamCat/blob/master/spec-file.txt) file:
+     - for instance: cd C:/UserName/StreamCat
+2.  Use the .txt file to create a new environment
+     - conda create --name myenv --file spec-file.txt
+3.  Use the spec file to install all of its listed packages into this environment
+     - conda install --name myenv --file spec-file.txt
 
-  + conda activate StreamCat
+**Local directories and files:**
+Create a local directory for your working files.  
 
-* 
-* To open Spyder, type the following at the conda prompt
-  + activate StreamCat
-  
-  Then
+Make local copies of the [NHDPlusV2 hydrology data](https://www.epa.gov/waterdata/nhdplus-national-hydrography-dataset-plus) and the [StreamCat repository](https://github.com/USEPA/StreamCat.git) and store these in directories on your local machine.
 
-  + Spyder
+The StreamCat GitHub repository includes a control table, a configuration file,  and Python scripts needed for running metrics.
 
-Finally, to use arcpy in this new environment, you will need to copy several ArcPro files and folders to your new environment as follows:
 
-+ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/Lib/site-packages/Arcgisscripting 
+## [Processing Steps](https://github.com/USEPA/StreamCat/wiki/1.-Landscape-Layer-Processing)
 
-+ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/Lib/site-packages/arcpy_wmx
-
-+ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/Lib/site-packages/gapy
-
-+ C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/Lib/site-packages/bapy
-
-To your environment directory which should look something like:
-
-+ C:/Users/mweber/AppData/Local/Continuum/anaconda3/envs/StreamCat/Lib/site-packages
-
-In order to use `arcpy`, at the python command prompt or in your script, you need to run:
-
-+ import os,sys
-+ os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
-+ sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
-+ import arcpy
-
-Note that the exact paths may vary depending on the version of ArcGIS and Anaconda you have installed and the configuration of your computer
-
-## How to Run Scripts
-### The scripts make use of 'control tables' to pass all the particular parameters to the three primary scripts: 
-
-+ [StreamCat_PreProcessing.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat_PreProcessing.py)
+* Download data into dedicated location.
+* For raster datasets, save as .tif files (saving from ArcPro, using gdal, or using rasterio in Python)
+* In ArcPro use the "Project Raster" tool and set "Output Coordinate System" to "USGS Albers Equal Area Conic"
+* Perform a visual inspection of dataset for gaps, edges, and other anomalous features. Verify how "no-data" values are represented and record values as no-data where appropriate (for instance, if "no-data" locations are represented by 0's or -9999,  convert to no-data value such as "null").
+* Isolate catchments that exist on US border and clip them to the areas that exist within the US to calculate the percent full for these catchments.
+* Record Data source, date, units, and resolution into project tracking spreadsheet (Control Table)
+## [How to Run Scripts](https://github.com/USEPA/StreamCat/wiki/2.-Running-StreamCat-Scripts)
+### The scripts make use of a [Control Table](https://github.com/USEPA/StreamCat/blob/master/ControlTable_StreamCat.csv) to pass all the particular parameters to the two primary scripts: 
 + [StreamCat.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat.py)
-+ [MakeFinalTables.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat_functions.py).  
++ [MakeFinalTables.py](https://github.com/USEPA/StreamCat/blob/master/MakeFinalTables.py)  
 
 In turn, these scripts rely on a generic functions in [StreamCat_functions.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat_functions.py). 
+And pathways as described by [stream_cat_config.py](https://github.com/USEPA/StreamCat/blob/master/stream_cat_config.py.template) , which will need to be formated and saved as .py to fit your directories
 
-To generate the riparian buffers we used in [StreamCat](ftp://newftp.epa.gov/EPADataCommons/ORD/NHDPlusLandscapeAttributes/StreamCat/Documentation/ReadMe.html) we used the code in [RiparianBuffers.py](https://github.com/USEPA/StreamCat/blob/master/RiparianBuffer.py) 
+To generate the riparian buffers we used in [StreamCat](https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset)
+we used the code in [RiparianBuffers.py](https://github.com/USEPA/StreamCat/blob/master/RiparianBuffer.py) 
 
 To generate percent full for catchments on the US border for point features, we used the code in [border.py](https://github.com/USEPA/StreamCat/blob/master/border.py)
 
-Examples of control tables used in scripts are:
-+ [RasterControlTable](https://github.com/USEPA/StreamCat/blob/master/RasterControlTable.csv)
-+ [ReclassTable](https://github.com/USEPA/StreamCat/blob/master/ReclassTable.csv)
-+ [FieldCalcTable.](https://github.com/USEPA/StreamCat/blob/master/FieldCalcTable.csv)
-+ [Lithology_lookup](https://github.com/USEPA/StreamCat/blob/master/Lithology_lookup.csv)
-+ [NLCD2006_lookup](https://github.com/USEPA/StreamCat/blob/master/NLCD2006_lookup.csv)
-+ [ControlTable_StreamCat](https://github.com/USEPA/StreamCat/blob/master/ControlTable_StreamCat.csv)
-+ [MakeFinalTables](https://github.com/USEPA/StreamCat/blob/master/MakeFinalTables.csv)
 
 ### Running StreamCat.py to generate new StreamCat metrics
+After editing the control tables to provide necessary information, such as directory paths, the following steps will execute processes to generate new watershed metrics for the conterminous US. This example uses Conda format within Spyder IDE.
 
-After editing the control tables to provide necessary information, such as directory paths, the following stesps will excecute processes to generate new watershed metrics for the conterminous US. All examples in the control table are for layers (e.g., STATSGO % clay content of soils) that were processed as part of the StreamCat Dataset. This example assumes run in Anaconda within Conda shell.
+1. Edit [ControlTable_StreamCat](https://github.com/USEPA/StreamCat/blob/master/ControlTable_StreamCat.csv) and set desired layer's "run" column to 1. All other rows should be set to 0 in run column.
+2. Open a conda shell and type "activate StreamCat".
+3. At the conda shell type "spyder" to activate Spyder IDE.
+4. Open file selection in Spyder and select your project location
+5. Open "StreamCat.py" in the code editor
+6. Open "StreamCat_functions.py" and "stream_cat_config.py" as well
 
-1. Edit [ControlTable_StreamCat](https://github.com/USEPA/StreamCat/blob/master/ControlTable_StreamCat.csv) and set desired layer's "run" column to 1. All other columns should be set to 0
-2. Open a Conda shell and type "activate StreamCat" 
-3. At the Conda shell type: "Python<space>"
-4. Drag and drop "StreamCat.py" to the Conda shell from a file manager followed by another space
-5. Drag and drop the control table to the Conda shell
+### StreamCat Config
+1. Save [stream_cat_config.py.template](https://github.com/USEPA/StreamCat/blob/master/stream_cat_config.py.template) as .py in project folder
+2. Set LOCAL_DIR to the proper directory. (This will be your project folder)
+3.	Ensure the LYR_DIR has proper directory (Normally the QA Complete Rasters).  This will be .tif files that you have stored on local drive.
+4.	Check the STREAMCAT_DIR is running through Streamcat Allocations_and_Accumulation folder. * This runs data through Streamcat first in the Allocation and Accumulation folder
+5.	Check NHD_DIR is in your own local NHD folder
+6.	Check STATES_FILE is your own local folder
+7.	Set ACCUM_DIR to "(project file director)/accum_npy/"
+    * The **first time** running [StreamCat.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat.py), the ***accum_npy*** folder will need to be removed from project file. This folder will autopopulate with information and files
+8.	OUT_DIR goes to local drive
+9.	FINAL_DIR goes to FTP Staging Hydroregions
 
-Final text in Conda shell should resemble this: python C:\some_path\StreamCat.py  C:\some_other_path\ControlTable.csv
+10. Double check that only the metrics you want to run have a 1, all others have a zero
+11. Run [StreamCat.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat.py) script
+
+
+### Make Final Tables
+Once [StreamCat.py](https://github.com/USEPA/StreamCat/blob/master/StreamCat.py) has run
+1. Open [Make_Final_Tables.py](https://github.com/USEPA/StreamCat/blob/master/Make_Final_Tables.py) in editor
+2. These final tables will show up in the OUT_DIR from [stream_cat_config.py](https://github.com/USEPA/StreamCat/blob/master/stream_cat_config.py.template)
+3. Run [Make_Final_Tables.py](https://github.com/USEPA/StreamCat/blob/master/Make_Final_Tables.py)
 
 
 ## EPA Disclaimer
