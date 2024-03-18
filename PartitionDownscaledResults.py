@@ -33,4 +33,4 @@ for i in VPU:
     df = farm_fert[farm_fert['VPU'] == i]
     df = df.drop(columns=['VPU'])
     df.to_csv(nut_dir + '/ByHydroregion/FarmFert_' + str(i) + '.csv',
-              , index=False)
+              index=False)
