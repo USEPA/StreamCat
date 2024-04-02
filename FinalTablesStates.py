@@ -7,7 +7,7 @@ FinalTablesStates
 import pandas as pd
 import os
 
-var = 'NLCD2001'
+var = 'RefStreamTempPred'
 # Read in a state / hydro-region lookup table
 lookupdir = 'L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/StateLookup'
 stateVPU = pd.read_csv(lookupdir + '/State_VPU.csv')
@@ -29,7 +29,7 @@ for i in os.listdir(lookupdir):
             if count > 0:
                 temp = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library_Projects/StreamCat/FTP_Staging/HydroRegions/' + var + '_Region' + VPU + '.csv')
                 temp = temp[temp['COMID'].isin(state['COMID'])]
-                outtable = outtable.append(temp, ignore_index = True)
+                outtable = pd.concat([outtable, temp], ignore_index = True)
             count+=1
         # grab state two letter code to use in writing out file
         St_Abbr = pd.read_csv(lookupdir + '/states_lookup.csv')
