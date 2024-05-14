@@ -818,12 +818,12 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl):
     if any(interVPUtbl.toCOMIDs.values > 0):
         con = pd.read_csv(Connector).set_index("COMID")
         con.columns = map(str, con.columns)
-        toVPUs = toVPUs.append(con)
+        toVPUs = pd.concat([toVPUs,con], axis=0, ignore_index=False)
         toVPUs.to_csv(Connector)
     if os.path.exists(Connector):  # if Connector already exists, read it in and append
         con = pd.read_csv(Connector).set_index("COMID")
         con.columns = map(str, con.columns)
-        throughVPUs = throughVPUs.append(con)
+        throughVPUs = pd.concat([throughVPUs, con], axis=0, ignore_index=False) 
     throughVPUs.to_csv(Connector)
 
 
@@ -1228,7 +1228,7 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
         )
     ]
 
-    cat = cat.append(con)
+    cat = pd.concat([cat, con], axis=0, ignore_index=False)   
     return cat.reset_index(drop=True)
 
 

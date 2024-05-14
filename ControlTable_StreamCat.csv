@@ -402,3 +402,10 @@ WetnessIndex,Continuous,WetIndex,none,wetness_index.tif,,WetIndex,Mean,1,0,0,0,,
 WWTPAll,Point,WWTPAllDens,none,WWTP_All_CWA_Active_2013_CONUS.shp,,WWTP,Density,1,0,0,0,,Yes,yes,,12/29/2021
 WWTPMajor,Point,WWTPMajorDens,none,WWTP_Major_CWA_Active_2013_CONUS.shp,,WWTP,Density,1,0,0,0,,Yes,yes,,12/30/2021
 WWTPMinor,Point,WWTPMinorDens,none,WWTP_Minor_CWA_Active_2013_CONUS.shp,,WWTP,Density,1,0,0,0,,Yes,yes,,12/30/2021
+WetnessIndex,Continuous,WetIndex,none,wetness_index.tif,,WetIndex,Mean,1,0,0,0,,Yes,yes,Yes,7/4/2020
+NPP_YrMean,Continuous,NPP_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
+NPP,Continuous,NPP,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
+Precip_YrMean,Continuous,Precip_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
+LST_YrMean,Continuous,LST_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
+LST,Continuous,LST,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
+SNOW_YrMean,Continuous,SNOW_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024

@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 
 from stream_cat_config import(
-    LOCAL_DIR,
+    # LOCAL_DIR,
     FINAL_DIR,
     ACCUM_DIR,
     LENGTHS,
@@ -60,7 +60,7 @@ ctl = pd.read_csv(control)
 print(ctl.query("run == 1").MetricName.head())
 #exit()
 
-inputs = np.load(ACCUM_DIR + "vpu_inputs.npy", allow_pickle=True).item()
+inputs = np.load(ACCUM_DIR + "/vpu_inputs.npy", allow_pickle=True).item()
 
 runners = ctl.query("run == 1").groupby("Final_Table_Name")
 tables = runners["FullTableName"].unique().to_dict()
@@ -72,7 +72,7 @@ for table, metrics in tables.items():  # make sure all tables exist
         for metric in metrics:
             accumulated_file = OUT_DIR / fn.format(metric, vpu)
             if not accumulated_file.exists():
-                missing.append(accumulated_file)
+                missing = pd.concat([missing,accumulated_file], axis=0, ignore_index=False)
 
 if len(missing) > 0:
     for miss in missing:
@@ -168,8 +168,8 @@ for table, metrics in tables.items():
                             ).replace("M3", "")
                             tbl[sum_col_cat] = tbl["Cat" + summary] / weighted_cat_area
                             tbl[sum_col_ws] = tbl["Ws" + summary] / weighted_ws_area
-                            cat_sums.append(sum_col_cat)
-                            ws_sums.append(sum_col_ws)
+                            cat_sums = pd.concat([cat_sums,sum_col_cat], axis=0, ignore_index=False)
+                            ws_sums = pd.concat([ws_sums,sum_col_ws], axis=0, ignore_index=False)
                     if table in ["RoadStreamCrossings", "CanalDensity"]:
                         tbl[cat_colname] = (
                             tbl.CatSum / weighted_cat_area * row.Conversion
@@ -209,10 +209,10 @@ for table, metrics in tables.items():
                     for col in tbl.columns:
                         if "CatVALUE" in col and not "Up" in col:
                             tbl[col] = (tbl[col] * 1e-6) / weighted_cat_area * 100
-                            catcols.append(col)
+                            catcols = pd.concat([catcols,col], axis=0, ignore_index=False)
                         if "WsVALUE" in col:
                             tbl[col] = (tbl[col] * 1e-6) / weighted_ws_area * 100
-                            wscols.append(col)
+                            wscols = pd.concat([wscols,col], axis=0, ignore_index=False)
                     if metric_count == 0:
                         final = tbl[front_cols + catcols + wscols]
                         final.columns = front_cols + cat_named + ws_named
@@ -263,7 +263,7 @@ for table, metrics in tables.items():
         for vpu in states_dict[state]["VPUs"]:
             vpu_tbl = pd.read_csv(FINAL_DIR / region_fn.format(table, vpu))
             vpu_tbl.query("COMID in @keepers", inplace=True)
-            state_tbl = state_tbl.append(vpu_tbl)
+            state_tbl = pd.concat([state_tbl,vpu_tbl], axis=0, ignore_index=False)
         state_tbl.to_csv(state_file, index=False)
 
         # ZIP up every state as we write them out
