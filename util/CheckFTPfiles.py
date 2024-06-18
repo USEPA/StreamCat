@@ -21,7 +21,7 @@ for region in region_list:
     region_recordlens = dict()
     for f in os.listdir(hydrodir):
         if f.replace('.csv','.zip') in filelist and f.split('.')[0].split('_')[-1] == region:
-            print f
+            print(f)
             check = pd.read_csv(hydrodir + f)
             region_recordlens[f.split('.')[0].split('_Region')[0]] = len(check)
     expected_value = next(iter(region_recordlens.values()))

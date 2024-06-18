@@ -8,8 +8,8 @@ Created on Thu Jan 12 11:30:50 2017
 import os
 from os.path import basename
 import zipfile
-from Tkinter import Tk
-from tkFileDialog import askdirectory
+from tkinter import Tk
+from tkinter.filedialog import askdirectory
 Tk().withdraw()
 
 def main():

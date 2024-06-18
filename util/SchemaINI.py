@@ -25,7 +25,7 @@ b = open('%s/schema.ini' % wrk_dir, 'wb')
 a = csv.writer(b,delimiter=',')
 hold = 'bogus'
 for f in files:
-    print f
+    print(f)
     if f.split('_')[0] != hold:
         tbl = pd.read_csv(wrk_dir + '/' + f)
         # use to compare table names so only 1 table has to be read in for each metric

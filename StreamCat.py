@@ -31,7 +31,7 @@ import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-control = "ControlTable_StreamCat.csv"
+control = "config_tables/ControlTable_StreamCat.csv"
 
 
 from stream_cat_config import (
@@ -61,7 +61,7 @@ from StreamCat_functions import (
 ctl = pd.read_csv(control)
 
 # Load table of inter vpu connections
-inter_vpu = pd.read_csv("InterVPU.csv")
+inter_vpu = pd.read_csv("config_tables/InterVPU.csv")
 
 if not os.path.exists(OUT_DIR):
     os.mkdir(OUT_DIR)
