@@ -453,7 +453,7 @@ class DatabaseConnection():
                 revert_columns[col_name.upper()] = col_name
 
             df.rename(columns=new_col_names, inplace=True)
-            df.to_sql(table_name, self.engine, if_exists='append', chunksize=10000, dtype=dtypes)
+            df.to_sql(table_name, self.engine, if_exists='replace', chunksize=10000, dtype=dtypes, index=False)
             df.rename(columns=revert_columns, inplace=True)
         else:
             # IF execute is false then we just write the raw sql queries to a file
