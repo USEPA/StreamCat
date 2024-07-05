@@ -4,13 +4,13 @@
 
 TODO
 
-Finish cuSpatial functions to replace geopandas processing.
-
-Integrate Xarray-spatial to replace ArcGIS Pro functions.
-
-Replace as many local .csv file reads with StreamCat API calls.
-
-Replace StreamCat_API.py file with public api calls when possible and use new database tool where otherwise necessary.
+* [ ] Finish cuSpatial functions to replace geopandas processing.
+* [ ] Integrate Xarray-spatial to replace ArcGIS Pro functions.
+* [ ] Replace as many local .csv file reads with StreamCat database API calls.
+* [ ] Replace StreamCat_API.py file with public api calls when possible.
+* [ ] Work on Tkinter gui (sqlalchemy_gui.py)
+  * [ ] Complete 'Create New Metric Info' action
+* [ ] Integrate new database.py functions into StreamCat.py
 
 ## Description:
 
@@ -46,15 +46,13 @@ Make local copies of the [NHDPlusV2 hydrology data](https://www.epa.gov/waterdat
 
 The StreamCat GitHub repository includes a control table, a configuration file,  and Python scripts needed for running metrics.
 
-
 ## GPU Proccessing (in progress)
 
 If you have a local GPU available we can acheive exponential speed ups.
 
 First, install the CUDA toolkit.
 
-Then, use the StreamCatGPU.yml file (in progress) to create a conda environment and pull cuDF and cuSpatial from Nvidia's rapids channel. 
-
+Then, use the StreamCatGPU.yml file (in progress) to create a conda environment and pull cuDF and cuSpatial from Nvidia's rapids channel.
 
 ## [Processing Steps](https://github.com/USEPA/StreamCat/wiki/1.-Landscape-Layer-Processing)
 

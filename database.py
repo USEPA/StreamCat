@@ -2,7 +2,7 @@ from sqlalchemy.engine import create_engine
 from sqlalchemy import inspect, Table, Column, MetaData, func, insert, update, delete, select, bindparam, event, text, and_, types, TextClause
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.schema import CreateTable
-from sqlalchemy.dialects import oracle
+from sqlalchemy.dialects.oracle import NUMBER
 from sqlalchemy.sql.compiler import SQLCompiler
 import pandas as pd
 import logging
@@ -198,7 +198,7 @@ class DatabaseConnection():
                 col = Column(col_name, types.DateTime())
             else:
                 col = Column(col_name, types.VARCHAR())
-                
+            #TODO change the columns to nullable = true maybe. Also this should be for dataset tables only new function non dataset tables
 
             columns.append(col)
 
@@ -443,8 +443,18 @@ class DatabaseConnection():
         table_name = prefix + 'ds_' + str(dsid)
         if self.execute:
             # Change this to sqlalchemy CreateTable function called self.CreateNewTable
-            self.CreateNewTable(table_name, df)
-            # df.to_sql(table_name, self.engine, if_exists='append', chunksize=5000)
+            #self.CreateNewTable(table_name, df)
+            revert_columns = {}
+            new_col_names = {}
+            dtypes = {}
+            for col_name in df.columns:
+                dtypes[col_name.upper()] = NUMBER
+                new_col_names[col_name] = col_name.upper()
+                revert_columns[col_name.upper()] = col_name
+
+            df.rename(columns=new_col_names, inplace=True)
+            df.to_sql(table_name, self.engine, if_exists='append', chunksize=10000, dtype=dtypes)
+            df.rename(columns=revert_columns, inplace=True)
         else:
             # IF execute is false then we just write the raw sql queries to a file
             lines = []
