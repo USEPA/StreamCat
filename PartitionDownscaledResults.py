@@ -37,7 +37,8 @@ list(nut)
 # select columns - this part we can modify to iterate through columns
 final = nut[['COMID', 'SNOW_YrMean', 'CatAreaSqKm', 'VPU']]
 final = final.rename(columns={'SNOW_YrMean': 'CatSum'})
-final['CatCount'] = final['CatAreaSqKm']
+final['CatCount'] = final['CatAreaSqKm'] 
+final['CatSum'] = final['CatSum'] * final['CatCount']
 final['CatPctFull'] = 100
 final = final.set_axis(['COMID', 'CatSum', 'CatAreaSqKm','VPU', 'CatCount', 'CatPctFull'], axis=1)
 
