@@ -239,6 +239,7 @@ class DatabaseConnection():
             table_name (str): Name of table to insert into
             values (dict): dictionary with items key = column_name : value = new_value
         """
+        
         if self.inspector.has_table(table_name):
             table = self.metadata.tables[table_name]
             query = insert(table).values(values).returning(*table.c)
@@ -524,6 +525,8 @@ class DatabaseConnection():
         else:
             df = pd.read_csv(files)
             dsname = files.split('/')[-1].removesuffix('.csv')
+        if '_' in dsname:
+            dsname = dsname.split('_')[0]
         df.fillna(0, inplace=True)
         
         ds_result, metric_result, display_result = self.CreateDataset(partition, df, dsname)
@@ -660,3 +663,22 @@ class DatabaseConnection():
         update_stmt = ds_table.update().where(ds_table.c.dsname == dsname).values(active=new_val)
         update_res = self.RunQuery(update_stmt)
         return update_res
+
+    def getVersionNumber(self, partition): 
+        table_name = 'lc_info' if partition == 'lakecat' else 'sc_info'
+        info_table = Table(table_name, self.metadata, autoload_with=self.engine)
+        with self.engine.connect() as conn:
+            max_version = conn.execute(func.max(info_table.c.version)).scalar()
+            conn.rollback()
+        return max_version
+    
+    def newChangelogRow(self, partition, public_desc):
+        table_name = 'sc_info' if partition == 'streamcat' else 'lc_info'
+        # stmt = f"INSERT INTO {table_name} (version, public_description) VALUES ((SELECT MAX(version)+1 FROM lc_info), '{public_desc}');"
+        new_version_num = self.getVersionNumber(partition) + 1
+        values = {
+            "version": new_version_num,
+            "public_description": public_desc
+        }
+        result = self.InsertRow(table_name, values)
+        return result

@@ -1,6 +1,6 @@
 from database import DatabaseConnection
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, simpledialog
 from tkinter.messagebox import showinfo
 from enum import Enum
 
@@ -292,6 +292,10 @@ def submit():
         showinfo(f"Created variable info for {row_data['metric_name']}", f"Inserted into {table_name}: {result}")
     else:
         showinfo('Invalid Selection', 'Please use the actions dropdown to select a valid option')
+    
+    changelog_update = simpledialog.askstring("Describe DB Change", "What changes did you make to the database here", parent = root)
+    if changelog_update is not None:
+        changelog_result = db_conn.newChangelogRow(selected_partition.get(), changelog_update)
 
 if __name__ == "__main__":
     db_conn = DatabaseConnection()
@@ -313,7 +317,7 @@ if __name__ == "__main__":
     execute_sql_switch = ttk.Checkbutton(root, text="Execute SQL?", variable=execute_sql_var, command=lambda: setattr(db_conn, 'execute', execute_sql_var.get()))
     execute_sql_switch.grid(row=0, column=3, columnspan=2, pady=10)
 
-    selected_partition = tk.StringVar(value='StreamCat')
+    selected_partition = tk.StringVar(value='streamcat')
 
     # Dropdown selection
     dropdown_var = tk.StringVar(root)
