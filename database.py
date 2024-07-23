@@ -28,7 +28,7 @@ def log_query(conn, clauseelement, multiparams, params, execution_options):
             f.write(compiled_sql + ';\n')
 
 class DatabaseConnection():
-    def __init__(self, execute=False, config_file_path="C:/Users/thudso02/repositories/streamcat_db_config.json") -> None:
+    def __init__(self, execute=False, config_file_path="O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/DatabaseModification/streamcat_db_config.json") -> None:
 
         if config_file_path:
             fp = open(config_file_path)
@@ -59,7 +59,7 @@ class DatabaseConnection():
     def connect(self):
         """Connect to database"""
         if self.engine is None:
-            self.engine = create_engine(self.__str__(), thick_mode={'lib_dir' : 'C:/Users/thudso02/Oracle/instantclient_19_22'}, logging_name="StreamCatDB")
+            self.engine = create_engine(self.__str__(), thick_mode={'lib_dir' : 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/DatabaseModification/instantclient-basic-windows/instantclient_23_4'}, logging_name="StreamCatDB")
             self.inspector = inspect(self.engine)
             self.metadata = MetaData()
             self.metadata.reflect(self.engine) # move to connect / init function
@@ -111,7 +111,7 @@ class DatabaseConnection():
             else:
                 result = str(query.compile(dialect=self.engine.dialect, compile_kwargs={"literal_binds": True}))
 
-            print(result)
+            #print(result)
             with open(f'db_updates_{datetime.today().strftime("%m_%d_%Y")}.sql', 'a') as db_file:
                 db_file.write(result + ';\n')
         return result, self.execute # Return statement and whether or not it was executed
