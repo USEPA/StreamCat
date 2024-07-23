@@ -493,7 +493,7 @@ class DatabaseConnection():
                     metric_name = metric_name.removesuffix("ws")
                 display_names.add(metric_name)
 
-        
+        # Insert into sc/lc _ metrics
         metric_result = self.BulkInsert(metrics_table_name, metric_data)
             
         
@@ -501,6 +501,8 @@ class DatabaseConnection():
         for alias in display_names:
             # get list of params to pass to one query
             display_params.append({"metric_alias": alias, "dsid": dsid})
+        
+        # Insert into sc/lc _metrics_display_names
         display_result = self.BulkInsert(display_table_name, display_params)
 
         return ds_result, metric_result, display_result
@@ -525,8 +527,10 @@ class DatabaseConnection():
         else:
             df = pd.read_csv(files)
             dsname = files.split('/')[-1].removesuffix('.csv')
+
         if '_' in dsname:
             dsname = dsname.split('_')[0]
+
         df.fillna(0, inplace=True)
         
         ds_result, metric_result, display_result = self.CreateDataset(partition, df, dsname)
