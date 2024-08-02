@@ -102,15 +102,15 @@ def on_action_select(*args):
         
         table_name_dropdown = ttk.Combobox(root, textvariable=table_name_dropdown_var, values=table_options)
         #table_name_dropdown.bind("<<ComboboxSelected>>", on_action_select)
-        table_name_dropdown.grid(row=2, column=1, columnspan=3, padx=10, pady=5)
+        table_name_dropdown.grid(row=3, column=1, columnspan=3, padx=10, pady=5)
         additional_widgets.insert(1, table_name_dropdown)
 
         files_btn = ttk.Button(root, text="Choose Files", command=lambda: choose_files(file_display))
-        files_btn.grid(row=3, column=1, padx=10, pady=5)
+        files_btn.grid(row=4, column=1, padx=10, pady=5)
         additional_widgets.insert(2, files_btn)
 
         file_display = ttk.Entry(root)
-        file_display.grid(row=4, column=1, columnspan=2, padx=10, pady=5)
+        file_display.grid(row=5, column=1, columnspan=2, padx=10, pady=5)
         additional_widgets.insert(3, file_display)
     
     elif choice =='Create Metric Info':
@@ -155,7 +155,7 @@ def on_action_select(*args):
         description_label.grid(row=7, column=0, padx=10, pady=5)
         additional_widgets.append(description_label) #10
         description_entry = ttk.Entry(root)
-        description_entry.grid(row=7, column=1, columnspan=2, rowspan=3, padx=10, pady=5)
+        description_entry.grid(row=7, column=1, columnspan=2, padx=10, pady=5)
         additional_widgets.append(description_entry) #11
 
         units_label = ttk.Label(root, text="Enter metric units:")
@@ -169,7 +169,7 @@ def on_action_select(*args):
         uuid_label.grid(row=9, column=0, padx=10, pady=5)
         additional_widgets.append(uuid_label) #14
         uuid_entry = ttk.Entry(root)
-        uuid_entry.grid(row=9, column=1, columnspan=2, rowspan=3, padx=10, pady=5)
+        uuid_entry.grid(row=9, column=1, columnspan=2, padx=10, pady=5)
         additional_widgets.append(uuid_entry) #15
 
         metadata_label = ttk.Label(root, text="Enter metric metadata:")
@@ -226,6 +226,76 @@ def on_action_select(*args):
         additional_widgets.append(lakecat_radio) #30
 
         submit_button.grid(row=18, column=0, columnspan=2, pady=10)
+    
+    elif choice =='Edit Metric Info':
+        def get_edit_metric_info():
+            if len(additional_widgets) > 0:
+                #print(additional_widgets)
+                for widget in additional_widgets:
+                    #print(widget)
+                    #print(type(widget))
+                    widget.grid_forget()
+            del additional_widgets[2:]
+            table_name = 'sc_metrics_tg' if selected_partition.get() == 'streamcat' else 'lc_metrics_tg'
+            tg_table = db_conn.metadata.tables[table_name]
+            # metric_name_col = tg_table.c['metric_name']
+            # metric_name_options = tg_table.c['metric_name'].keys()
+            metric_name_options = db_conn.SelectColsFromTable('metric_name', table_name)
+
+            metric_name_dropdown_var.set(metric_name_options[0])
+            metric_name_dropdown = ttk.Combobox(root, textvariable=metric_name_dropdown_var, values=metric_name_options)
+            metric_name_dropdown.grid(row=3, column=1, columnspan=3, padx=10, pady=5)
+            additional_widgets.append(metric_name_dropdown) #2
+
+
+            tg_columns = list(tg_table.c.keys())
+            # tg_columns_dropdown_var = tk.StringVar(root)
+            tg_columns_dropdown_var.set(tg_columns[0])
+            tg_columns_dropdown = ttk.Combobox(root, textvariable=tg_columns_dropdown_var, values=tg_columns)
+            tg_columns_dropdown.grid(row=4, column=1, columnspan=3, padx=10, pady=5)
+            additional_widgets.append(tg_columns_dropdown) #3
+
+            new_val_label = ttk.Label(root, text="Enter new value for the selected column:")
+            new_val_label.grid(row=5, column=0, padx=10, pady=5)
+            additional_widgets.append(new_val_label) #4
+            new_val_entry = ttk.Entry(root)
+            new_val_entry.grid(row=5, column=1, columnspan=2, padx=10, pady=5)
+            additional_widgets.append(new_val_entry) #5
+
+        streamcat_radio = ttk.Radiobutton(root, text="StreamCat", variable=selected_partition, value='streamcat', command=get_edit_metric_info)
+        streamcat_radio.grid(row=2, column=1, sticky='w', padx=10, pady=5)
+        lakecat_radio = ttk.Radiobutton(root, text="LakeCat", variable=selected_partition, value='lakecat', command=get_edit_metric_info)
+        lakecat_radio.grid(row=2, column=2, sticky='w', padx=10, pady=5)
+        additional_widgets.append(streamcat_radio) #0
+        additional_widgets.append(lakecat_radio) #1
+        # streamcat_radio.bind('<Button-1>', command=get_edit_metric_info)
+        # lakecat_radio.bind('<Button-1>', command=get_edit_metric_info)
+        # metric_name_dropdown_var = tk.StringVar(root)
+        # Get TG table for appropriate partition
+        # tg_table = db_conn.metadata.tables[selected_partition.get()]
+        # metric_name_options = tg_table.c['metric_name']
+
+        # metric_name_dropdown_var.set(table_options[0])
+        # metric_name_dropdown = ttk.Combobox(root, textvariable=metric_name_dropdown_var, values=metric_name_options)
+        # metric_name_dropdown.grid(row=3, column=1, columnspan=3, padx=10, pady=5)
+        # additional_widgets.append(metric_name_dropdown) #2
+
+
+        # tg_columns = list(tg_table.c.keys())
+        # # tg_columns_dropdown_var = tk.StringVar(root)
+        # tg_columns_dropdown_var.set(tg_columns[0])
+        # tg_columns_dropdown = ttk.Combobox(root, textvariable=tg_columns_dropdown_var, values=tg_columns)
+        # tg_columns_dropdown.grid(row=4, column=1, columnspan=3, padx=10, pady=5)
+        # additional_widgets.append(tg_columns_dropdown) #3
+
+        # new_val_label = ttk.Label(root, text="Enter new value for the selected column:")
+        # new_val_label.grid(row=5, column=0, padx=10, pady=5)
+        # additional_widgets.append(new_val_label) #4
+        # new_val_entry = ttk.Entry(root)
+        # new_val_entry.grid(row=5, column=1, columnspan=2, padx=10, pady=5)
+        # additional_widgets.append(new_val_entry) #5
+
+        submit_button.grid(row=7, column=0, columnspan=2, pady=10)
 
 
 def choose_files(entry_widget):
@@ -240,6 +310,7 @@ def submit():
     """
 
     # TODO should make sure these functions return some kind of info and use showinfo() popups to display the return results
+    # TODO add progress bar
     choice = dropdown_var.get()
     if choice == 'Create Dataset from files':
         partition = selected_partition.get().lower()
@@ -290,6 +361,19 @@ def submit():
         row_data['final_table'] = additional_widgets[27].get()
         result = db_conn.InsertRow(table_name, row_data)
         showinfo(f"Created variable info for {row_data['metric_name']}", f"Inserted into {table_name}: {result}")
+    
+    elif choice =='Edit Metric Info':
+        partition = selected_partition.get().lower()
+        table_name = 'sc_metrics_tg' if partition == 'streamcat' else 'lc_metrics_tg'
+        metric = metric_name_dropdown_var.get()
+        col = tg_columns_dropdown_var.get()
+        new_val = additional_widgets[5].get()
+        print(table_name)
+        print(col)
+        print(metric)
+        print(new_val)
+        update = db_conn.UpdateRow(table_name, col, metric, new_val)
+
     else:
         showinfo('Invalid Selection', 'Please use the actions dropdown to select a valid option')
     
@@ -321,7 +405,7 @@ if __name__ == "__main__":
 
     # Dropdown selection
     dropdown_var = tk.StringVar(root)
-    actions = ['Select Action', 'Create Dataset from files', 'Create Table from Files', 'Rename Metric', 'Activate/Deactivate Dataset', 'Update Table With File Data']
+    actions = ['Select Action', 'Create Dataset from files', 'Create Table from Files', 'Rename Metric', 'Activate/Deactivate Dataset', 'Update Table With File Data', 'Create Metric Info', 'Edit Metric Info']
     dropdown_var.set(actions[0])  # default value
     dropdown = ttk.Combobox(root, textvariable=dropdown_var, values=actions)
     dropdown.bind("<<ComboboxSelected>>", on_action_select)
@@ -345,5 +429,8 @@ if __name__ == "__main__":
     # Submit Button
     submit_button = ttk.Button(root, text="Submit", command=submit)
     submit_button.grid(row=5, column=0, columnspan=2, pady=10)
+
+    metric_name_dropdown_var = tk.StringVar(root)
+    tg_columns_dropdown_var = tk.StringVar(root)
 
     root.mainloop()

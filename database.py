@@ -1,5 +1,5 @@
 from sqlalchemy.engine import create_engine
-from sqlalchemy import inspect, Table, Column, MetaData, func, insert, update, delete, select, bindparam, event, text, and_, types, TextClause
+from sqlalchemy import inspect, Table, Column, MetaData, func, insert, update, delete, select, bindparam, event, text, and_, types
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects.oracle import NUMBER
@@ -8,6 +8,10 @@ import pandas as pd
 import logging
 import json
 from datetime import datetime
+import os
+
+if not os.path.exists('logs'):
+    os.makedirs('logs')
 
 def log_query(conn, clauseelement, multiparams, params, execution_options):
     # Log all non-SELECT SQL commands before execution
@@ -63,7 +67,7 @@ class DatabaseConnection():
             self.inspector = inspect(self.engine)
             self.metadata = MetaData()
             self.metadata.reflect(self.engine) # move to connect / init function
-            logging.basicConfig(filename=f'logs/db_log_{datetime.today().strftime('%m_%d_%Y')}.log', filemode='a')
+            logging.basicConfig(filename=f'logs/db_log_{datetime.today().strftime("%m_%d_%Y")}.log', filemode='a')
             logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
             event.listen(self.engine, 'before_execute', log_query)
         return
@@ -570,6 +574,7 @@ class DatabaseConnection():
         return ''.join(missing_from_sc_metrics) # could return just the set as well
 
     def UpdateMetricName(self, old_name, new_name):
+        # call this in the edit metric info fucntion if name is updated.
         metrics_update, display_update, tg_update = None # To bypass variable undefined errors on returns 
 
         # Update metric everywhere it is used, as a table column, in metrics, display names, and tg
@@ -658,6 +663,22 @@ class DatabaseConnection():
     #             return row[:-len(aoi)].strip()
     #     return row
 
+    def GetAllDatasetNames(self):
+
+        sc_dsnames = []
+        lc_dsnames = []
+        sc_select_stmt = text("SELECT dsname FROM sc_datasets")
+        sc_datasets_res = self.TextSelect(sc_select_stmt)
+        for row in sc_datasets_res:
+            sc_dsnames.append(row._t[0])
+
+        lc_select_stmt = text("SELECT dsname FROM lc_datasets")
+        lc_datasets_res = self.TextSelect(lc_select_stmt)
+        for row in lc_datasets_res:
+            lc_dsnames.append(row._t[0])
+        
+        return sc_dsnames + lc_dsnames
+
     def UpdateActiveDataset(self, dsname):
         ds_table = self.metadata.tables['sc_datasets']
         
@@ -667,6 +688,7 @@ class DatabaseConnection():
         update_stmt = ds_table.update().where(ds_table.c.dsname == dsname).values(active=new_val)
         update_res = self.RunQuery(update_stmt)
         return update_res
+    
 
     def getVersionNumber(self, partition): 
         table_name = 'lc_info' if partition == 'lakecat' else 'sc_info'
