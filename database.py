@@ -120,18 +120,41 @@ class DatabaseConnection():
                 db_file.write(result + ';\n')
         return result, self.execute # Return statement and whether or not it was executed
     
-    def SelectColsFromTable(self, columns, table_name):
-        if isinstance(columns, str):
-            query = text(f"SELECT {columns} FROM {table_name}")
-        elif isinstance(columns, list):
-            cols = ','.join(columns)
-            query = text(f"SELECT {cols} FROM {table_name}")
+    def SelectColsFromTable(self, columns: list, table_name:str, function:None | str = None):
+        """Select columns from database table 
+
+        Args:
+            columns (list): columns to be selected
+            table_name (str): name of db table
+            function (None | str, optional): Function to apply to query. Options are 'distinct', 'count', 'max', 'min', 'avg'. Defaults to None.
+
+        Returns:
+            result (sequence of rows): Result set of query
+        """
+        if len(columns) == 1:
+            col_str = columns[0]
+        else:
+            col_str = ','.join(columns)
+        if function == 'distinct':
+            query = text(f"SELECT DISTINCT({col_str}) FROM {table_name}")
+        elif function == 'count':
+            query = text(f"SELECT COUNT({col_str}) FROM {table_name}")
+        else:
+            query = text(f"SELECT {col_str} FROM {table_name}")
         with self.engine.connect() as conn:
             result = conn.execute(query).fetchall()
 
         return result
     
     def TextSelect(self, text_stmt):
+        """Select query using the SQLAlchemy text() function
+
+        Args:
+            text_stmt (str | Text): String query to pass to database
+
+        Returns:
+            Sequence[Row]: Return set from SQL select statement
+        """
         if isinstance(text_stmt, str):
             text_stmt = text(text_stmt)
 
@@ -256,18 +279,31 @@ class DatabaseConnection():
     # TODO finish dynamic bindings
     # change old value and new_value to pd.Series or sqlalchemy Column
     # Update all items in these series
-    def UpdateRow(self, table_name: str, column: str, id: str, new_value: str):
+    def UpdateRow(self, table_name: str, column: str, id_column: str, id_val: str, new_value: str):
+        """Update Row in database
+
+        Args:
+            table_name (str): Name of database table
+            column (str): Name of column to update
+            id (str): Identifier for row
+            new_value (str): New value to set column equal to where the identifier is found
+
+        Returns:
+            result (Result): return result of the update query
+        """
         # if has_table is false call create table
         if self.inspector.has_table(table_name):
             table = self.metadata.tables[table_name]
-            col = table.c.get(column)
-            if col == None:
+            #col = table.c.get(column)
+            # if col == None:
+            #     return f"No Column named {column} in Table {table_name}"
+            
+            id_col = table.c.get(id_column)
+            if id_col == None:
                 return f"No Column named {column} in Table {table_name}"
-            
-            query = update(table).where(id == bindparam("id")).values(new_value=bindparam("new_value"))
-            
-            params = {"id" : id, "new_value": new_value}
-            result, executed = self.RunQuery(query, params)
+            #query = update(table).where(col == bindparam("id")).values(new_value=bindparam("new_value"))
+            query = update(table).where(id_col == id_val).values({column: new_value})
+            result, executed = self.RunQuery(query)
             if executed:
                 return result.fetchall()
             else:
@@ -511,15 +547,16 @@ class DatabaseConnection():
 
         return ds_result, metric_result, display_result
     
-    def CreateDatasetFromFiles(self, partition: str, files: list | str):
+    def CreateDatasetFromFiles(self, partition: str, dataset_name: str, files: list | str):
         """Create new dataset in given partition from a list of files
 
         Args:
             partition (str): IMPORTANT: this needs to be either 'streamcat' or 'lakecat'. This is how we will decide what part of the database to create new data in.
+            dataset_name (str): Name of the dataset. This will be used in the sc/lc_datasets table and is also the final_table name in the TG table (metric variable info page)
             files (list | str): list of paths to files
 
         Returns:
-            tuple(metric_result, display_result): see create dataset
+            tuple(dataset_result, metric_result, display_result): see function CreateDataset
         """
         if ',' in files and isinstance(files, str):
             files = files.split(', ')
@@ -527,17 +564,17 @@ class DatabaseConnection():
         if isinstance(files, list):
             dfs = [pd.read_csv(path) for path in files]
             df = pd.concat(dfs)
-            dsname = files[0].split('/')[-1].removesuffix('.csv')
+            # dsname = files[0].split('/')[-1].removesuffix('.csv')
         else:
             df = pd.read_csv(files)
-            dsname = files.split('/')[-1].removesuffix('.csv')
+            # dsname = files.split('/')[-1].removesuffix('.csv')
 
-        if '_' in dsname:
-            dsname = dsname.split('_')[0]
+        # if '_' in dsname:
+        #     dsname = dsname.split('_')[0]
 
         df.fillna(0, inplace=True)
         
-        ds_result, metric_result, display_result = self.CreateDataset(partition, df, dsname)
+        ds_result, metric_result, display_result = self.CreateDataset(partition, df, dataset_name)
         return ds_result, metric_result, display_result
 
     def FindAllMetrics(self, partition: str) -> list:
@@ -679,13 +716,32 @@ class DatabaseConnection():
         
         return sc_dsnames + lc_dsnames
 
-    def UpdateActiveDataset(self, dsname):
-        ds_table = self.metadata.tables['sc_datasets']
-        
-        stmt = ds_table.select(ds_table.c.get('active')).where(ds_table.c.dsname == dsname)
-        res = self.RunQuery(stmt)
-        new_val = 0 if res == 1 else 1
-        update_stmt = ds_table.update().where(ds_table.c.dsname == dsname).values(active=new_val)
+    def UpdateActiveDataset(self, dsname, partition):
+        if partition == 'both':
+            pass
+            # TODO perform join + 2 updates
+            sql = text(f"SELECT l.active, s.active FROM sc_datasets s JOIN lc_datasets l ON s.dsid = l.dsid WHERE s.dsname = '{dsname}'")
+            res = self.TextSelect(sql)
+            for row in res:
+                new_val = 1 if 0 in row._t else 0
+            
+        else:
+            prefix = 'sc' if partition == 'streamcat' else 'lc'
+            ds_table_name = f'{prefix}_datasets'
+            sql = text(f"SELECT active, tablename FROM {ds_table_name} WHERE dsname = '{dsname}'")
+            res = self.TextSelect(sql)
+            print(res[0]._t)
+            active = res[0]._t[0]
+
+            new_val = 0 if active == 1 else 1
+        if new_val == 1:
+            # check dataset for null values
+            
+            dataset_table = res[0]._t[1]
+            table_df = self.GetTableAsDf(dataset_table)
+            if table_df.isnull().any(bool_only=True):
+                return f"Found null values found in dataset {dsname}. Fix this and try again."
+        update_stmt = self.UpdateRow(ds_table_name, 'active', 'dsname', dsname, new_val)
         update_res = self.RunQuery(update_stmt)
         return update_res
     
@@ -698,13 +754,14 @@ class DatabaseConnection():
             conn.rollback()
         return max_version
     
-    def newChangelogRow(self, partition, public_desc):
+    def newChangelogRow(self, partition, public_desc, change_desc):
         table_name = 'sc_info' if partition == 'streamcat' else 'lc_info'
         # stmt = f"INSERT INTO {table_name} (version, public_description) VALUES ((SELECT MAX(version)+1 FROM lc_info), '{public_desc}');"
         new_version_num = self.getVersionNumber(partition) + 1
         values = {
             "version": new_version_num,
-            "public_description": public_desc
+            "public_description": public_desc,
+            "change_description": change_desc
         }
         result = self.InsertRow(table_name, values)
         return result
