@@ -8,7 +8,7 @@ TODO
 * [ ] Integrate Xarray-spatial to replace ArcGIS Pro functions.
 * [ ] Replace as many local .csv file reads with StreamCat database API calls.
 * [ ] Replace StreamCat_API.py file with public api calls when possible.
-* [ ] Work on Tkinter gui (sqlalchemy_gui.py)
+* [ ] Work on custom Tkinter gui (StreamCat_GUI.py)
   * [ ] Complete 'Create New Metric Info' action
 * [ ] Integrate new database.py functions into StreamCat.py
 

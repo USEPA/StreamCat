@@ -26,38 +26,38 @@ class CTkAutocompleteCombobox(ctk.CTkComboBox):
         self.tk.eval
         # navigate on keypress in the dropdown:
         # code taken from https://wiki.tcl-lang.org/page/ttk%3A%3Acombobox by Pawel Salawa, copyright 2011
-        self.tk.eval("""
-proc ComboListKeyPressed {w key} {
-        if {[string length $key] > 1 && [string tolower $key] != $key} {
-                return
-        }
+#         self.tk.eval("""
+# proc ComboListKeyPressed {w key} {
+#         if {[string length $key] > 1 && [string tolower $key] != $key} {
+#                 return
+#         }
 
-        set cb [winfo parent [winfo toplevel $w]]
-        set text [string map [list {[} {\[} {]} {\]}] $key]
-        if {[string equal $text ""]} {
-                return
-        }
+#         set cb [winfo parent [winfo toplevel $w]]
+#         set text [string map [list {[} {\[} {]} {\]}] $key]
+#         if {[string equal $text ""]} {
+#                 return
+#         }
 
-        set values [$cb cget -values]
-        set x [lsearch -glob -nocase $values $text*]
-        if {$x < 0} {
-                return
-        }
+#         set values [$cb cget -values]
+#         set x [lsearch -glob -nocase $values $text*]
+#         if {$x < 0} {
+#                 return
+#         }
 
-        set current [$w curselection]
-        if {$current == $x && [string match -nocase $text* [lindex $values [expr {$x+1}]]]} {
-                incr x
-        }
+#         set current [$w curselection]
+#         if {$current == $x && [string match -nocase $text* [lindex $values [expr {$x+1}]]]} {
+#                 incr x
+#         }
 
-        $w selection clear 0 end
-        $w selection set $x
-        $w activate $x
-        $w see $x
-}
+#         $w selection clear 0 end
+#         $w selection set $x
+#         $w activate $x
+#         $w see $x
+# }
 
-set popdown [ttk::combobox::PopdownWindow %s]
-bind $popdown.f.l <KeyPress> [list ComboListKeyPressed %%W %%K]
-""" % (self))
+# set popdown [ttk::combobox::PopdownWindow %s]
+# bind $popdown.f.l <KeyPress> [list ComboListKeyPressed %%W %%K]
+# """ % (self))
 
     def set_completion_list(self, completion_list):
         """
@@ -384,7 +384,7 @@ class RenameStreamCatMetricFrame(ctk.CTkFrame):
         self.old_metric_label.grid(row=1, column=0, padx=10, pady=5)
         
 
-        self.metric_name_dropdown = ctk.CTkComboBox(self, width=280, variable=self.metric_name_var, values=self.metric_name_options)
+        self.metric_name_dropdown = CTkAutocompleteCombobox(self, width=280, variable=self.metric_name_var, completevalues=self.metric_name_options)
         self.metric_name_dropdown.grid(row=1, column=1, padx=10, pady=5)
 
         self.new_metric_label = ctk.CTkLabel(self, text="Enter new metric name")

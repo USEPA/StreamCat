@@ -2,13 +2,13 @@
 ### Rewrite StreamCat API functions using GPU / parquet files functions in the RAPIDS package.
 ### This assumes we have a database connection for fast writing. 
 ### Read / Get functions will be done ORDS/REST API when available
-%load_ext cudf.pandas  # pandas operations now use the GPU! Requires RAPIDS install first
+#%load_ext cudf.pandas  # pandas operations now use the GPU! Requires RAPIDS install first
 import argparse
 import os
 import requests
-import pandas as pd # Change to cuDf after conda install
+import pandas as pd # Change to cuDf after RAPIDS install
 import geopandas as gpd
-import cuspatial
+#import cuspatial
 #import numpy as np
 import cupy as cp
 #cupy calls numpy functions and auto maps them to the current device
@@ -16,23 +16,25 @@ import cupy as cp
 from StreamCat_functions_gpu import Accumulation, AdjustCOMs, PointInPoly, appendConnectors, createCatStats, interVPU, makeVectors, mask_points, nhd_dict
 
 def main(args):
-    print("----- Welcome to the StreamCat data pipeline ----- \n")
+    print("----- Welcome to the StreamCat high res data pipeline ----- \n")
     
     # These csv files are small and don't necessarily need GPU speedup
-    control_table = pd.read_csv(args.control_table).content
+    # change from local csv's to database functions
+    control_table = pd.read_csv(args.control_table) 
     inter_vpu = pd.read_csv(args.inter_vpu)
-    if not os.path.exists(args.OUT_DIR):
-        os.mkdir(args.OUT_DIR)
+    if not os.path.exists(args.config.OUT_DIR):
+        os.mkdir(args.config.OUT_DIR)
 
-    if not os.path.exists(args.OUT_DIR + "/DBF_stash"):
-        os.mkdir(args.OUT_DIR + "/DBF_stash")
+    if not os.path.exists(args.config.OUT_DIR + "/DBF_stash"):
+        os.mkdir(args.config.OUT_DIR + "/DBF_stash")
 
-    if not os.path.exists(args.ACCUM_DIR):
+    if not os.path.exists(args.config.ACCUM_DIR):
         # TODO: work out children OR bastards only
-        makeVectors(inter_vpu, args.NHD_DIR)
+        makeVectors(inter_vpu, args.config.NHD_DIR)
     
-    INPUTS = cp.load(args.ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
+    INPUTS = cp.load(args.config.ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
     already_processed = []
+    
     for _, row in control_table.query("run == 1").iterrows():
         apm = "" if row.AppendMetric == "none" else row.AppendMetric
         if row.use_mask == 1:
@@ -125,10 +127,11 @@ def main(args):
 if __name__ == '__main__':
     # add arg parser for config file and control table layer info
     parser = argparse.ArgumentParser()
-    parser.add_argument('control_table', type=str, default='ControlTable_StreamCat.csv', help="Path to control table csv")
+    parser.add_argument('control_table', type=str, default='config_tables/ControlTable_StreamCat.csv', help="Path to control table csv")
     parser.add_argument('running_layer_name', type=str, help="Name of layer in control table to set run = 1")
-    parser.add_argument('inter_vpu', type=str, default='Inter_VPU.csv', help="Path to interVPU csv")
-    parser.add_argument('config', type=str, default='stream_cat_config.py', help="Path to config file")
+    parser.add_argument('inter_vpu', type=str, default='config_tables/Inter_VPU.csv', help="Path to interVPU csv")
+    parser.add_argument('config', type=str, default='config_tables/stream_cat_config.py', help="Path to config file")
+    
     # parser.add_argument('device', type=str, default='cpu', help="Device to execute pipeline on")
     
     args = parser.parse_args()

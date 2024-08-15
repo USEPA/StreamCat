@@ -24,7 +24,7 @@ import time
 from collections import OrderedDict, defaultdict, deque
 from typing import Generator
 
-#import numpy as np
+import numpy as np
 import pandas as pd
 import rasterio
 #from gdalconst import *
@@ -40,10 +40,15 @@ import fiona
 import geopandas as gpd
 from geopandas.tools import sjoin
 
-os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
-sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
-import arcpy
-from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
+# os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
+# sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
+# import arcpy
+# from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
+
+##############################################################################
+
+# Replace arcpy with xarray spatial
+from xrspatial.zonal import stats, crosstab
 
 ##############################################################################
 
@@ -965,8 +970,10 @@ def createCatStats(
     """
 
     try:
-        arcpy.env.cellSize = "30"
-        arcpy.env.snapRaster = inZoneData
+        # arcpy.env.cellSize = "30"
+        # arcpy.env.snapRaster = inZoneData
+        cellSize = 30
+        snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
                 outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
@@ -984,9 +991,10 @@ def createCatStats(
                 )
             if not os.path.exists(outTable):
                 if accum_type == "Categorical":
-                    TabulateArea(
-                        inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
-                    )
+                    # TabulateArea(
+                    #     inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
+                    # )
+                    stats()
                 if accum_type == "Continuous":
                     ZonalStatisticsAsTable(
                         inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
