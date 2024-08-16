@@ -9,6 +9,7 @@ import logging
 import json
 from datetime import datetime
 import os
+import re
 
 if not os.path.exists('logs'):
     os.makedirs('logs')
@@ -120,13 +121,14 @@ class DatabaseConnection():
                 db_file.write(result + ';\n')
         return result, self.execute # Return statement and whether or not it was executed
     
-    def SelectColsFromTable(self, columns: list, table_name:str, function:None | str = None):
+    def SelectColsFromTable(self, columns: list, table_name:str, function:None | dict = None):
         """Select columns from database table 
 
         Args:
             columns (list): columns to be selected
             table_name (str): name of db table
-            function (None | str, optional): Function to apply to query. Options are 'distinct', 'count', 'max', 'min', 'avg'. Defaults to None.
+            function (None | dict, optional): Function to apply to query. Key will be the type of function to apply to the query, key is column name for function if applicable.
+                                              Options are 'distinct', 'count', 'max', 'min', 'avg', 'groupby', 'orderby'. Defaults to None.
 
         Returns:
             result (sequence of rows): Result set of query
@@ -135,10 +137,13 @@ class DatabaseConnection():
             col_str = columns[0]
         else:
             col_str = ','.join(columns)
-        if function == 'distinct':
+        if 'distinct' in function.keys():
             query = text(f"SELECT DISTINCT({col_str}) FROM {table_name}")
-        elif function == 'count':
-            query = text(f"SELECT COUNT({col_str}) FROM {table_name}")
+        elif 'count' in function.keys():
+            col_str += f'COUNT({function['count']})' #TODO reorganize function to do something like this then add FROM then do any function that would happen after FROM like groupby and orderby
+            query = text(f"SELECT {col_str} FROM {table_name}")
+        elif 'orderby' in function.keys():
+            query = text(f"SELECT {col_str} FROM {table_name} ORDER BY {function['orderby']}")
         else:
             query = text(f"SELECT {col_str} FROM {table_name}")
         with self.engine.connect() as conn:
@@ -610,40 +615,6 @@ class DatabaseConnection():
         missing_from_sc_metrics = set(full_available_metrics) - set(current_metric_names)
         return ''.join(missing_from_sc_metrics) # could return just the set as well
 
-    def UpdateMetricName(self, old_name, new_name):
-        # call this in the edit metric info fucntion if name is updated.
-        metrics_update, display_update, tg_update = None # To bypass variable undefined errors on returns 
-
-        # Update metric everywhere it is used, as a table column, in metrics, display names, and tg
-
-        METRICS_QUERY = f'UPDATE sc_metrics SET metricname = "{new_name}" WHERE metricname = "{old_name}"'
-        metrics_update = pd.read_sql(METRICS_QUERY, con=self.engine)
-        
-        DISPLAY_QUERY = f'UPDATE sc_metrics_display_names SET metric_alias = "{new_name.lower()}" WHERE metricname = "{old_name}"'
-        display_update = pd.read_sql(DISPLAY_QUERY, con=self.engine)
-        
-        tg_select = pd.read_sql(f'SELECT * FROM sc_metrics_tg WHERE metric_name LIKE lower({old_name}) || %', con=self.engine)
-        tg_names = tg_select['metric_name'].split('[', 1)
-        if old_name == tg_names[0].lower():
-            new_tg_name = new_name + tg_names[1]
-            tg_update = pd.read_sql(f'UPDATE sc_metrics_tg SET metric_name = {new_tg_name} WHERE metric_name LIKE lower({old_name}) || %', con=self.engine)
-        return metrics_update, display_update, tg_update
-    
-    def UpdateDatasetColumn(self, table_name: str, col_name: str, values: list[dict]):
-        """
-        values should be dictionary mapping of comid to new updated value
-        example:[ {"comid": comid_1, "new_value": new_value_1}, {"comid": comid_2, "new_value": new_value_2}]
-        
-        query: UPDATE table_name SET :column = :new_value WHERE :comid = comid
-        """
-        
-        if self.inspector.has_table(table_name):
-            query = text(f"UPDATE {table_name}, SET {col_name} = :new_value WHERE comid = :comid")
-            
-            exec = self.RunQuery(query, values)
-            return exec
-
-
         
     def GetMetricsInTG(self) -> pd.Series:
         def get_combinations(row):
@@ -715,6 +686,63 @@ class DatabaseConnection():
             lc_dsnames.append(row._t[0])
         
         return sc_dsnames + lc_dsnames
+    
+    def UpdateMetricName(self, partition, old_name, new_name):
+        # call this in the edit metric info fucntion if name is updated. 
+        prefix = 'sc_' if partition == 'streamcat' else 'lc_'
+        dsid_result = self.TextSelect(text(f"SELECT dsid FROM sc_metrics WHERE metricname = '{old_name}'"))
+        
+        dsid = str(dsid_result[0]._t[0])
+        # for row in dsid_result:
+        #     dsid = row._t[0]
+        dataset_table_name = f'{prefix}ds_{dsid}'
+        dataset_table = self.metadata.tables[dataset_table_name]
+        if old_name in dataset_table.columns.keys():
+            print(f"Need to update dataset {dataset_table_name}")
+            #self.UpdateColumnName(dataset_table_name, old_name.lower(), new_name.lower())
+        
+        #METRICS_QUERY = f'UPDATE sc_metrics SET metricname = "{new_name}" WHERE metricname = "{old_name}"'
+        metrics_update = self.UpdateRow(f'{prefix}metrics', 'metricname', old_name, new_name)
+        
+        #DISPLAY_QUERY = f'UPDATE sc_metrics_display_names SET metric_alias = "{new_name.lower()}" WHERE metric_alias = "{old_name}"'
+        display_update = self.UpdateRow(f'{prefix}metrics_display_names', 'metric_alias', old_name.lower(), new_name.lower())
+        # possibly change it to get all possible year dates from 1980-2029
+        # pattern = r'(Cat|Ws|\b(19[8-9]\d|20[0-1]\d|202\d)\b)'
+        tg_pattern = r'(Cat|Ws|\b\d{4}\b)'
+        tg_split = re.split(tg_pattern, old_name, maxsplit=1)
+        tg_name = tg_split[0] # Regex to split at a number or Cat/Ws
+        tg_select = self.TextSelect(text(f"SELECT * FROM sc_metrics_tg WHERE metric_name LIKE '{tg_name}['|| %"))
+        tg_names = tg_select['metric_name'].split('[', 1)[0]
+        tg_update = None
+        if old_name == tg_names[0].lower():
+            new_tg_name = new_name + tg_names[1]
+            #tg_update = pd.read_sql(f'UPDATE sc_metrics_tg SET metric_name = {new_tg_name} WHERE metric_name LIKE lower({old_name}) || %', con=self.engine)
+
+        return metrics_update, display_update, tg_update
+    
+    def UpdateColumnName(self, table_name, old_col, new_col):
+        if self.inspector.has_table(table_name):
+            alter_stmt = f'ALTER TABLE {table_name} RENAME "{old_col}" TO "{new_col}"'
+            result = self.RunQuery(alter_stmt)
+            return result 
+        else:
+            return f"No table named {table_name} found."
+
+    
+    def UpdateDatasetColumn(self, table_name: str, col_name: str, values: list[dict]):
+        """
+        values should be dictionary mapping of comid to new updated value
+        example:[ {"comid": comid_1, "new_value": new_value_1}, {"comid": comid_2, "new_value": new_value_2}]
+        
+        query: UPDATE table_name SET :column = :new_value WHERE :comid = comid
+        """
+        
+        if self.inspector.has_table(table_name):
+            query = text(f"UPDATE {table_name}, SET {col_name} = :new_value WHERE comid = :comid")
+            
+            exec = self.RunQuery(query, values)
+            return exec
+
 
     def UpdateActiveDataset(self, dsname, partition):
         if partition == 'both':

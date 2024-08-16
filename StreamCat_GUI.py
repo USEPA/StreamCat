@@ -236,7 +236,7 @@ class DbUpdatesFrame(ctk.CTkToplevel):
         result = db_conn.newChangelogRow(partition, public_desc, change_desc)
         
     
-class CreateDatasetFrame(ctk.CTkFrame):
+class CreateDatasetFrame(ctk.CTkScrollableFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -328,7 +328,7 @@ class CreateDatasetFrame(ctk.CTkFrame):
         self.updates_window.focus()
 
 
-class CreateTableFrame(ctk.CTkFrame):
+class CreateTableFrame(ctk.CTkScrollableFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -367,41 +367,58 @@ class CreateTableFrame(ctk.CTkFrame):
         self.updates_window = DbUpdatesFrame(self)
         self.updates_window.focus()
 
-class RenameStreamCatMetricFrame(ctk.CTkFrame):
+class RenameStreamCatMetricFrame(ctk.CTkScrollableFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
 
+        self.metric_name_options = [] #self.get_metric_names()
+
+        self.partition_label = ctk.CTkLabel(self, text="Is this update for a streamcat or lakecat metric?")
+        self.partition_var = ctk.StringVar()
+        self.partition_var.set('streamcat')
+        self.partition_radio_streamcat = ctk.CTkRadioButton(self, text="StreamCat", variable=self.partition_var, value='streamcat', command=self.get_metric_names)
+        self.partition_radio_streamcat.grid(row=1, column=0, padx=10, pady=5)
+        self.partition_radio_lakecat = ctk.CTkRadioButton(self, text="LakeCat", variable=self.partition_var, value='lakecat', command=self.get_metric_names)
+        self.partition_radio_lakecat.grid(row=1, column=1, padx=10, pady=5)
+
         # select all metrics from sc_metrics
-        self.metric_name_results = db_conn.SelectColsFromTable(['metricname'], 'sc_metrics')
-        self.metric_name_options = []
-        for row in self.metric_name_results:
-            self.metric_name_options.append(row._t[0])
+        self.metric_name_options = self.get_metric_names()
         self.metric_name_var = ctk.StringVar()
         self.metric_name_var.set(self.metric_name_options[0])
 
         self.old_metric_label = ctk.CTkLabel(self, text="Select the metric you want to rename")
-        self.old_metric_label.grid(row=1, column=0, padx=10, pady=5)
+        self.old_metric_label.grid(row=2, column=0, padx=10, pady=5)
         
 
         self.metric_name_dropdown = CTkAutocompleteCombobox(self, width=280, variable=self.metric_name_var, completevalues=self.metric_name_options)
-        self.metric_name_dropdown.grid(row=1, column=1, padx=10, pady=5)
+        self.metric_name_dropdown.grid(row=2, column=1, padx=10, pady=5)
 
         self.new_metric_label = ctk.CTkLabel(self, text="Enter new metric name")
-        self.new_metric_label.grid(row=2, column=0, padx=10, pady=5)
+        self.new_metric_label.grid(row=3, column=0, padx=10, pady=5)
         self.new_name = ctk.CTkEntry(self, width=280)
-        self.new_name.grid(row=2, column=1, padx=10, pady=5)
+        self.new_name.grid(row=3, column=1, padx=10, pady=5)
 
         self.submit_button = ctk.CTkButton(self, text="Submit", command=self.rename_metric)
-        self.submit_button.grid(row=3, column=0, columnspan=3, padx=10, pady=5)
+        self.submit_button.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
 
         self.results_window = None
         self.updates_window = None
+
+    def get_metric_names(self):
+        self.metric_name_options.clear()
+        table_name = 'sc_metrics' if self.partition_var.get() == 'streamcat' else 'lc_metrics'
+        results = db_conn.SelectColsFromTable(['metricname'], table_name, {'orderby': 'metricname'})
+        for row in results:
+            self.metric_name_options.append(row._t[0])
+        return self.metric_name_options
+
     
     def rename_metric(self):
+        partition = self.partition_var.get()
         old_name = self.metric_name_var.get()
         new_name = self.new_name.get()
-        results = db_conn.UpdateMetricName(old_name, new_name)
+        results = db_conn.UpdateMetricName(partition, old_name, new_name)
 
         self.results_window = DbResultsFrame(self, results)
         self.results_window.focus()
@@ -409,7 +426,7 @@ class RenameStreamCatMetricFrame(ctk.CTkFrame):
         self.updates_window = DbUpdatesFrame(self)
         self.updates_window.focus()
 
-class ActivateDatasetFrame(ctk.CTkFrame):
+class ActivateDatasetFrame(ctk.CTkScrollableFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -446,7 +463,7 @@ class ActivateDatasetFrame(ctk.CTkFrame):
         self.updates_window = DbUpdatesFrame(self)
         self.updates_window.focus()
 
-class UpdateTableFrame(ctk.CTkFrame):
+class UpdateTableFrame(ctk.CTkScrollableFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -491,7 +508,7 @@ class UpdateTableFrame(ctk.CTkFrame):
         self.updates_window = DbUpdatesFrame(self)
         self.updates_window.focus()
 
-class CreateMetricInfoFrame(ctk.CTkFrame):
+class CreateMetricInfoFrame(ctk.CTkScrollableFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -544,7 +561,7 @@ class CreateMetricInfoFrame(ctk.CTkFrame):
         # self.units_entry = ctk.CTkEntry(self, width=280)
         # self.units_entry.grid(row=8, column=1, columnspan=2, padx=10, pady=5)
         self.units_options = []
-        self.units_results = db_conn.SelectColsFromTable(['metric_units'], 'sc_metrics_tg', 'distinct')
+        self.units_results = db_conn.SelectColsFromTable(['metric_units'], 'sc_metrics_tg', {'distinct': 'metric_units'})
         for unit in self.units_results:
             self.units_options.append(unit._t[0])
         self.units_var = ctk.StringVar()
@@ -628,7 +645,7 @@ class CreateMetricInfoFrame(ctk.CTkFrame):
         self.updates_window = DbUpdatesFrame(self)
         self.updates_window.focus()
         
-class EditMetricInfoFrame(ctk.CTkFrame):
+class EditMetricInfoFrame(ctk.CTkScrollableFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
