@@ -33,9 +33,10 @@ def log_query(conn, clauseelement, multiparams, params, execution_options):
             f.write(compiled_sql + ';\n')
 
 class DatabaseConnection():
-    def __init__(self, execute=False, config_file_path="O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/DatabaseModification/streamcat_db_config.json") -> None:
+    def __init__(self, execute=False, database_dir="O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/DatabaseModification", database_config_file="streamcat_db_config.json") -> None:
 
-        if config_file_path:
+        if database_dir and database_config_file:
+            config_file_path = os.path.join(database_dir, database_config_file)
             fp = open(config_file_path)
             config_file = json.load(fp)
             self.dialect = config_file['dialect']
@@ -68,14 +69,14 @@ class DatabaseConnection():
             self.inspector = inspect(self.engine)
             self.metadata = MetaData()
             self.metadata.reflect(self.engine) # move to connect / init function
+            os.makedirs('logs', exist_ok=True)
             logging.basicConfig(filename=f'logs/db_log_{datetime.today().strftime("%m_%d_%Y")}.log', filemode='a')
             logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
             event.listen(self.engine, 'before_execute', log_query)
         return
     
     def disconnect(self):
-        """Disconnect from database
-        """
+        """Disconnect from database"""
         if self.engine:
             self.engine.dispose()
         return
@@ -304,7 +305,7 @@ class DatabaseConnection():
             #     return f"No Column named {column} in Table {table_name}"
             
             id_col = table.c.get(id_column)
-            if id_col == None:
+            if id_col is None:
                 return f"No Column named {column} in Table {table_name}"
             #query = update(table).where(col == bindparam("id")).values(new_value=bindparam("new_value"))
             query = update(table).where(id_col == id_val).values({column: new_value})
@@ -689,41 +690,75 @@ class DatabaseConnection():
     
     def UpdateMetricName(self, partition, old_name, new_name):
         # call this in the edit metric info fucntion if name is updated. 
-        prefix = 'sc_' if partition == 'streamcat' else 'lc_'
-        dsid_result = self.TextSelect(text(f"SELECT dsid FROM sc_metrics WHERE metricname = '{old_name}'"))
-        
-        dsid = str(dsid_result[0]._t[0])
-        # for row in dsid_result:
-        #     dsid = row._t[0]
-        dataset_table_name = f'{prefix}ds_{dsid}'
-        dataset_table = self.metadata.tables[dataset_table_name]
-        if old_name in dataset_table.columns.keys():
-            print(f"Need to update dataset {dataset_table_name}")
-            #self.UpdateColumnName(dataset_table_name, old_name.lower(), new_name.lower())
-        
-        #METRICS_QUERY = f'UPDATE sc_metrics SET metricname = "{new_name}" WHERE metricname = "{old_name}"'
-        metrics_update = self.UpdateRow(f'{prefix}metrics', 'metricname', old_name, new_name)
-        
-        #DISPLAY_QUERY = f'UPDATE sc_metrics_display_names SET metric_alias = "{new_name.lower()}" WHERE metric_alias = "{old_name}"'
-        display_update = self.UpdateRow(f'{prefix}metrics_display_names', 'metric_alias', old_name.lower(), new_name.lower())
-        # possibly change it to get all possible year dates from 1980-2029
-        # pattern = r'(Cat|Ws|\b(19[8-9]\d|20[0-1]\d|202\d)\b)'
-        tg_pattern = r'(Cat|Ws|\b\d{4}\b)'
-        tg_split = re.split(tg_pattern, old_name, maxsplit=1)
-        tg_name = tg_split[0] # Regex to split at a number or Cat/Ws
-        tg_select = self.TextSelect(text(f"SELECT * FROM sc_metrics_tg WHERE metric_name LIKE '{tg_name}['|| %"))
-        tg_names = tg_select['metric_name'].split('[', 1)[0]
-        tg_update = None
-        if old_name == tg_names[0].lower():
-            new_tg_name = new_name + tg_names[1]
-            #tg_update = pd.read_sql(f'UPDATE sc_metrics_tg SET metric_name = {new_tg_name} WHERE metric_name LIKE lower({old_name}) || %', con=self.engine)
+        prefix = 'sc' if partition == 'streamcat' else 'lc'
+        old_name_prefix = old_name.split('[')[0]
+        new_name_prefix = new_name.split('[')[0]
+        tg_query_result = self.TextSelect(text(f"SELECT metric_name, aoi, year, dsid FROM {prefix}_metrics_tg WHERE metric_name = '{old_name}'"))
+        tg_info = {}
+        for row in tg_query_result:
+            tg_info = row._asdict()
+            tg_info['name_prefix'] = tg_info['metric_name'].split('[')[0]
+            tg_info['aoi'] = tg_info['aoi'].split(', ') if ',' in tg_info['aoi'] else [tg_info['aoi']]
+            if tg_info['year'] is not None:
+                tg_info['year'] = tg_info['year'].split(', ') if ',' in tg_info['year'] else [tg_info['year']]
+            else: 
+                tg_info['year'] = ['']
 
-        return metrics_update, display_update, tg_update
+        # sc/lc_metrics_tg update
+        tg_result = self.UpdateRow(f'{prefix}_metrics_tg', 'metric_name', 'metric_name', old_name, new_name)
+        # sc/lc_metrics update
+        # concat name_prefix and all the aois
+        metric_result = []
+        
+        for year in tg_info['year']:
+            for aoi in tg_info['aoi']:
+                if '[Year]' in old_name:
+                    old_metric_name = old_name_prefix + year + aoi
+                else: 
+                    old_metric_name = old_name_prefix + aoi
+
+                if '[Year]' in new_name:
+                    new_metric_name = new_name_prefix + year + aoi 
+                else:
+                    new_metric_name = new_name_prefix + aoi
+
+                metric_res = self.UpdateRow(f'{prefix}_metrics', 'metricname', 'metricname', old_metric_name, new_metric_name)
+                metric_result.append(metric_res)
+
+        # sc/lc_metrics_display_names update
+        display_query = self.TextSelect(text(f"SELECT metric_alias FROM {prefix}_metrics_display_names WHERE metric_alias LIKE '%{old_name_prefix.lower()}%'"))
+        display_result = []
+        for row, year in zip(display_query, tg_info['year']):
+            old_display_name = row._t[0].lower()
+            new_display_name = new_name_prefix.lower() + year
+            display_update = self.UpdateRow(f'{prefix}_metrics_display_names', 'metric_alias', 'metric_alias', old_display_name, new_display_name)
+            display_result.append(display_update)
+
+
+        # Need to make full metric name array then use those to update the column names
+        dataset_table_name = f'{prefix}_ds_{tg_info['dsid']}'
+        dataset_table = self.metadata.tables[dataset_table_name]
+        for year in tg_info['year']:
+            for aoi in tg_info['aoi']:
+                if '[Year]' in old_name:
+                    old_col_name = old_name_prefix + year + aoi
+                else:
+                    old_col_name = old_name_prefix + aoi
+                if '[Year]' in new_name:
+                    new_col_name = new_name_prefix + year + aoi 
+                else:
+                    new_col_name = new_name_prefix + aoi
+                if old_col_name.lower() in dataset_table.columns.keys():
+                    print(f"Need to update dataset {dataset_table_name}")
+                    self.UpdateColumnName(dataset_table_name, old_col_name.lower(), new_col_name.lower())
+        
+        return metric_result, display_result, tg_result
     
     def UpdateColumnName(self, table_name, old_col, new_col):
         if self.inspector.has_table(table_name):
-            alter_stmt = f'ALTER TABLE {table_name} RENAME "{old_col}" TO "{new_col}"'
-            result = self.RunQuery(alter_stmt)
+            alter_stmt = f'ALTER TABLE {table_name} RENAME COLUMN "{old_col}" TO "{new_col}"'
+            alter_query = text(alter_stmt)
+            result = self.RunQuery(alter_query)
             return result 
         else:
             return f"No table named {table_name} found."

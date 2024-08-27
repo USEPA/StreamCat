@@ -394,21 +394,24 @@ class RenameStreamCatMetricFrame(ctk.CTkScrollableFrame):
         self.metric_name_dropdown = CTkAutocompleteCombobox(self, width=280, variable=self.metric_name_var, completevalues=self.metric_name_options)
         self.metric_name_dropdown.grid(row=2, column=1, padx=10, pady=5)
 
-        self.new_metric_label = ctk.CTkLabel(self, text="Enter new metric name")
+        self.new_metric_label = ctk.CTkLabel(self, text="Enter new metric name (all lowercase)")
         self.new_metric_label.grid(row=3, column=0, padx=10, pady=5)
         self.new_name = ctk.CTkEntry(self, width=280)
         self.new_name.grid(row=3, column=1, padx=10, pady=5)
 
+        self.info_label = ctk.CTkLabel(self, text="We will apply the changes to all tables as well as all years and aoi's associated with this metric")
+        self.info_label.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
+
         self.submit_button = ctk.CTkButton(self, text="Submit", command=self.rename_metric)
-        self.submit_button.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
+        self.submit_button.grid(row=5, column=1, columnspan=3, padx=10, pady=5)
 
         self.results_window = None
         self.updates_window = None
 
     def get_metric_names(self):
         self.metric_name_options.clear()
-        table_name = 'sc_metrics' if self.partition_var.get() == 'streamcat' else 'lc_metrics'
-        results = db_conn.SelectColsFromTable(['metricname'], table_name, {'orderby': 'metricname'})
+        table_name = 'sc_metrics_tg' if self.partition_var.get() == 'streamcat' else 'lc_metrics_tg'
+        results = db_conn.SelectColsFromTable(['metric_name'], table_name, {'orderby': 'metric_name'})
         for row in results:
             self.metric_name_options.append(row._t[0])
         return self.metric_name_options
