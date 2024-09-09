@@ -882,7 +882,8 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     icol                  : column in arr object to index
     """
     # RuntimeWarning: invalid value encountered in double_scalars
-    cp.seterr(all="ignore")
+    # cp.seterr(all="ignore")
+    
     coms = tbl[icol].values.astype("int32")  # Read in comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
     del upstream  # a and indices are big - clean up to minimize RAM
@@ -891,6 +892,8 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     data = cp.zeros((len(comids), len(tbl.columns)))
     data[:, 0] = comids  # Define first column as comids
     accumulated_indexes = cp.add.accumulate(lengths)[:-1]
+    # accumulated_indexes = cp.ufunc.accumulate(lengths)[:-1]
+    # accumulated_indexes = cp.cumsum(lengths)[:-1]
     # Loop and accumulate values
     for index, column in enumerate(cols, 1):
         col_values = tbl[column].values.astype("float")

@@ -6,12 +6,18 @@
 import argparse
 import os
 import requests
+import json
+import time
 import pandas as pd # Change to cuDf after RAPIDS install
 import geopandas as gpd
 #import cuspatial
 #import numpy as np
 import cupy as cp
 #cupy calls numpy functions and auto maps them to the current device
+from dask.distributed import Client, LocalCluster
+import dask.dataframe as dd
+from dask_jobqueue import SLURMCluster
+from dask_jobqueue.slurm import SLURMRunner, SLURMJob
 
 from StreamCat_functions_gpu import Accumulation, AdjustCOMs, PointInPoly, appendConnectors, createCatStats, interVPU, makeVectors, mask_points, nhd_dict
 
@@ -22,33 +28,35 @@ def main(args):
     # change from local csv's to database functions
     control_table = pd.read_csv(args.control_table) 
     inter_vpu = pd.read_csv(args.inter_vpu)
-    if not os.path.exists(args.config.OUT_DIR):
-        os.mkdir(args.config.OUT_DIR)
+    with open(args.config, 'r') as config_file:
+        config = json.load(config_file)
+    if not os.path.exists(config.OUT_DIR):
+        os.mkdir(config.OUT_DIR)
 
-    if not os.path.exists(args.config.OUT_DIR + "/DBF_stash"):
-        os.mkdir(args.config.OUT_DIR + "/DBF_stash")
+    if not os.path.exists(config.OUT_DIR + "/DBF_stash"):
+        os.mkdir(config.OUT_DIR + "/DBF_stash")
 
-    if not os.path.exists(args.config.ACCUM_DIR):
+    if not os.path.exists(config.ACCUM_DIR):
         # TODO: work out children OR bastards only
-        makeVectors(inter_vpu, args.config.NHD_DIR)
+        makeVectors(inter_vpu, config.NHD_DIR)
     
-    INPUTS = cp.load(args.config.ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
+    INPUTS = cp.load(config.ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
     already_processed = []
     
     for _, row in control_table.query("run == 1").iterrows():
         apm = "" if row.AppendMetric == "none" else row.AppendMetric
         if row.use_mask == 1:
-            mask_dir = args.config.MASK_DIR_RP100
+            mask_dir = config.MASK_DIR_RP100
         elif row.use_mask == 2:
-            mask_dir = args.config.MASK_DIR_SLP10
+            mask_dir = config.MASK_DIR_SLP10
         elif row.use_mask == 3:
-            mask_dir = args.config.MASK_DIR_SLP20
+            mask_dir = config.MASK_DIR_SLP20
         else:
             mask_dir = ""
         layer = (
             row.LandscapeLayer
             if os.sep in row.LandscapeLayer
-            else (f"{args.config.LYR_DIR}/{row.LandscapeLayer}")
+            else (f"{config.LYR_DIR}/{row.LandscapeLayer}")
         )  # use abspath
         if isinstance(row.summaryfield, str):
             summary = row.summaryfield.split(";")
@@ -58,13 +66,13 @@ def main(args):
             # Load in point geopandas table and Pct_Full table
             # TODO: script to create this PCT_FULL_FILE
             pct_full = pd.read_csv(
-                args.config.PCT_FULL_FILE if row.use_mask == 0 else args.config.PCT_FULL_FILE_RP100
+                config.PCT_FULL_FILE if row.use_mask == 0 else config.PCT_FULL_FILE_RP100
             )
             points = gpd.read_file(layer)
             if mask_dir:
                 points = mask_points(points, mask_dir, INPUTS)
         # File string to store InterVPUs needed for adjustments
-        Connector = f"{args.config.OUT_DIR}/{row.FullTableName}_connectors.csv"
+        Connector = f"{config.OUT_DIR}/{row.FullTableName}_connectors.csv"
         print(
             f"Acquiring `{row.FullTableName}` catchment statistics...",
             end="",
@@ -73,7 +81,7 @@ def main(args):
         print("done!")
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:
-        fn = f"{args.config.OUT_DIR}/{row.FullTableName}_{zone}.csv"
+        fn = f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"
         cat = pd.read_csv(fn)
         processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().bool()
         if processed:
@@ -99,7 +107,7 @@ def main(args):
         )
 
         if zone in inter_vpu.ToZone.values:
-            cat = pd.read_csv(f"{args.config.OUT_DIR}/{row.FullTableName}_{zone}.csv")
+            cat = pd.read_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv")
         if zone in inter_vpu.FromZone.values:
             interVPU(
                 ws,
@@ -111,7 +119,7 @@ def main(args):
             )
         upFinal = pd.merge(up, ws, on="COMID")
         final = pd.merge(cat, upFinal, on="COMID")
-        final.to_csv(f"{args.config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+        final.to_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
         # TODO Instead of to csv we should Create DB table here
         
     print(end="") if processed else print("done!")
@@ -120,7 +128,7 @@ def main(args):
             "\n!!!Processing Problem!!!\n\n"
             f"{', '.join(already_processed)} already run!\n"
             "Be sure to delete the associated files in your `OUTDIR` to rerun:"
-            f"\n\t> {args.config.OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
+            f"\n\t> {config.OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
             f"output used in 'Continuous' and 'Categorical' metrics!!!"
     )
 
@@ -135,4 +143,15 @@ if __name__ == '__main__':
     # parser.add_argument('device', type=str, default='cpu', help="Device to execute pipeline on")
     
     args = parser.parse_args()
-    main()
+    cluster = LocalCluster(n_workers=os.cpu_count())
+    print(cluster.dashboard_link)
+    # If using HPC slurm machine
+    # uncomment following two lines
+    # cluster = SLURMCluster()
+    # cluster.adapt(minimum=1, maximum=16)
+    #cluster = SLURMRunner()
+    client = Client(cluster)
+    start_time = time.time()
+    main(args)
+    end_time = time.time()
+    print(f"Time to complete full pipeline: {(end_time-start_time)/60} minutes. ")

@@ -12,3 +12,4 @@ StreamCat.Rproj
 *.sql
 /logs
 /__pycache__
+/high_res_data

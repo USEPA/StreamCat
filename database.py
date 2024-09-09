@@ -68,8 +68,8 @@ class DatabaseConnection():
             self.engine = create_engine(self.__str__(), thick_mode={'lib_dir' : 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/DatabaseModification/instantclient-basic-windows/instantclient_23_4'}, logging_name="StreamCatDB")
             self.inspector = inspect(self.engine)
             self.metadata = MetaData()
-            self.metadata.reflect(self.engine) # move to connect / init function
-            os.makedirs('logs', exist_ok=True)
+            self.metadata.reflect(self.engine)
+            os.makedirs('logs', exist_ok=True) # make logs dir if it doesn't exists
             logging.basicConfig(filename=f'logs/db_log_{datetime.today().strftime("%m_%d_%Y")}.log', filemode='a')
             logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
             event.listen(self.engine, 'before_execute', log_query)

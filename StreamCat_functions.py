@@ -861,7 +861,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
     Arguments
     ---------
-    arr                   : table containing watershed values
+    tbl                   : table containing watershed values
     comids                : numpy array of all zones comids
     lengths               : numpy array with lengths of upstream comids
     upstream              : numpy array of all upstream arrays for each COMID

@@ -113,34 +113,34 @@ for _, row in ctl.query("run == 1").iterrows():
         end="",
         flush=True,
     )
-    # for zone, hydroregion in INPUTS.items():
-    #     if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
-    #         print(zone, end=", ", flush=True)
-    #         pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
-    #         if not row.accum_type == "Point":
-    #             izd = (
-    #                 f"{mask_dir}/{zone}.tif"
-    #                 if mask_dir
-    #                 else f"{pre}/NHDPlusCatchment/cat"
-    #             )
-    #             cat = createCatStats(
-    #                 row.accum_type,
-    #                 layer,
-    #                 izd,
-    #                 OUT_DIR,
-    #                 zone,
-    #                 row.by_RPU,
-    #                 mask_dir,
-    #                 NHD_DIR,
-    #                 hydroregion,
-    #                 apm,
-    #             )
-    #         if row.accum_type == "Point":
-    #             izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
-    #             cat = PointInPoly(
-    #                 points, zone, izd, pct_full, mask_dir, apm, summary
-    #             )
-    #         cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+    for zone, hydroregion in INPUTS.items():
+        if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
+            print(zone, end=", ", flush=True)
+            pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
+            if not row.accum_type == "Point":
+                izd = (
+                    f"{mask_dir}/{zone}.tif"
+                    if mask_dir
+                    else f"{pre}/NHDPlusCatchment/cat"
+                )
+                cat = createCatStats(
+                    row.accum_type,
+                    layer,
+                    izd,
+                    OUT_DIR,
+                    zone,
+                    row.by_RPU,
+                    mask_dir,
+                    NHD_DIR,
+                    hydroregion,
+                    apm,
+                )
+            if row.accum_type == "Point":
+                izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
+                cat = PointInPoly(
+                    points, zone, izd, pct_full, mask_dir, apm, summary
+                )
+            cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
     print("done!")
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:

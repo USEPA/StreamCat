@@ -9,8 +9,11 @@ TODO
 * [ ] Replace as many local .csv file reads with StreamCat database API calls.
 * [ ] Replace StreamCat_API.py file with public api calls when possible.
 * [ ] Work on custom Tkinter gui (StreamCat_GUI.py)
-  * [ ] Complete 'Create New Metric Info' action
+  * [X] Complete 'Create New Metric Info' action
 * [ ] Integrate new database.py functions into StreamCat.py
+* [ ] New pipeline for high res NHDplus
+  * [ ] How do we go straight form a folder of geopackages to the dataframes that we can upload straight to the database?
+  * [ ] Dask + geopandas for scalability since full set of geopackages will be too large for memory
 
 ## Description:
 
