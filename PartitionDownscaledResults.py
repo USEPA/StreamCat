@@ -22,8 +22,11 @@ VPU = COMID_VPU['VPU'].unique()
 
 # Nutrient file
 #nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/NutrientInventory/Inputs/'
-nut_dir = 'E:/WorkingData/To_Be_Flow_Accumulated/'
-nut = pd.read_csv(nut_dir + 'ClimTerms_2012_10.csv')
+# nut_dir = 'E:/WorkingData/To_Be_Flow_Accumulated/'
+# nut = pd.read_csv(nut_dir + 'ClimTerms_2012_10.csv')
+nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/AmaliaHandler/'
+nut = pd.read_csv(nut_dir + 'ToBeFlowAccumulated.csv')
+
 cat_area = pd.read_csv('O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/NutrientInventory/Inputs/COMID_Scaled_AgVars.csv')
 cat_area = cat_area[['COMID','CatAreaSqKm']]
 cat_area.head()
@@ -35,15 +38,18 @@ nut = nut.drop('Unnamed: 0', axis=1)
 list(nut)
 
 # select columns - this part we can modify to iterate through columns
-final = nut[['COMID', 'SNOW_YrMean', 'CatAreaSqKm', 'VPU']]
-final = final.rename(columns={'SNOW_YrMean': 'CatSum'})
-final['CatCount'] = final['CatAreaSqKm']
-final['CatPctFull'] = 100
-final = final.set_axis(['COMID', 'CatSum', 'CatAreaSqKm','VPU', 'CatCount', 'CatPctFull'], axis=1)
+cols = [i for i in nut.columns if i not in ["COMID", "VPU", "CatAreaSqKm"]]
+for col in cols:
+    final = nut[['COMID', col, 'CatAreaSqKm', 'VPU']]
+    final = final.rename(columns={'SNOW_YrMean': 'CatSum'})
+    final['CatCount'] = final['CatAreaSqKm'] 
+    final['CatSum'] = final['CatSum'] * final['CatCount']
+    final['CatPctFull'] = 100
+    final = final.set_axis(['COMID', 'CatSum', 'CatAreaSqKm','VPU', 'CatCount', 'CatPctFull'], axis=1)
 
-for i in VPU:
-    print(i)
-    df = final[final['VPU'] == i]
-    df = df.drop(columns=['VPU'])
-    df.to_csv(nut_dir + '/Allocation_and_Accumulation/SNOW_YrMean_' + str(i) + '.csv',
-              index=False)
+    for i in VPU:
+        print(i)
+        df = final[final['VPU'] == i]
+        df = df.drop(columns=['VPU'])
+        df.to_csv(nut_dir + '/Allocation_and_Accumulation/SNOW_YrMean_' + str(i) + '.csv',
+                  index=False)
