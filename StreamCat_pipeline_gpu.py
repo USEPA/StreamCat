@@ -38,6 +38,7 @@ def main(args):
 
     if not os.path.exists(config.ACCUM_DIR):
         # TODO: work out children OR bastards only
+        # Is this step necessary
         makeVectors(inter_vpu, config.NHD_DIR)
     
     INPUTS = cp.load(config.ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
@@ -144,13 +145,13 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     cluster = LocalCluster(n_workers=os.cpu_count())
-    print(cluster.dashboard_link)
     # If using HPC slurm machine
     # uncomment following two lines
     # cluster = SLURMCluster()
     # cluster.adapt(minimum=1, maximum=16)
     #cluster = SLURMRunner()
     client = Client(cluster)
+    print(client.dashboard_link)
     start_time = time.time()
     main(args)
     end_time = time.time()

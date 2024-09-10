@@ -144,7 +144,6 @@ def bastards(token, tree):
     ---------
     token           : a single COMID
     tree            : Full dictionary of list of upstream COMIDs for each COMID in the zone
-    chkset          : set of all the NHD catchment COMIDs, used to remove flowlines with no associated catchment
     """
     visited = set()
     to_crawl = deque([token])
