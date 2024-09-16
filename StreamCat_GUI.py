@@ -176,7 +176,7 @@ class DbResultsFrame(ctk.CTkToplevel):
     def __init__(self, parent, response):
         super().__init__(parent)
         self.parent = parent
-        self.geometry("400x300")
+        self.geometry("450x350")
 
         self.label = ctk.CTkLabel(self, text="Database Response")
         self.label.pack(side=ctk.TOP, padx=20, pady=20)
@@ -186,27 +186,27 @@ class DbResultsFrame(ctk.CTkToplevel):
             for i in self.response:
                 if not isinstance(i, str):
                     flattend_i = [item for sub in i for item in sub]
-                    self.response_str = ' '.join(map(str, flattend_i))
+                    self.response_str += '\n'.join(map(str, flattend_i))
                 else:
-                    self.response_str += i
+                    self.response_str += f'\n{i}'
         else:
             self.response_str = str(self.response)
         self.textbox = ctk.CTkTextbox(self)
-        self.textbox.pack(expand=True, fill=ctk.BOTH)
         self.textbox.insert("0.0", text=self.response_str)
-
         self.textbox.configure(state="disabled")
+        self.textbox.pack(expand=True, fill=ctk.BOTH)
     
 class DbUpdatesFrame(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.geometry("400x300")
+        self.geometry("450x350")
 
         self.label = ctk.CTkLabel(self, text="Database Update Form")
         self.label.pack(side=ctk.TOP, padx=20, pady=20)
 
         self.partition_label = ctk.CTkLabel(self, text="Was this update for streamcat or lakecat?")
+        self.partition_label.pack(padx=10, pady=5)
         self.partition_var = ctk.StringVar()
         self.partition_var.set('streamcat')
         self.partition_radio_streamcat = ctk.CTkRadioButton(self, text="StreamCat", variable=self.partition_var, value='streamcat')
@@ -303,27 +303,39 @@ class CreateDatasetFrame(ctk.CTkScrollableFrame):
     
     def create_dataset(self):
         #progressbar = ProgressbarFrame(self)
-        progressbar_frame = ctk.CTkFrame(self)
-        progressbar_frame.pack(side=ctk.BOTTOM)
-        progressbar_frame.grid_columnconfigure(0, weight=1)
-        progressbar_frame.grid_rowconfigure(1, weight=1)
+        progressbar_frame = ctk.CTkToplevel(self)
+        # progressbar_frame.pack(side=ctk.BOTTOM)
+        # progressbar_frame.grid_columnconfigure(0, weight=1)
+        # progressbar_frame.grid_rowconfigure(1, weight=1)
         progressbar = ctk.CTkProgressBar(progressbar_frame, orientation='horizontal', mode='determinate')
         progressbar.configure(mode='determinate')
         
-        partition = self.selected_partition.get().lower()
+        partition = self.partition_var.get().lower()
         files = self.files_entry.get()
         dsname = self.dataset_entry.get()
+        published = self.published_var.get()
+        active = 1 if published == 'published' else 0
         progressbar.start()
-        ds_result, metric_result, display_result = db_conn.CreateDatasetFromFiles(partition, dsname, files)
+        ds_result, metric_result, display_result = db_conn.CreateDatasetFromFiles(partition, dsname, files, active)
         progressbar.stop()
-        print(ds_result)
-        print(metric_result)
-        print(display_result)
+        # print(ds_result)
+        # print(metric_result)
+        # print(display_result)
         results = (ds_result, metric_result, display_result)
         self.results_window = DbResultsFrame(self, results)
         self.results_window.focus()
         #after this move to the create metric info frame.
         # prepopulate final table (dataset name) and dsid from this functions results
+        known_info = {}
+        known_info['final_table'] = self.dataset_entry.get()
+        known_info['source_name'] = self.source_name_entry.get()
+        known_info['source_url'] = self.source_url_entry.get()
+        known_info['date_downloaded'] = self.date_entry.get()
+        known_info['active'] = self.published_var.get()
+
+        self.metric_info_frame = CreateMetricInfoFrame(self, known_info)
+        self.metric_info_frame.pack(fill=ctk.BOTH, expand=True, padx=10, pady=5)
+
         self.updates_window = DbUpdatesFrame(self)
         self.updates_window.focus()
 
@@ -394,7 +406,7 @@ class RenameStreamCatMetricFrame(ctk.CTkScrollableFrame):
         self.metric_name_dropdown = CTkAutocompleteCombobox(self, width=280, variable=self.metric_name_var, completevalues=self.metric_name_options)
         self.metric_name_dropdown.grid(row=2, column=1, padx=10, pady=5)
 
-        self.new_metric_label = ctk.CTkLabel(self, text="Enter new metric name (all lowercase)")
+        self.new_metric_label = ctk.CTkLabel(self, text="Enter new metric name (case sensitive)")
         self.new_metric_label.grid(row=3, column=0, padx=10, pady=5)
         self.new_name = ctk.CTkEntry(self, width=280)
         self.new_name.grid(row=3, column=1, padx=10, pady=5)
@@ -512,7 +524,7 @@ class UpdateTableFrame(ctk.CTkScrollableFrame):
         self.updates_window.focus()
 
 class CreateMetricInfoFrame(ctk.CTkScrollableFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, known_info=None):
         super().__init__(parent)
         self.parent = parent
 
@@ -601,7 +613,7 @@ class CreateMetricInfoFrame(ctk.CTkScrollableFrame):
         self.dsid_entry = ctk.CTkEntry(self, width=280)
         self.dsid_entry.grid(row=18, column=1, columnspan=2, padx=10, pady=5)
 
-        self.dataset_name_label = ctk.CTkLabel(self, text="Enter metric dataset name:")
+        self.dataset_name_label = ctk.CTkLabel(self, text="Enter metric dataset name (aka final_table):")
         self.dataset_name_label.grid(row=19, column=0, padx=10, pady=5)
          
         self.dataset_name_entry = ctk.CTkEntry(self, width=280)
@@ -621,6 +633,22 @@ class CreateMetricInfoFrame(ctk.CTkScrollableFrame):
 
         self.results_window = None
         self.updates_window = None
+        if known_info is not None:
+            self.fill_known_values(known_info)
+
+    def fill_known_values(self, known_vals: dict):
+        keys = known_vals.keys()
+        if 'final_table' in keys:
+            self.dataset_name_entry.insert(0, known_vals['final_table'])
+
+        if 'source_name' in keys:
+            self.source_name_entry.insert(0, known_vals['source_name'])
+
+        if 'source_url' in keys:
+            self.source_url_entry.insert(0, known_vals['source_url'])
+
+        if 'date_downloaded' in keys:
+            self.date_entry.insert(0, known_vals['date_downloaded'])
 
     def create_metric_info(self):
         print("Creating metric info card")

@@ -138,17 +138,23 @@ class DatabaseConnection():
             col_str = columns[0]
         else:
             col_str = ','.join(columns)
-        if 'distinct' in function.keys():
-            query = text(f"SELECT DISTINCT({col_str}) FROM {table_name}")
-        elif 'count' in function.keys():
-            col_str += f'COUNT({function['count']})' #TODO reorganize function to do something like this then add FROM then do any function that would happen after FROM like groupby and orderby
-            query = text(f"SELECT {col_str} FROM {table_name}")
-        elif 'orderby' in function.keys():
-            query = text(f"SELECT {col_str} FROM {table_name} ORDER BY {function['orderby']}")
+        if function is not None:
+            if 'distinct' in function.keys():
+                query = text(f"SELECT DISTINCT({col_str}) FROM {table_name}")
+            elif 'count' in function.keys():
+                col_str += f'COUNT({function['count']})' #TODO reorganize function to do something like this then add FROM then do any function that would happen after FROM like groupby and orderby
+                query = text(f"SELECT {col_str} FROM {table_name}")
+            elif 'orderby' in function.keys():
+                query = text(f"SELECT {col_str} FROM {table_name} ORDER BY {function['orderby']}")
         else:
             query = text(f"SELECT {col_str} FROM {table_name}")
         with self.engine.connect() as conn:
             result = conn.execute(query).fetchall()
+
+        # parsed_res = []
+        # for row in result:
+        #     parsed_res.append(row._asdict())
+
 
         return result
     
@@ -465,13 +471,15 @@ class DatabaseConnection():
             return results
 
 
-    def CreateDataset(self, partition: str, df: pd.DataFrame, dsname: str):
+    def CreateDataset(self, partition: str, df: pd.DataFrame, dsname: str, active: int = 0):
         """Create new dataset table from pandas dataframe. This will also insert the new metrics into our metric informatio tables, _metrics, _metrics_display_names and _metrics_tg.
 
         Args:
             partition (str): IMPORTANT: this needs to be either 'streamcat' or 'lakecat'. This is how we will decide what part of the database to create new data in.
             df (pd.DataFrame): Dataframe to upload to database as table
             dsname (str): New dataset name, defaults to csv name.
+            active (int): binary int 1 if dataset will be published and displayed upon creation. 0 if not. Default is 0
+
 
         Returns:
             ds_result (tuple): new dataset table name and dataset name inserted into 
@@ -516,7 +524,7 @@ class DatabaseConnection():
         
         
         # Insert dataset info into sc / lc datasets
-        ds_result = self.InsertRow(f'{prefix}datasets', {'dsid': dsid, 'dsname': dsname, 'tablename': table_name, 'active': 1})
+        ds_result = self.InsertRow(f'{prefix}datasets', {'dsid': dsid, 'dsname': dsname, 'tablename': table_name, 'active': active})
 
         display_names = set()
         metric_data = []
@@ -553,13 +561,14 @@ class DatabaseConnection():
 
         return ds_result, metric_result, display_result
     
-    def CreateDatasetFromFiles(self, partition: str, dataset_name: str, files: list | str):
+    def CreateDatasetFromFiles(self, partition: str, dataset_name: str, files: list | str, active: int = 0):
         """Create new dataset in given partition from a list of files
 
         Args:
             partition (str): IMPORTANT: this needs to be either 'streamcat' or 'lakecat'. This is how we will decide what part of the database to create new data in.
             dataset_name (str): Name of the dataset. This will be used in the sc/lc_datasets table and is also the final_table name in the TG table (metric variable info page)
             files (list | str): list of paths to files
+            active (int): binary int 1 if dataset will be published and displayed upon creation. 0 if not. Default is 0
 
         Returns:
             tuple(dataset_result, metric_result, display_result): see function CreateDataset
@@ -580,7 +589,7 @@ class DatabaseConnection():
 
         df.fillna(0, inplace=True)
         
-        ds_result, metric_result, display_result = self.CreateDataset(partition, df, dataset_name)
+        ds_result, metric_result, display_result = self.CreateDataset(partition, df, dataset_name, active)
         return ds_result, metric_result, display_result
 
     def FindAllMetrics(self, partition: str) -> list:
@@ -738,6 +747,7 @@ class DatabaseConnection():
         # Need to make full metric name array then use those to update the column names
         dataset_table_name = f'{prefix}_ds_{tg_info['dsid']}'
         dataset_table = self.metadata.tables[dataset_table_name]
+        alter_table_results = []
         for year in tg_info['year']:
             for aoi in tg_info['aoi']:
                 if '[Year]' in old_name:
@@ -750,16 +760,16 @@ class DatabaseConnection():
                     new_col_name = new_name_prefix + aoi
                 if old_col_name.lower() in dataset_table.columns.keys():
                     print(f"Need to update dataset {dataset_table_name}")
-                    self.UpdateColumnName(dataset_table_name, old_col_name.lower(), new_col_name.lower())
+                    alter_table_results.append(self.UpdateColumnName(dataset_table_name, old_col_name.lower(), new_col_name.lower()))
         
-        return metric_result, display_result, tg_result
+        return metric_result, display_result, tg_result, alter_table_results
     
     def UpdateColumnName(self, table_name, old_col, new_col):
         if self.inspector.has_table(table_name):
             alter_stmt = f'ALTER TABLE {table_name} RENAME COLUMN "{old_col}" TO "{new_col}"'
             alter_query = text(alter_stmt)
             result = self.RunQuery(alter_query)
-            return result 
+            return result[0]
         else:
             return f"No table named {table_name} found."
 

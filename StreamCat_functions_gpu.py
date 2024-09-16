@@ -27,6 +27,8 @@ from typing import Generator
 import numpy as np
 import pandas as pd
 import rasterio
+# maybe switch from rasterio to
+import rioxarray
 #from gdalconst import *
 from osgeo import gdal, ogr, osr
 from rasterio import transform
@@ -55,7 +57,7 @@ from xrspatial.zonal import stats, crosstab
 ### GPU / RAPIDS imports
 import cupy as cp
 # import cudf
-import cuspatial
+# import cuspatial
 
 ##############################################################################
 
@@ -600,7 +602,7 @@ def get_raster_value_at_points(
     """
     if isinstance(points, str):
         points = gpd.read_file(points)
-        gpu_points = cuspatial.from_geopandas(points)
+        #gpu_points = cuspatial.from_geopandas(points)
     if isinstance(points, gpd.GeoDataFrame):
         assert points.geometry.type.all() == "Point"
         if fieldname:
@@ -997,11 +999,13 @@ def createCatStats(
                     # TabulateArea(
                     #     inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
                     # )
-                    stats()
+                    outTable = crosstab(inZoneData, LandscapeLayer)
                 if accum_type == "Continuous":
-                    ZonalStatisticsAsTable(
-                        inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
-                    )
+                    # ZonalStatisticsAsTable(
+                    #     inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
+                    # )
+                    
+                    outTable = stats(inZoneData, LandscapeLayer)
             try:
                 table = dbf2GPUDF(outTable)
             except fiona.errors.DriverError as e:
@@ -1018,9 +1022,10 @@ def createCatStats(
                 print("working on " + elev)
                 outTable = out_dir + "/DBF_stash/zonalstats_elev%s.dbf" % (subdirs[-3:])
                 if not os.path.exists(outTable):
-                    ZonalStatisticsAsTable(
-                        inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
-                    )
+                    # ZonalStatisticsAsTable(
+                    #     inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
+                    # )
+                    outTable = stats(inZoneData, elev)
             for count, rpu in enumerate(rpuList):
                 if count == 0:
                     table = dbf2GPUDF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
@@ -1034,11 +1039,14 @@ def createCatStats(
             if len(rpuList) > 1:
                 table.reset_index(drop=True, inplace=True)
                 table = table.loc[table.groupby("VALUE").AREA.idxmax()]
-    except LicenseError:
-        print("Spatial Analyst license is unavailable")
-    except arcpy.ExecuteError:
-        print("Failing at the ExecuteError!")
-        print(arcpy.GetMessages(2))
+
+    except RuntimeError:
+        print("Runtime error")
+    # except LicenseError:
+    #     print("Spatial Analyst license is unavailable")
+    # except arcpy.ExecuteError:
+    #     print("Failing at the ExecuteError!")
+    #     print(arcpy.GetMessages(2))
 
     if mask_dir:
         nhdtbl = dbf2GPUDF(
