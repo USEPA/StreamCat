@@ -45,6 +45,11 @@ def load_dask_geopackage(path, layers):
 
 if __name__ == '__main__':
     important_layers = ['NHDPlusCatchment', 'NHDPlusFlow', 'NHDPlusFlowlineVAA']
+    data_path = 'high_res_data/NHDPlus_H_National_Release_1_GDB/NHDPlus_H_National_Release_1_GDB.gdb'
+    df = dg.read_file(data_path, npartitions=32, layer='NHDPlusCatchment')
+    #shape = len(df.index)
+    length_1 = len(df)
+    length = df['nhdplusid'].count().compute() #df['A'].count().compute()
 
     # GDB Test
     # dask_gdb = load_dask_geodb('high_res_data')
