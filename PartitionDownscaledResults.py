@@ -25,7 +25,7 @@ VPU = COMID_VPU['VPU'].unique()
 # nut_dir = 'E:/WorkingData/To_Be_Flow_Accumulated/'
 # nut = pd.read_csv(nut_dir + 'ClimTerms_2012_10.csv')
 nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/AmaliaHandler/'
-nut = pd.read_csv(nut_dir + 'ToBeFlowAccumulated.csv')
+nut = pd.read_csv(nut_dir + 'ToBeFlowAccumulated_update.csv')
 
 cat_area = pd.read_csv('O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/NutrientInventory/Inputs/COMID_Scaled_AgVars.csv')
 cat_area = cat_area[['COMID','CatAreaSqKm']]
@@ -33,23 +33,25 @@ cat_area.head()
 # add VPU using lookup table
 nut = pd.merge(nut, COMID_VPU, how='left', left_on=['COMID'], right_on=['COMID'])
 nut = pd.merge(nut, cat_area, how='left', left_on=['COMID'], right_on=['COMID'])
-nut = nut.drop('Unnamed: 0', axis=1)
+# nut = nut.drop('Unnamed: 0', axis=1)
 # nut = nut.drop('...1', axis=1)
 list(nut)
 
 # select columns - this part we can modify to iterate through columns
+nut.columns = nut.columns.str.replace('_Cat','')
 cols = [i for i in nut.columns if i not in ["COMID", "VPU", "CatAreaSqKm"]]
+
 for col in cols:
     final = nut[['COMID', col, 'CatAreaSqKm', 'VPU']]
-    final = final.rename(columns={'SNOW_YrMean': 'CatSum'})
-    final['CatCount'] = final['CatAreaSqKm'] 
+    final = final.rename(columns={col: 'CatSum'})
+    final['CatCount'] = final['CatAreaSqKm']
     final['CatSum'] = final['CatSum'] * final['CatCount']
     final['CatPctFull'] = 100
-    final = final.set_axis(['COMID', 'CatSum', 'CatAreaSqKm','VPU', 'CatCount', 'CatPctFull'], axis=1)
+    final = final[['COMID', 'CatAreaSqKm', 'CatCount', 'CatSum', 'CatPctFull', 'VPU']]
 
     for i in VPU:
         print(i)
         df = final[final['VPU'] == i]
         df = df.drop(columns=['VPU'])
-        df.to_csv(nut_dir + '/Allocation_and_Accumulation/SNOW_YrMean_' + str(i) + '.csv',
+        df.to_csv(nut_dir + '/Allocation_and_Accumulation/' + col + '_' + str(i) + '.csv',
                   index=False)
