@@ -1,6 +1,6 @@
 from sqlalchemy.engine import create_engine
 from sqlalchemy import inspect, Table, Column, MetaData, func, insert, update, delete, select, bindparam, event, text, and_, types
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects.oracle import NUMBER
 from sqlalchemy.sql.compiler import SQLCompiler
@@ -9,7 +9,6 @@ import logging
 import json
 from datetime import datetime
 import os
-import re
 
 if not os.path.exists('logs'):
     os.makedirs('logs')
@@ -175,7 +174,27 @@ class DatabaseConnection():
         
         return result
 
+    def SelectColWhere(self, table_name: str, col_name: str, where: dict):
+        """Select Columns from table with where condition
 
+        Args:
+            table_name (str): Name of table to select from
+            col_name (str): Name of column to select
+            where (dict): Where clause. WHERE key[0] = value[0]
+
+        Returns:
+            value (rows): Rows returned from sql statement
+        """
+        if self.inspector.has_table(table_name):
+            table = self.metadata.tables[table_name]
+            for key, val in where.items():
+                where_col = key
+                where_val = val
+            stmt = select(table.c[col_name]).where(table.c[where_col] == where_val)
+            with self.engine.connect() as conn:
+                value = conn.execute(stmt).fetchall()
+                conn.rollback()
+            return value
     
     def GetTableAsDf(self, table_name: str) -> pd.DataFrame | str:
         """Get database table by name as pandas Dataframe
@@ -363,9 +382,22 @@ class DatabaseConnection():
         
         
     def BulkInsertFromFile(self, table_name, file_path):
+        # TODO
+        # If all df columns are in Table
+        # Then BULK INSERT
+        # Else if some
+        # BULK UPDATE
         df = pd.read_csv(file_path)
-        data = df.to_dict(orient='records')
-        results = self.BulkInsert(table_name, data)
+        if self.inspector.has_table(table_name):
+            table = self.metadata.tables[table_name]
+            if all(table.c) in df.columns:
+
+                data = df.to_dict(orient='records')
+                results = self.BulkInsert(table_name, data)
+            else:
+                data = df.to_dict(orient='records')
+                results = self.BulkUpdate(table_name, data)
+                
         if results:
             return results
 
@@ -392,7 +424,7 @@ class DatabaseConnection():
                     raise ValueError("Each row must include the primary key 'comid'")
                 
                 # Remove 'comid' from the dictionary to use as update values
-                comid = row_data.pop('comid')
+                comid = row_data.get('comid')
                 
                 # Create an update statement
                 update_query = (

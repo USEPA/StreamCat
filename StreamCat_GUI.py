@@ -273,12 +273,12 @@ class CreateDatasetFrame(ctk.CTkScrollableFrame):
         self.date_entry = ctk.CTkEntry(self, width=280)
         self.date_entry.pack(padx=10, pady=5)
 
-        self.published_var = ctk.StringVar()
-        self.published_var.set('unpublished')
-        self.published_radio = ctk.CTkRadioButton(self, text="Published?", variable=self.partition_var, value='unpublished')
-        self.published_radio.pack(padx=10, pady=5)
-        self.unpublished_radio = ctk.CTkRadioButton(self, text="Unpublished?", variable=self.partition_var, value='published')
-        self.unpublished_radio.pack(padx=10, pady=5)
+        self.visible_var = ctk.StringVar()
+        self.visible_var.set('invisible')
+        self.visible_radio = ctk.CTkRadioButton(self, text="Visible?", variable=self.partition_var, value='invisible')
+        self.visible_radio.pack(padx=10, pady=5)
+        self.invisible_radio = ctk.CTkRadioButton(self, text="Invisible?", variable=self.partition_var, value='visible')
+        self.invisible_radio.pack(padx=10, pady=5)
 
 
         self.files_label = ctk.CTkLabel(self, text="Choose files:")
@@ -313,8 +313,8 @@ class CreateDatasetFrame(ctk.CTkScrollableFrame):
         partition = self.partition_var.get().lower()
         files = self.files_entry.get()
         dsname = self.dataset_entry.get()
-        published = self.published_var.get()
-        active = 1 if published == 'published' else 0
+        visible = self.visible_var.get()
+        active = 1 if visible == 'visible' else 0
         progressbar.start()
         ds_result, metric_result, display_result = db_conn.CreateDatasetFromFiles(partition, dsname, files, active)
         progressbar.stop()
@@ -331,7 +331,7 @@ class CreateDatasetFrame(ctk.CTkScrollableFrame):
         known_info['source_name'] = self.source_name_entry.get()
         known_info['source_url'] = self.source_url_entry.get()
         known_info['date_downloaded'] = self.date_entry.get()
-        known_info['active'] = self.published_var.get()
+        known_info['active'] = self.visible_var.get()
 
         self.metric_info_frame = CreateMetricInfoFrame(self, known_info)
         self.metric_info_frame.pack(fill=ctk.BOTH, expand=True, padx=10, pady=5)
@@ -412,10 +412,13 @@ class RenameStreamCatMetricFrame(ctk.CTkScrollableFrame):
         self.new_name.grid(row=3, column=1, padx=10, pady=5)
 
         self.info_label = ctk.CTkLabel(self, text="We will apply the changes to all tables as well as all years and aoi's associated with this metric")
-        self.info_label.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
+        self.info_label.grid(row=4, column=0, padx=10, pady=5)
+
+        self.specific_info = ctk.CTkLabel(self, text="VERY IMPORTANT!\n The naming convention is to have the first letter of the metric be capitalized and then use camel casing (no underscores) in the rest of the name.\n If the metric applies to multiple years add [Year] to the end of the name.\n Afterwards almost all metrics should have the [AOI] tag as well. The only reason it wouldn't is if the area of interest is `Other`.")
+        self.specific_info.grid(row=5, column=0, padx=10, pady=5)
 
         self.submit_button = ctk.CTkButton(self, text="Submit", command=self.rename_metric)
-        self.submit_button.grid(row=5, column=1, columnspan=3, padx=10, pady=5)
+        self.submit_button.grid(row=6, column=0, padx=10, pady=5)
 
         self.results_window = None
         self.updates_window = None
@@ -446,26 +449,59 @@ class ActivateDatasetFrame(ctk.CTkScrollableFrame):
         super().__init__(parent)
         self.parent = parent
 
-        self.dsname_var = ctk.StringVar()
-        self.dsname_options = db_conn.GetAllDatasetNames()
-        self.dsname_var.set(self.dsname_options[0])
-        self.dsname_dropdown = ctk.CTkComboBox(self, variable=self.dsname_var, values=self.dsname_options)
-        self.dsname_dropdown.pack(fill=ctk.X, expand=True, padx=10, pady=5)
-
         self.partition_var = ctk.StringVar()
         self.partition_var.set('streamcat')
-        self.partition_radio_streamcat = ctk.CTkRadioButton(self, text="StreamCat", variable=self.partition_var, value='streamcat')
+        self.partition_radio_streamcat = ctk.CTkRadioButton(self, text="StreamCat", variable=self.partition_var, value='streamcat', command=self.get_table_options)
         self.partition_radio_streamcat.pack(padx=10, pady=5)
-        self.partition_radio_lakecat = ctk.CTkRadioButton(self, text="LakeCat", variable=self.partition_var, value='lakecat')
+        self.partition_radio_lakecat = ctk.CTkRadioButton(self, text="LakeCat", variable=self.partition_var, value='lakecat', command=self.get_table_options)
         self.partition_radio_lakecat.pack(padx=10, pady=5)
-        self.partition_radio_both = ctk.CTkRadioButton(self, text="Both", variable=self.partition_var, value='both')
+        self.partition_radio_both = ctk.CTkRadioButton(self, text="Both", variable=self.partition_var, value='both', command=self.get_table_options)
         self.partition_radio_both.pack(padx=10, pady=5)
+
+        self.dsname_var = ctk.StringVar()
+        self.dsname_options = self.get_table_options() # db_conn.GetAllDatasetNames()
+        self.dsname_var.set(self.dsname_options[0])
+        self.dsname_dropdown = ctk.CTkComboBox(self, variable=self.dsname_var, values=self.dsname_options, command=self.get_current_active_value)
+        self.dsname_dropdown.pack(fill=ctk.X, expand=True, padx=10, pady=5)
+
+        self.curr_active_label = ctk.CTkLabel(self, text="This dataset is currently: ")
+        self.curr_active_label.pack(padx=10, pady=5)
+        self.curr_active_val = ctk.CTkEntry(self, width=280)
+        self.curr_active_val.pack(padx=10, pady=5)
 
         self.submit_button = ctk.CTkButton(self, text="Submit", command=self.update_active_dataset)
         self.submit_button.pack(side=ctk.BOTTOM, fill=ctk.X, padx=10, pady=5)
 
         self.results_window = None
         self.updates_window = None
+
+    def get_table_options(self):
+        options = []
+        if self.partition_var.get() == 'both':
+            options = db_conn.GetAllDatasetNames()
+            
+            
+        else:
+            table = 'sc_datasets' if self.partition_var.get() == 'streamcat' else 'lc_datasets'
+            dsnames = db_conn.SelectColsFromTable(['dsname'], table)
+            for row in dsnames:
+                options.append(row._t[0])
+        # full_list = list(db_conn.metadata.tables.keys())
+        # if self.partition_var.get() == 'both':
+        #     return full_list
+        
+        # prefix = 'sc_ds' if self.partition_var.get() == 'streamcat' else 'lc_ds'
+        # options = [x for x in full_list if x.startswith(prefix)]
+        return options
+
+    def get_current_active_value(self, choice):
+        table_name = 'sc_datasets' if self.partition_var.get() == 'streamcat' else 'lc_datasets'
+        col = 'active'
+        where = {'dsname': choice}
+        curr_val = db_conn.SelectColWhere(table_name, col, where)
+        for row in curr_val:
+            active_val = 'Visible' if row._t[0] == 1 else 'Invisible'
+            self.curr_active_val.insert(0, active_val)
 
     def update_active_dataset(self):
         dsname = self.dsname_var.get()
@@ -483,11 +519,18 @@ class UpdateTableFrame(ctk.CTkScrollableFrame):
         super().__init__(parent)
         self.parent = parent
 
+        self.partition_var = ctk.StringVar()
+        self.partition_var.set('streamcat')
+        self.partition_radio_streamcat = ctk.CTkRadioButton(self, text="StreamCat", variable=self.partition_var, value='streamcat', command=self.get_table_options)
+        self.partition_radio_streamcat.pack(padx=10, pady=5)
+        self.partition_radio_lakecat = ctk.CTkRadioButton(self, text="LakeCat", variable=self.partition_var, value='lakecat', command=self.get_table_options)
+        self.partition_radio_lakecat.pack(padx=10, pady=5)
+
         self.table_dropdown_label = ctk.CTkLabel(self, text="Select table to update:")
         self.table_dropdown_label.pack(padx=10, pady=5)
 
         self.table_var = ctk.StringVar()
-        self.table_options = list(db_conn.metadata.tables.keys())
+        self.table_options = self.get_table_options() #list(db_conn.metadata.tables.keys())
         self.table_var.set(self.table_options[0])
         self.table_dropdown = ctk.CTkComboBox(self, variable=self.table_var, values=self.table_options)
         self.table_dropdown.pack(padx=10, pady=5)
@@ -506,6 +549,12 @@ class UpdateTableFrame(ctk.CTkScrollableFrame):
 
         self.results_window = None
         self.updates_window = None
+    
+    def get_table_options(self):
+        prefix = 'sc' if self.partition_var.get() == 'streamcat' else 'lc'
+        full_list = list(db_conn.metadata.tables.keys())
+        options = [x for x in full_list if x.startswith(prefix)]
+        return options
 
     def browse_files(self):
         files = ctk.filedialog.askopenfilenames()
@@ -545,9 +594,6 @@ class CreateMetricInfoFrame(ctk.CTkScrollableFrame):
         self.aoi_label = ctk.CTkLabel(self, text="Select all AOIs for the metric:")
         self.aoi_label.grid(row=4, column=0, padx=10, pady=5)
         
-        # self.aoi_dropdown_var = ctk.StringVar()
-        # self.aoi_dropdown = ctk.CTkComboBox(self, width=280, variable=self.aoi_dropdown_var, values=["Cat", "Ws", "CatRp100", "WsRp100", "Other"])
-        # self.aoi_dropdown.grid(row=4, column=1, columnspan=2, padx=10, pady=5)
         self.aoi_values = ["Cat", "Ws", "CatRp100", "WsRp100", "Other"]
         self.aoi_listbox = CTkListbox(self, multiple_selection=True)
         for i, aoi in enumerate(self.aoi_values):
@@ -573,14 +619,13 @@ class CreateMetricInfoFrame(ctk.CTkScrollableFrame):
 
         self.units_label = ctk.CTkLabel(self, text="Enter metric units:")
         self.units_label.grid(row=12, column=0, padx=10, pady=5)
-        # self.units_entry = ctk.CTkEntry(self, width=280)
-        # self.units_entry.grid(row=8, column=1, columnspan=2, padx=10, pady=5)
+        
         self.units_options = []
         self.units_results = db_conn.SelectColsFromTable(['metric_units'], 'sc_metrics_tg', {'distinct': 'metric_units'})
         for unit in self.units_results:
             self.units_options.append(unit._t[0])
         self.units_var = ctk.StringVar()
-        self.units_entry = CTkAutocompleteCombobox(self, width=280, completevalues=self.units_options, variable=self.units_var) #, values=self.units_options
+        self.units_entry = CTkAutocompleteCombobox(self, width=280, completevalues=self.units_options, variable=self.units_var) 
         self.units_entry.grid(row=12, column=1, columnspan=2, padx=10, pady=5)
 
         self.uuid_label = ctk.CTkLabel(self, text="Enter metric uuid:")
@@ -703,17 +748,22 @@ class EditMetricInfoFrame(ctk.CTkScrollableFrame):
         self.tg_col_label.grid(row=3, column=0, padx=10, pady=5)
 
         self.tg_col_var = ctk.StringVar()
-        self.tg_col_dropdown = ctk.CTkComboBox(self, width=280, variable=self.tg_col_var, values=tg_columns)
+        self.tg_col_dropdown = ctk.CTkComboBox(self, width=280, variable=self.tg_col_var, values=tg_columns, command=self.get_current_metric_value)
         self.tg_col_dropdown.grid(row=3, column=1, padx=10, pady=5)
 
+        self.tg_curr_val_label = ctk.CTkLabel(self, text="Current value for selected metric attribute")
+        self.tg_curr_val_label.grid(row=4, column=0, padx=10, pady=5)
+        self.tg_col_curr_val = ctk.CTkEntry(self, width=280)
+        self.tg_col_curr_val.grid(row=4, column=1, padx=10, pady=5)
+
         self.new_val_label = ctk.CTkLabel(self, text="Enter new value for selected metric value: ")
-        self.new_val_label.grid(row=4, column=0, padx=10, pady=5)
+        self.new_val_label.grid(row=5, column=0, padx=10, pady=5)
 
         self.new_val_entry = ctk.CTkEntry(self, width=280)
-        self.new_val_entry.grid(row=4, column=1, padx=10, pady=5)
+        self.new_val_entry.grid(row=5, column=1, padx=10, pady=5)
 
         self.submit_button = ctk.CTkButton(self, text="Submit", command=self.edit_metric_info)
-        self.submit_button.grid(row=5, column=0, padx=10, pady=5)
+        self.submit_button.grid(row=6, column=0, padx=10, pady=5)
         
         self.results_window = None
         self.updates_window = None
@@ -729,6 +779,16 @@ class EditMetricInfoFrame(ctk.CTkScrollableFrame):
         tg_columns = list(db_conn.metadata.tables[table_name].c.keys())
 
         return metric_name_options, tg_columns
+
+    def get_current_metric_value(self, choice):
+        table_name = 'sc_metrics_tg' if self.partition_var.get() == 'streamcat' else 'lc_metrics_tg'
+        col = self.tg_col_dropdown.get()
+        metric = self.metric_name_var.get()
+        curr_val = db_conn.SelectColWhere(table_name, col, {'metric_name': metric})
+        idx = 0
+        for row in curr_val:
+            self.tg_col_curr_val.insert(idx, str(row._t[0]))
+            idx += len(str(row._t))
 
     def edit_metric_info(self):
         table_name = 'sc_metrics_tg' if self.partition_var.get() == 'streamcat' else 'lc_metrics_tg'
@@ -771,7 +831,7 @@ class DatabaseApp(ctk.CTk):
             'Edit Metric Info'
         ]
         self.action_var.set(self.actions[0]) # could add a default / info frame to be actions[0] called '--'
-        self.action_dropdown = ctk.CTkComboBox(self, variable=self.action_var, values=self.actions)
+        self.action_dropdown = ctk.CTkComboBox(self, width=200, variable=self.action_var, values=self.actions)
         self.action_dropdown.pack(side=ctk.TOP, padx=10, pady=10)
 
         self.action_button = ctk.CTkButton(self, text="Go", command=self.show_frame)
