@@ -1,0 +1,4 @@
+pandas
+SQLAlchemy
+customtkinter
+CTkListbox
