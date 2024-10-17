@@ -10,8 +10,8 @@ awch,Continuous,awch,none,awch.tif,,awch,Mean,1,0,0,0,,No,no,,6/15/2016
 BDH,Continuous,BDH,none,bdh.tif,,BDH,Mean,1,0,0,0,,No,no,,8/19/2021
 Bedrock_Perm,Categorical,lookup/bedrock_perm_lookup.csv,none,bedrock_perm.tif,,bedrock_perm,Percent,1,0,0,0,,No,no,,6/15/2020
 BFI,Continuous,BFI,none,bfi.tif,,BFI,Mean,1,0,0,0,,Yes,yes,Yes,8/19/2021
-CanalDensity,Continuous,CanalDens,none,CanalsDitches.tif,,CanalDensity,Density,0.03,0,0,0,,Yes,yes,Yes,6/15/2021
-CoalMines,Point,CoalMineDens,none,USTRAT.shp,,CoalMines,Density,1,0,0,0,,Yes,yes,Yes,12/29/2021
+CanalDensity,Continuous,CanalDens,none,CanalsDitches.tif,,CanalDensity,Density,0.03,0,0,1,,Yes,yes,Yes,6/15/2021
+CoalMines,Point,CoalMineDens,none,USTRAT.shp,,CoalMines,Density,1,0,0,1,,Yes,yes,Yes,12/29/2021
 Phos_Ag_Balance,Continuous,Phos_Ag_Balance,none,Phos_Ag_Balance.tif,,Compton_Phos_Inputs,Mean,1,0,0,0,,No,no,,7/2/2020
 Phos_Crop_Uptake,Continuous,Phos_Crop_Uptake,none,Phos_Crop_Uptake.tif,,Compton_Phos_Inputs,Mean,1,0,0,0,,No,no,,7/2/2020
 Phos_Fert,Continuous,Phos_Fert,none,Phos_Fert.tif,,Compton_Phos_Inputs,Mean,1,0,0,0,,No,no,,7/2/2020
@@ -403,9 +403,9 @@ WWTPAll,Point,WWTPAllDens,none,WWTP_All_CWA_Active_2013_CONUS.shp,,WWTP,Density,
 WWTPMajor,Point,WWTPMajorDens,none,WWTP_Major_CWA_Active_2013_CONUS.shp,,WWTP,Density,1,0,0,0,,Yes,yes,,12/30/2021
 WWTPMinor,Point,WWTPMinorDens,none,WWTP_Minor_CWA_Active_2013_CONUS.shp,,WWTP,Density,1,0,0,0,,Yes,yes,,12/30/2021
 WetnessIndex,Continuous,WetIndex,none,wetness_index.tif,,WetIndex,Mean,1,0,0,0,,Yes,yes,Yes,7/4/2020
-NPP_YrMean,Continuous,NPP_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
-NPP,Continuous,NPP,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
-Precip_YrMean,Continuous,Precip_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
-LST_YrMean,Continuous,LST_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
-LST,Continuous,LST,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
-SNOW_YrMean,Continuous,SNOW_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,1,,No,No,No,5/6/2024
+NPP_YrMean,Continuous,NPP_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,0,,No,No,No,5/6/2024
+NPP,Continuous,NPP,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,0,,No,No,No,5/6/2024
+Precip_YrMean,Continuous,Precip_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,0,,No,No,No,5/6/2024
+LST_YrMean,Continuous,LST_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,0,,No,No,No,5/6/2024
+LST,Continuous,LST,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,0,,No,No,No,5/6/2024
+SNOW_YrMean,Continuous,SNOW_YrMean,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,0,,No,No,No,5/6/2024

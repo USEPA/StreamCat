@@ -63,7 +63,7 @@ out_coor_system = "PROJCS['NAD_1983_Contiguous_USA_Albers',\
 
 for line in ControlTable.values: # loop through each landscape_var in control table
     if line[-1] == 1:   # check 'run' field from the table, if 1 run, if not, skip
-        print 'running ' + str(line[2])
+        print('running ' + str(line[2]))
         InFile = line[2]
         OutFile = line[3]
         FileType = line[4]
@@ -88,7 +88,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 InRas = InFile
 
             NDV, Stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType = getRasterInfo(InDir + '/' + InRas)
-            print DataType
+            print(DataType)
 
             # Check if we need to reclass any raster values
             if ReclassTable=='Yes':
@@ -115,7 +115,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                     NewVal = ReClassTable.loc[ReClassTable['FileName'] == OutFile,'NewVal']
                     # Need to pull values out of a pandas series as a simple integer or float to use in reclass
                     for i in OldVal.index.tolist():
-                        print i
+                        print(i)
                         reclass_dict[float(OldVal[i])] = float(NewVal[i])
                 tempras = TempDir + '/' + OutFile + '.tif'
                 if not os.path.isfile(tempras):
@@ -184,7 +184,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                         resamp_string = "gdalwarp --config GDAL_DATA " + '"C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data" ' +' -tr ' + str(ConvertRes) + ' -' + str(ConvertRes) + " -te " + bounds + " -srcnodata " + str(outNDV) +  " -dstnodata "  + str(outNDV) +  " -of GTiff -r near -t_srs " + dst_crs + " -co COMPRESS=DEFLATE -co TFW=YES -co TILED=YES -co TIFF_USE_OVR=TRUE -ot " + outDataType + " " + tempras + " " + resamp_ras
                         startTime = dt.now()
                         call(resamp_string)
-                        print "elapsed time " + str(dt.now()-startTime)
+                        print("elapsed time " + str(dt.now()-startTime))
 
         # Processes for vector features
         if FileType == 'ESRI Shapefile':
@@ -242,7 +242,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
             # Do we need to rasterize shapefile? (Right now only for census block groups)
             if Convert == 'Yes':
                 for item in ConvertFields.split(';'):
-                    print item
+                    print(item)
                     InShp = FinalDir + '/' + InFile + '.shp'
         #            InShp = InDir + '/' + Rast + '.shp'
                     OutRas =  FinalDir + '/' + item + '.tif'
@@ -251,6 +251,6 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
 #                    call(resamp_string)
                     ##  call() statement not working for me, use arcpy, rickD
                     arcpy.PolygonToRaster_conversion(InShp, item, OutRas, 'CELL_CENTER', "", str(ConvertRes))
-                    print "elapsed time " + str(dt.now()-startTime)
+                    print("elapsed time " + str(dt.now()-startTime))
 
 

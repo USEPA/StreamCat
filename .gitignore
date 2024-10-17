@@ -11,5 +11,5 @@ stream_cat_config.py
 StreamCat.Rproj
 *.sql
 /logs
-/__pycache__
+*__pycache__
 /high_res_data

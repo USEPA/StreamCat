@@ -1,25 +1,6 @@
-%load_ext cudf.pandas  # pandas operations now use the GPU!
-"""       __                                       __
-    _____/ /_________  ____  ____ ___  _________ _/ /_
-   / ___/ __/ ___/ _ \/ __ `/ __ `__ \/ ___/ __ `/ __/
-  (__  ) /_/ /  /  __/ /_/ / / / / / / /__/ /_/ / /_
- /____/\__/_/   \___/\__,_/_/ /_/ /_/\___/\__,_/\__/
-
- Functions for standardizing landscape rasters, allocating landscape metrics
- to NHDPlusV2 catchments, accumulating metrics for upstream catchments, and
- writing final landscape metric tables
-
- Authors: Marc Weber<weber.marc@epa.gov>
-          Ryan Hill<hill.ryan@epa.gov>
-          Darren Thornbrugh<thornbrugh.darren@epa.gov>
-          Rick Debbout<debbout.rick@epa.gov>
-          Tad Larsen<laresn.tad@epa.gov>
-
- Date: October 2015
-"""
+#%load_ext cudf.pandas  # pandas operations now use the GPU!
 
 import os
-import sys
 import time
 from collections import OrderedDict, defaultdict, deque
 from typing import Generator
@@ -27,16 +8,19 @@ from typing import Generator
 import numpy as np
 import pandas as pd
 import rasterio
-# maybe switch from rasterio to
+# maybe switch from rasterio to rioxarray
 import rioxarray
 #from gdalconst import *
-from osgeo import gdal, ogr, osr
+#from osgeo import gdal, ogr, osr
 from rasterio import transform
 
 if rasterio.__version__[0] == "0":
     from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
 if rasterio.__version__[0] == "1":
     from rasterio.warp import calculate_default_transform, reproject, Resampling
+
+
+from rasterstats import zonal_stats
 
 import fiona
 import geopandas as gpd
@@ -59,6 +43,9 @@ import cupy as cp
 # import cudf
 # import cuspatial
 
+import dask_geopandas as dg
+import dask.dataframe as dd
+from dask.distributed import progress
 ##############################################################################
 
 
@@ -84,10 +71,10 @@ def UpcomDict(nhd, interVPUtbl, zone):
     """
     # Returns UpCOMs dictionary for accumulation process
     # Provide either path to from-to tables or completed from-to table
-    flow = dbf2GPUDF(f"{nhd}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
+    flow = dbf2DF(f"{nhd}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
     flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
     # check to see if out of zone values have FTYPE = 'Coastline'
-    fls = dbf2GPUDF(f"{nhd}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
+    fls = dbf2DF(f"{nhd}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
     coastfl = fls.COMID[fls.FTYPE == "Coastline"]
     flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
     # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs here
@@ -367,7 +354,8 @@ def rasterMath(inras, outras, expression=None, out_dtype=None):
 
 ##############################################################################
 
-
+# TODO
+# Is this used
 def Project(inras, outras, dst_crs, template_raster, nodata):
     """
     __author__ =  "Marc Weber <weber.marc@epa.gov>"
@@ -681,10 +669,10 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
 
     """
 
-    polys = gpd.GeoDataFrame.from_file(catchments)
+    polys = gpd.read_file(catchments) 
     polys.to_crs(points.crs, inplace=True)
     if mask_dir:
-        rat = dbf2GPUDF(f"{mask_dir}/{vpu}.tif.vat.dbf")
+        rat = dbf2DF(f"{mask_dir}/{vpu}.tif.vat.dbf")
         rat["AreaSqKM"] = ((rat.COUNT * 900) * 1e-6).fillna(0)
         polys = pd.merge(
             polys.drop("AreaSqKM", axis=1),
@@ -695,16 +683,17 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
         )
 
     # Get list of lat/long fields in the table
-    points["latlon_tuple"] = tuple(
-        zip(
-            points.geometry.map(lambda point: point.x),
-            points.geometry.map(lambda point: point.y),
-        )
-    )
+    points["latlon_tuple"] = tuple(zip(points.geometry.x, points.geometry.y))
+    # points["latlon_tuple"] = tuple(
+    #     zip(
+    #         points.geometry.map(lambda point: point.x),
+    #         points.geometry.map(lambda point: point.y),
+    #     )
+    # )
     # Remove duplicate points for 'Count'
-    points2 = points.drop_duplicates("latlon_tuple")
+    points2 = points.drop_duplicates("latlon_tuple") #TODO inplace drop instead and change all points2 to points
     try:
-        point_poly_join = sjoin(points2, polys, how="left", op="within")
+        point_poly_join = sjoin(points2, polys, how="left", predicate="within")
         fld = "GRIDCODE"
     except:
         polys["link"] = cp.nan
@@ -712,31 +701,32 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
         fld = "link"
     # Create group of all points in catchment
     grouped = point_poly_join.groupby("FEATUREID")
-    point_poly_count = grouped[fld].count()
-    point_poly_count.name = "COUNT"
+    point_poly_count = grouped[fld].count().rename("COUNT")
+    # point_poly_count = grouped[fld].count()
+    # point_poly_count.name = "COUNT"
     # Join Count column on to NHDCatchments table and keep only
     # ['COMID','CatAreaSqKm','CatCount']
-    final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
-    final = final[["FEATUREID", "AreaSqKM", "COUNT"]].fillna(0)
+    final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left").fillna(0)
+    final = final[["FEATUREID", "AreaSqKM", "COUNT"]]# .fillna(0)
     cols = ["COMID", f"CatAreaSqKm{appendMetric}", f"CatCount{appendMetric}"]
-    if not summary == None:  # Summarize fields including duplicates
+    if summary: #if not summary == None:  # Summarize fields including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby("FEATUREID")
         for x in summary:  # Sum the field in summary field list for each catchment
-            point_poly_stats = grouped2[x].sum()
-            point_poly_stats.name = x
+            point_poly_stats = grouped2[x].sum().rename(x)
+            # point_poly_stats = grouped2[x].sum()
+            # point_poly_stats.name = x
             final = final.join(point_poly_stats, on="FEATUREID", how="left").fillna(0)
             cols.append("Cat" + x + appendMetric)
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on="COMID", how="left")
     if len(mask_dir) > 0:
-        if not summary == None:
-            final.columns = (
-                ["COMID", "CatAreaSqKmRp100", "CatCountRp100"]
-                + ["Cat" + y + appendMetric for y in summary]
-                + ["CatPctFullRp100"]
-            )
+        if summary: #if not summary == None:
+            final.columns = [
+                    "COMID", "CatAreaSqKmRp100", "CatCountRp100"
+                ] + ["Cat" + y + appendMetric for y in summary] + ["CatPctFullRp100"]
+            
         else:
             final.columns = [
                 "COMID",
@@ -876,7 +866,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
     Arguments
     ---------
-    arr                   : table containing watershed values
+    tbl                   : table containing watershed values
     comids                : numpy array of all zones comids
     lengths               : numpy array with lengths of upstream comids
     upstream              : numpy array of all upstream arrays for each COMID
@@ -913,7 +903,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
             area = all_values.copy()
         if "PctFull" in column:
             values = [
-                cp.ma.average(cp.nan_to_num(val), weights=w)
+                cp.average(cp.nan_to_num(val), weights=w) # changed from cp.ma.average
                 for val, w in zip(all_values, area)
             ]
         elif "MIN" in column or "MAX" in column:
@@ -979,6 +969,7 @@ def createCatStats(
         # arcpy.env.snapRaster = inZoneData
         cellSize = 30
         snapRaster = inZoneData
+        #izd_df = dg.read_file(inZoneData, npartitions=16)
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
                 outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
@@ -999,20 +990,64 @@ def createCatStats(
                     # TabulateArea(
                     #     inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
                     # )
-                    outTable = crosstab(inZoneData, LandscapeLayer)
-                if accum_type == "Continuous":
-                    # ZonalStatisticsAsTable(
-                    #     inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
-                    # )
+                    izd_array = rioxarray.open_rasterio(inZoneData).sel(band=1).drop('band', dim=None)
+                    print(izd_array.shape)
                     
-                    outTable = stats(inZoneData, LandscapeLayer)
+                    ll_array = rioxarray.open_rasterio(LandscapeLayer).sel(band=1).drop('band', dim=None)
+                    print(ll_array.shape)
+
+                    outTable = crosstab(izd_array, ll_array)
+                if accum_type == "Continuous":
+
+                    # Load Raster data to Xarray and Chunk data into dask array 
+                    # Drop the 'band' dimension so we have the 2D array of x,y coordinates
+                    # Set type to int32 so it doesn't try to load into float64
+                    izd_array = rioxarray.open_rasterio(inZoneData, chunks={'x': 2048, 'y': 2048}).sel(band=1).drop('band', dim=None)# .astype('int32')
+                    
+                    # Continuous LandscapeLayer loads without a nodata value 
+                    # Load as same type as in zone data array
+                    ll_array = rioxarray.open_rasterio(LandscapeLayer, chunks={'x': 2048, 'y': 2048}, nodata=-2147483647.0).sel(band=1).drop('band', dim=None)# .astype('int16')
+
+                    # Replace the nodata value with -9999
+                    # izd_array = izd_array.where(izd_array != -2147483647, -9999)
+                    # ll_array = ll_array.where(ll_array != -2147483647, -9999)
+
+                    # Convert the dtype to int16
+                    # izd_array = izd_array.astype('int16', casting='unsafe')
+                    #ll_array = ll_array.astype('int16', casting='unsafe')
+
+                    # Find unique ids in the zone array
+                    # will be passed to stats function to reduce amount of computation
+                    unique_zone_ids = np.unique(izd_array.data.compute())
+                    
+                    # Filter izd array
+                    izd_array_filtered = izd_array.where(np.isin(izd_array, unique_zone_ids))
+                    
+                    # xrspatial requires zone and value arrays in stats function to be same shape so we reindex
+                    izd_array_reindexed = izd_array_filtered.reindex_like(ll_array).chunk(ll_array.chunks).astype('int16')
+
+                    izd_array_reindexed = izd_array_reindexed.persist()
+                    ll_array = ll_array.persist()
+                    
+                    outTable = stats(izd_array_reindexed, ll_array, zone_ids=unique_zone_ids) # might have to assign_coords to the aligned arrays
+                    progress(outTable)
+                    print(outTable.head())
+                    outTable.to_parquet('high_res_data/output')
+                    
             try:
-                table = dbf2GPUDF(outTable)
+                if isinstance(outTable, dd.DataFrame):
+                    print(outTable.shape)
+                    #outTable.compute()
+                    del izd_array 
+                    del ll_array
+                    print(outTable.columns)
+                else:
+                    table = dbf2DF(outTable)
             except fiona.errors.DriverError as e:
                 # arc occassionally doesn't release the file and fails here
                 print(e, "\n\n!EXCEPTION CAUGHT! TRYING AGAIN!")
                 time.sleep(60)
-                table = dbf2GPUDF(outTable)
+                table = dbf2DF(outTable)
         if by_RPU == 1:
             hydrodir = "/".join(inZoneData.split("/")[:-2]) + "/NEDSnapshot"
             rpuList = []
@@ -1026,14 +1061,19 @@ def createCatStats(
                     #     inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
                     # )
                     outTable = stats(inZoneData, elev)
+                    izd_array = rioxarray.open_rasterio(inZoneData).sel(band=1).drop('band', dim=None)
+                    print(izd_array.shape)
+                    elev_array = rioxarray.open_rasterio(elev).sel(band=1).drop('band', dim=None)
+                    print(elev_array.shape)
+                    outTable = stats(izd_array, elev_array) # default = "ALL"
             for count, rpu in enumerate(rpuList):
                 if count == 0:
-                    table = dbf2GPUDF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
+                    table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
                 else:
                     table = pd.concat(
                         [
                             table,
-                            dbf2GPUDF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf"),
+                            dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf"),
                         ]
                     )
             if len(rpuList) > 1:
@@ -1047,24 +1087,24 @@ def createCatStats(
     # except arcpy.ExecuteError:
     #     print("Failing at the ExecuteError!")
     #     print(arcpy.GetMessages(2))
-
+    table = outTable
     if mask_dir:
-        nhdtbl = dbf2GPUDF(
+        nhdtbl = dbf2DF(
             f"{NHD_dir}/NHDPlus{hydroregion}/NHDPlus{zone}"
             "/NHDPlusCatchment/Catchment.dbf"
         ).loc[:, ["FEATUREID", "AREASQKM", "GRIDCODE"]]
-        tbl = dbf2GPUDF(outTable)
+        #tbl = dbf2DF(outTable)
         if accum_type == "Categorical":
-            tbl = chkColumnLength(tbl, LandscapeLayer)
+            table = chkColumnLength(table, LandscapeLayer)
         # We need to use the raster attribute table here for PctFull & Area
         # TODO: this needs to be considered when making masks!!!
-        tbl2 = dbf2GPUDF(f"{mask_dir}/{zone}.tif.vat.dbf")
+        tbl2 = dbf2DF(f"{mask_dir}/{zone}.tif.vat.dbf")
         tbl2 = (
-            pd.merge(tbl2, nhdtbl, how="right", left_on="VALUE", right_on="GRIDCODE")
+            pd.merge(tbl2, nhdtbl, how="right", left_on="VALUE", right_on="GRIDCODE") #TODO change "VALUE" to new xarray name 
             .fillna(0)
             .drop("VALUE", axis=1)
         )
-        result = pd.merge(tbl2, tbl, left_on="GRIDCODE", right_on="VALUE", how="left")
+        result = pd.merge(tbl2, table, left_on="GRIDCODE", right_on="VALUE", how="left") #TODO change "VALUE" to new xarray name 
         if accum_type == "Continuous":
             result["PctFull%s" % appendMetric] = (result.COUNT_y / result.COUNT_x) * 100
             result["AreaSqKm%s" % appendMetric] = (result.COUNT_x * 900) * 1e-6
@@ -1089,19 +1129,19 @@ def createCatStats(
                 "PctFull%s" % appendMetric,
             ]
         if accum_type == "Categorical":
-            result["TotCount"] = result[tbl.columns.tolist()[1:]].sum(axis=1)
+            result["TotCount"] = result[table.columns.tolist()[1:]].sum(axis=1)
             result["PctFull%s" % appendMetric] = (
                 result.TotCount / (result.COUNT * 900)
             ) * 100
             result["AreaSqKm%s" % appendMetric] = (result.COUNT * 900) * 1e-6
             result = result[
                 ["FEATUREID", "AreaSqKm%s" % appendMetric]
-                + tbl.columns.tolist()[1:]
+                + table.columns.tolist()[1:]
                 + ["PctFull%s" % appendMetric]
             ]
             result.columns = (
                 ["COMID", "AreaSqKm%s" % appendMetric]
-                + [lbl + appendMetric for lbl in tbl.columns.tolist()[1:]]
+                + [lbl + appendMetric for lbl in table.columns.tolist()[1:]]
                 + ["PctFull%s" % appendMetric]
             )
     else:
@@ -1110,12 +1150,12 @@ def createCatStats(
             if by_RPU == 1:
                 table = table[["VALUE", "AREA", "COUNT", "SUM", "MIN", "MAX"]]
             else:
-                table = table[["VALUE", "AREA", "COUNT", "SUM"]]
-            table = table.rename(columns={"COUNT": "Count", "SUM": "Sum"})
+                table = table["zone", "mean", "count", "sum"]
+            table = table.rename(columns={"count": "Count", "sum": "Sum"})
         if accum_type == "Categorical":
             table = chkColumnLength(table, LandscapeLayer)
-            table["AREA"] = table[table.columns.tolist()[1:]].sum(axis=1)
-        nhdTable = dbf2GPUDF(inZoneData[:-3] + "Catchment.dbf").loc[
+            table["AREA"] = table[table.columns.tolist()[1:]].sum(axis=1) # .compute()
+        nhdTable = dbf2DF(inZoneData[:-3] + "Catchment.dbf").loc[
             :, ["FEATUREID", "AREASQKM", "GRIDCODE"]
         ]
         nhdTable = nhdTable.rename(
@@ -1125,7 +1165,7 @@ def createCatStats(
             nhdTable, table, how="left", left_on="GRIDCODE", right_on="VALUE"
         )
         if LandscapeLayer.split("/")[-1].split(".")[0] == "rdstcrs":
-            slptbl = dbf2GPUDF(
+            slptbl = dbf2DF(
                 "%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf"
                 % (NHD_dir, hydroregion, zone)
             ).loc[:, ["COMID", "SLOPE"]]
@@ -1137,9 +1177,12 @@ def createCatStats(
         result["PctFull"] = (
             ((result.AREA * 1e-6) / result.AreaSqKm.astype("float")) * 100
         ).fillna(0)
+        print(result.columns)
         result = result.drop(["GRIDCODE", "VALUE", "AREA"], axis=1)
     cols = result.columns[1:]
-    result.columns = cp.append("COMID", "Cat" + cols.values)
+    result.columns = np.append("COMID", "Cat" + cols.values)
+    result.fillna(0, inplace=True)
+    # result.compute() ? if necessary
     return result  # ALL NAs need to be filled w/ zero here for Accumulation!!
 
 
@@ -1208,7 +1251,7 @@ def chkColumnLength(table, landscape_layer):
         # build RAT with GDAL
         rat_cols = get_rat_vals(landscape_layer)
     else:
-        rat_cols = dbf2GPUDF(rat_file).VALUE.tolist()
+        rat_cols = dbf2DF(rat_file).VALUE.tolist()
     tbl_cols = table.columns.tolist()
     tbl_cols.sort(key=len)  # sort() is done in place on a list -- returns None
     table, val_cols = table[tbl_cols], tbl_cols[1:]
@@ -1286,11 +1329,11 @@ def make_all_cat_comids(nhd, inputs):
     for zone, hr in inputs.items():
         print(zone, end=", ", flush=True)
         pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        cats = dbf2GPUDF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
+        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
         all_comids = cp.append(all_comids, cats.FEATUREID.values.astype(int))
     cp.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
     print("...done!")
-    return set(all_comids)  # RETURN A SET!
+    return set(all_comids)  # RETURN A SET FOR NO REPEATS!
 
 
 def makeVectors(inter_tbl, nhd):
@@ -1303,16 +1346,17 @@ def makeVectors(inter_tbl, nhd):
     inter_tbl   : table of inter-VPU connections
     nhd         : directory where NHD is stored
     """
-    os.mkdir("accum_npy")
+    if not os.path.exists("accum_npy"):
+        os.mkdir("accum_npy")
     inputs = nhd_dict(nhd)
     all_comids = make_all_cat_comids(nhd, inputs)
-    print("Making numpy files in zone...", end="", flush=True)
+    
     for zone, hr in inputs.items():
-        print(zone, end=", ", flush=True)
+        print(f"Making numpy files in zone {zone}\n")
         pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        flow = dbf2GPUDF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
+        flow = dbf2DF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
         flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
-        fls = dbf2GPUDF(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
+        fls = dbf2DF(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
         coastfl = fls.COMID[fls.FTYPE == "Coastline"]
         flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
         # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs
@@ -1338,7 +1382,7 @@ def makeVectors(inter_tbl, nhd):
         out_of_vpus = inter_tbl.loc[
             (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
         ].thruCOMIDs.values
-        cats = dbf2GPUDF(f"{pre}/NHDPlusCatchment/Catchment.dbf").set_index("FEATUREID")
+        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf").set_index("FEATUREID")
         comids = cats.index.values
         comids = cp.append(comids, out_of_vpus)
         # list of upstream lists, filter comids in all_comids
@@ -1374,7 +1418,7 @@ def nhd_dict(nhd, unit="VPU"):
     """
 
     inputs = OrderedDict()
-    bounds = dbf2GPUDF(f"{nhd}/NHDPlusGlobalData/BoundaryUnit.dbf")
+    bounds = dbf2DF(f"{nhd}/NHDPlusGlobalData/BoundaryUnit.dbf")
     remove = bounds.loc[bounds.DRAINAGEID.isin(["HI", "CI"])].index
     bounds = bounds.drop(remove, axis=0)
     if unit == "VPU":
@@ -1383,7 +1427,7 @@ def nhd_dict(nhd, unit="VPU"):
         )
         for idx, row in vpu_bounds.iterrows():
             inputs[row.UNITID] = row.DRAINAGEID
-        cp.save("./accum_npy/vpu_inputs.npy", inputs)
+        np.save("./accum_npy/vpu_inputs.npy", inputs)
         return inputs
 
     if unit == "RPU":
@@ -1397,7 +1441,7 @@ def nhd_dict(nhd, unit="VPU"):
             if not zone in inputs.keys():
                 inputs[zone] = []
             inputs[zone].append(row.UNITID)
-        cp.save("./accum_npy/rpu_inputs.npy", inputs)
+        np.save("./accum_npy/rpu_inputs.npy", inputs)
         return inputs
 
 
@@ -1426,10 +1470,22 @@ def findUpstreamNpy(zone, com, numpy_dir):
 
 
 def dbf2GPUDF(f, upper=True):
-    data = gpd.read_file(f)
-    gpu_data = cuspatial.from_geopandas(data)
-    gpu_data.drop("geometry", axis=1)
-    if upper is True:
-        gpu_data.columns = gpu_data.columns.str.upper()
+    # data = gpd.read_file(f)
+    # gpu_data = cuspatial.from_geopandas(data)
+    # gpu_data.drop("geometry", axis=1)
+    # if upper is True:
+    #     gpu_data.columns = gpu_data.columns.str.upper()
 
-    return gpu_data
+    # return gpu_data
+    data = dg.read_file(f, npartitions=os.cpu_count())
+    data = data.drop("geometry", axis=1)
+    if upper is True:
+        data.columns = data.columns.str.upper()
+    data.compute()
+    return data
+
+def dbf2DF(f, upper=True):
+    data = gpd.read_file(f).drop("geometry", axis=1)
+    if upper is True:
+        data.columns = data.columns.str.upper()
+    return data
