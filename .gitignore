@@ -9,4 +9,8 @@ scripts/
 .spyproject/
 stream_cat_config.py
 StreamCat.Rproj
-
+/high_res_data
+/.vscode
+/__pycache__
+/logs/
+/config_tables/
