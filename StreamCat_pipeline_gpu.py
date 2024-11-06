@@ -96,7 +96,7 @@ def main(args):
                 points = mask_points(points, mask_dir, INPUTS)
         # File string to store InterVPUs needed for adjustments
         # Currently stored in Streamcat Accumulation_and_Allocation
-        Connector = f"{config.OUT_DIR}/{row.FullTableName}_connectors.csv"
+        Connector = f"{config.FINAL_OUT_DIR}/{row.FullTableName}_connectors.csv"
         print(
             f"Acquiring `{row.FullTableName}` catchment statistics...",
             end="",
@@ -105,7 +105,7 @@ def main(args):
     
         for zone, hydroregion in INPUTS.items():
             if not os.path.exists(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"):
-                print(zone, end=", ", flush=True)
+                print(f"Region {zone}, ")
                 pre = f"{config.NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
                 if not row.accum_type == "Point":
                     izd = (
@@ -130,15 +130,19 @@ def main(args):
                     cat = PointInPoly(
                         points, zone, izd, pct_full, mask_dir, apm, summary
                     )
-                # TODO write to csv, or add to dask dataframe and persist()
+                # TODO instead of writing to csv add cat to dask dataframe and persist()
                 # This is because dask dataframes are a collection of pandas dataframes
+                # This dataframe should have be named {row.FullTableName}_{zone} then below in the next loop we should 
+                # get fn / cat dataframe by name 
                 cat.to_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False) 
-        print("done!")
-        print("Accumulating...", end="", flush=True)
-        #TODO if we change cats to be parititons in a dask dataframe then we need to change from zones to iterating through the dask paritions
+        print("done!\n")
+        print("Accumulating...")
+        #TODO if we change cats to be parititons in a dask dataframe then we need to change from zones to iterating through the dask sections
+        # Also consider writing large dask dataframe out to parquet file here as a checkpoint of sorts
         for zone in INPUTS:
             # TODO 
             # read fn table from database 
+            print(f"Region {zone}, ")
             fn = f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"
             cat = pd.read_csv(fn)
             processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().item() #TODO .bool() is depreciated change to .item()
@@ -146,11 +150,11 @@ def main(args):
                 print("skipping!")
                 already_processed.append(row.FullTableName)
                 break
-            print(zone, end=", ", flush=True)
+            # print(zone, end=", ", flush=True)
 
             if zone in inter_vpu.ToZone.values:
                 cat = appendConnectors(cat, Connector, zone, inter_vpu)
-            accum = np.load(f"accum_npy/accum_{zone}.npz")
+            accum = np.load(f"{config.ACCUM_DIR}/accum_{zone}.npz")
 
             cat.COMID = cat.COMID.astype(accum["comids"].dtype)
             cat.set_index("COMID", inplace=True)
@@ -218,8 +222,8 @@ if __name__ == '__main__':
     
     # args = parser.parse_args()
     args = DebugArgs()
-    num_workers = 8 # os.cpu_count()
-    cluster = LocalCluster(n_workers=num_workers)
+    # num_workers = 8 # os.cpu_count()
+    # cluster = LocalCluster(n_workers=num_workers)
 
     # If using HPC slurm machine
     # uncomment following 3 lines
@@ -227,9 +231,9 @@ if __name__ == '__main__':
     # cluster.adapt(minimum=1, maximum=64)
     # cluster = SLURMRunner()
     
-    client = Client(cluster)
-    print(client.dashboard_link)
-    start_time = time.time()
+    # client = Client(cluster)
+    # print(client.dashboard_link)
+    # start_time = time.time()
     main(args)
     
     # end_time = time.time()

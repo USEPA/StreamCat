@@ -4,11 +4,12 @@ import os
 import time
 from collections import OrderedDict, defaultdict, deque
 from typing import Generator
-
 import numpy as np
 import pandas as pd
+
 import rasterio
 # maybe switch from rasterio to rioxarray
+import rasterio.windows
 import rioxarray
 #from gdalconst import *
 #from osgeo import gdal, ogr, osr
@@ -35,6 +36,7 @@ from geopandas.tools import sjoin
 
 # Replace arcpy with xarray spatial
 from xrspatial.zonal import stats, crosstab
+import xarray as xr
 
 ##############################################################################
 
@@ -43,6 +45,7 @@ import cupy as cp
 # import cudf
 # import cuspatial
 
+# Dask imports
 import dask_geopandas as dg
 import dask.dataframe as dd
 from dask.distributed import progress
@@ -880,8 +883,8 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
     del upstream  # a and indices are big - clean up to minimize RAM
     cols = tbl.columns[1:]  # Get column names that will be accumulated
-    z = cp.zeros(comids.shape)  # Make empty vector for placing values
-    data = cp.zeros((len(comids), len(tbl.columns)))
+    z = np.zeros(comids.shape)  # Make empty vector for placing values
+    data = np.zeros((len(comids), len(tbl.columns)))
     data[:, 0] = comids  # Define first column as comids
     accumulated_indexes = cp.add.accumulate(lengths)[:-1]
     # accumulated_indexes = cp.ufunc.accumulate(lengths)[:-1]
@@ -889,11 +892,11 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     # Loop and accumulate values
     for index, column in enumerate(cols, 1):
         col_values = tbl[column].values.astype("float")
-        all_values = cp.split(col_values[indices], accumulated_indexes)
+        all_values = np.split(col_values[indices], accumulated_indexes)
         if tbl_type == "Ws":
             # add identity value to each array for full watershed
-            all_values = cp.array(
-                [cp.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
+            all_values = np.array(
+                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
                 dtype=object,
             )
 
@@ -903,11 +906,11 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
             area = all_values.copy()
         if "PctFull" in column:
             values = [
-                cp.average(cp.nan_to_num(val), weights=w) # changed from cp.ma.average
+                np.average(np.nan_to_num(val), weights=w) # changed from cp.ma.average
                 for val, w in zip(all_values, area)
             ]
         elif "MIN" in column or "MAX" in column:
-            func = cp.max if "MAX" in column else cp.min
+            func = np.max if "MAX" in column else np.min
             # initial is necessary to eval empty upstream arrays
             # these values will be overwritten w/ nan later
 
@@ -915,12 +918,12 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
             initial = -999999 if "MAX" in column else 999999
 
-            values = cp.array([func(val, initial=initial) for val in all_values])
+            values = np.array([func(val, initial=initial) for val in all_values])
             values[lengths == 0] = col_values[lengths == 0]
         else:
-            values = cp.array([cp.nansum(val) for val in all_values])
+            values = np.array([np.nansum(val) for val in all_values])
         data[:, index] = values
-    data = data[cp.in1d(data[:, 0], coms), :]  # Remove the extra comids
+    data = data[np.in1d(data[:, 0], coms), :]  # Remove the extra comids
     outDF = pd.DataFrame(data)
     prefix = "UpCat" if tbl_type == "Up" else "Ws"
     outDF.columns = [icol] + [c.replace("Cat", prefix) for c in cols.tolist()]
@@ -929,8 +932,46 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     # then NA values for everything past Area, covers upcats w. no area AND
     # WS w/ no area
     no_area_rows, na_columns = (outDF[areaName] == 0), outDF.columns[2:]
-    outDF.loc[no_area_rows, na_columns] = cp.nan
+    outDF.loc[no_area_rows, na_columns] = np.nan
     return outDF
+
+
+##############################################################################
+
+def xarrayZonalStatsPrep(izd_path, landscape_layer_path):
+    """Create Xarray DataArrays from inZoneData and LandscapeLayer files
+
+    Args:
+        izd_path (str): path to inZoneData dbf
+        landscape_layer_path (str): path to landscape layer raster
+
+    Returns:
+        izd_array (xr.DataArray): DataArray of zone data
+        ll_array (xr.DataArray): Windowed read of landscape layer raster as DataArray
+    """
+
+    # Load first band of in zone data to an xarray DataArray
+    izd_array = rioxarray.open_rasterio(izd_path).sel(band=1).drop_vars('band')
+
+    # Get transform and bounds from in zone data to create window
+    transform = izd_array.rio.transform()
+    bounds = izd_array.rio.bounds()
+    window = rasterio.windows.from_bounds(*bounds, transform)
+
+    # Read window of Landscape Layer (band 1) to rasterio array (numpy ndarray)
+    # Notes:
+    # Used rasterio because windowed reading with rioxarray was not working.
+    # Also attempted to use rioxarray and rio.clip & mask however this took 5-6 minutes for the NE region so was a huge slowdown.
+    # rasterio window read then DataArray conversion is simplest and fastest and does not require us loading a new GeoDataFrame for a shapely box.
+    with rasterio.open(landscape_layer_path) as src:
+        # Open LandscapeLayer raster, window read band 1
+        ll_rio_array = src.read(1, window=window)
+
+    # Convert numpy array to xarray DataArray with x and y as the dimensions to match izd_array
+    ll_array = xr.DataArray(ll_rio_array, dims=['y', 'x'])
+
+    # Return the DataArrays to use in xrspatial.zonal.stats, and xrspatial.zonal.crosstab
+    return izd_array, ll_array
 
 
 ##############################################################################
@@ -972,77 +1013,45 @@ def createCatStats(
         #izd_df = dg.read_file(inZoneData, npartitions=16)
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
-                outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
+                outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.csv" % (
                     out_dir,
                     LandscapeLayer.split("/")[-1].split(".")[0],
                     appendMetric,
                     zone,
                 )
             else:
-                outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
+                outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.csv" % (
                     out_dir,
                     LandscapeLayer.split("/")[-1],
                     appendMetric,
                     zone,
                 )
-            if not os.path.exists(outTable):
+            if not os.path.exists(outTable_path):
                 if accum_type == "Categorical":
                     # TabulateArea(
                     #     inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
                     # )
-                    izd_array = rioxarray.open_rasterio(inZoneData).sel(band=1).drop('band', dim=None)
-                    print(izd_array.shape)
-                    
-                    ll_array = rioxarray.open_rasterio(LandscapeLayer).sel(band=1).drop('band', dim=None)
-                    print(ll_array.shape)
+                    izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
 
                     outTable = crosstab(izd_array, ll_array)
                 if accum_type == "Continuous":
 
-                    # Load Raster data to Xarray and Chunk data into dask array 
-                    # Drop the 'band' dimension so we have the 2D array of x,y coordinates
-                    # Set type to int32 so it doesn't try to load into float64
-                    izd_array = rioxarray.open_rasterio(inZoneData, chunks={'x': 2048, 'y': 2048}).sel(band=1).drop('band', dim=None)# .astype('int32')
+                    izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
                     
-                    # Continuous LandscapeLayer loads without a nodata value 
-                    # Load as same type as in zone data array
-                    ll_array = rioxarray.open_rasterio(LandscapeLayer, chunks={'x': 2048, 'y': 2048}, nodata=-2147483647.0).sel(band=1).drop('band', dim=None)# .astype('int16')
+                    outTable = stats(izd_array, ll_array)
+                    outTable.round(2, inplace=True)
+                    #outTable = pd.read_csv('outTable_NE_Canals_rasterio.csv')
 
-                    # Replace the nodata value with -9999
-                    # izd_array = izd_array.where(izd_array != -2147483647, -9999)
-                    # ll_array = ll_array.where(ll_array != -2147483647, -9999)
-
-                    # Convert the dtype to int16
-                    # izd_array = izd_array.astype('int16', casting='unsafe')
-                    #ll_array = ll_array.astype('int16', casting='unsafe')
-
-                    # Find unique ids in the zone array
-                    # will be passed to stats function to reduce amount of computation
-                    unique_zone_ids = np.unique(izd_array.data.compute())
-                    
-                    # Filter izd array
-                    izd_array_filtered = izd_array.where(np.isin(izd_array, unique_zone_ids))
-                    
-                    # xrspatial requires zone and value arrays in stats function to be same shape so we reindex
-                    izd_array_reindexed = izd_array_filtered.reindex_like(ll_array).chunk(ll_array.chunks).astype('int16')
-
-                    izd_array_reindexed = izd_array_reindexed.persist()
-                    ll_array = ll_array.persist()
-                    
-                    outTable = stats(izd_array_reindexed, ll_array, zone_ids=unique_zone_ids) # might have to assign_coords to the aligned arrays
-                    progress(outTable)
-                    print(outTable.head())
-                    outTable.to_parquet('high_res_data/output')
-                    
             try:
-                if isinstance(outTable, dd.DataFrame):
-                    print(outTable.shape)
-                    #outTable.compute()
+                if isinstance(outTable, pd.DataFrame):
+                    print(outTable.columns)
+
                     del izd_array 
                     del ll_array
-                    print(outTable.columns)
-                else:
-                    table = dbf2DF(outTable)
+                    # Memory cleanup
+                    outTable.to_csv(outTable_path)
+                # else:
+                #     table = dbf2DF(outTable)
             except fiona.errors.DriverError as e:
                 # arc occassionally doesn't release the file and fails here
                 print(e, "\n\n!EXCEPTION CAUGHT! TRYING AGAIN!")
@@ -1060,12 +1069,8 @@ def createCatStats(
                     # ZonalStatisticsAsTable(
                     #     inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
                     # )
-                    outTable = stats(inZoneData, elev)
-                    izd_array = rioxarray.open_rasterio(inZoneData).sel(band=1).drop('band', dim=None)
-                    print(izd_array.shape)
-                    elev_array = rioxarray.open_rasterio(elev).sel(band=1).drop('band', dim=None)
-                    print(elev_array.shape)
-                    outTable = stats(izd_array, elev_array) # default = "ALL"
+                    izd_array, elev_array = xarrayZonalStatsPrep(inZoneData, elev)
+                    outTable = stats(izd_array, elev_array)
             for count, rpu in enumerate(rpuList):
                 if count == 0:
                     table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
@@ -1080,14 +1085,14 @@ def createCatStats(
                 table.reset_index(drop=True, inplace=True)
                 table = table.loc[table.groupby("VALUE").AREA.idxmax()]
 
-    except RuntimeError:
+    except xr.MergeError: #RuntimeError:
         print("Runtime error")
     # except LicenseError:
     #     print("Spatial Analyst license is unavailable")
     # except arcpy.ExecuteError:
     #     print("Failing at the ExecuteError!")
     #     print(arcpy.GetMessages(2))
-    table = outTable
+    table = outTable[1:].drop('Unnamed: 0', axis=1)
     if mask_dir:
         nhdtbl = dbf2DF(
             f"{NHD_dir}/NHDPlus{hydroregion}/NHDPlus{zone}"
@@ -1100,11 +1105,11 @@ def createCatStats(
         # TODO: this needs to be considered when making masks!!!
         tbl2 = dbf2DF(f"{mask_dir}/{zone}.tif.vat.dbf")
         tbl2 = (
-            pd.merge(tbl2, nhdtbl, how="right", left_on="VALUE", right_on="GRIDCODE") #TODO change "VALUE" to new xarray name 
+            pd.merge(tbl2, nhdtbl, how="right", left_on="zone", right_on="GRIDCODE") #TODO change "VALUE" to new xarray name 
             .fillna(0)
-            .drop("VALUE", axis=1)
+            .drop("zone", axis=1)
         )
-        result = pd.merge(tbl2, table, left_on="GRIDCODE", right_on="VALUE", how="left") #TODO change "VALUE" to new xarray name 
+        result = pd.merge(tbl2, table, left_on="GRIDCODE", right_on="zone", how="left") #TODO change "VALUE" to new xarray name 
         if accum_type == "Continuous":
             result["PctFull%s" % appendMetric] = (result.COUNT_y / result.COUNT_x) * 100
             result["AreaSqKm%s" % appendMetric] = (result.COUNT_x * 900) * 1e-6
@@ -1150,11 +1155,13 @@ def createCatStats(
             if by_RPU == 1:
                 table = table[["VALUE", "AREA", "COUNT", "SUM", "MIN", "MAX"]]
             else:
-                table = table["zone", "mean", "count", "sum"]
+                table = table[["zone", "mean", "count", "sum", "min", "max"]] # for xrspatial.zonal.stats
             table = table.rename(columns={"count": "Count", "sum": "Sum"})
+
         if accum_type == "Categorical":
             table = chkColumnLength(table, LandscapeLayer)
             table["AREA"] = table[table.columns.tolist()[1:]].sum(axis=1) # .compute()
+
         nhdTable = dbf2DF(inZoneData[:-3] + "Catchment.dbf").loc[
             :, ["FEATUREID", "AREASQKM", "GRIDCODE"]
         ]
@@ -1162,8 +1169,9 @@ def createCatStats(
             columns={"FEATUREID": "COMID", "AREASQKM": "AreaSqKm"}
         )
         result = pd.merge(
-            nhdTable, table, how="left", left_on="GRIDCODE", right_on="VALUE"
+            nhdTable, table, how="left", left_on="GRIDCODE", right_on="zone"
         )
+
         if LandscapeLayer.split("/")[-1].split(".")[0] == "rdstcrs":
             slptbl = dbf2DF(
                 "%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf"
@@ -1174,15 +1182,19 @@ def createCatStats(
             result.SLOPE = result.SLOPE.fillna(0)
             result["SlpWtd"] = result["Sum"] * result["SLOPE"]
             result = result.drop(["SLOPE"], axis=1)
-        result["PctFull"] = (
-            ((result.AREA * 1e-6) / result.AreaSqKm.astype("float")) * 100
-        ).fillna(0)
-        print(result.columns)
-        result = result.drop(["GRIDCODE", "VALUE", "AREA"], axis=1)
+        
+        #TODO
+        # Find new way to calculate PctFull values
+        # result["PctFull"] = (
+        #     ((result.AREA * 1e-6) / result.AreaSqKm.astype("float")) * 100
+        # ).fillna(0)
+        # print(result.columns)
+        # result = result.drop(["GRIDCODE", "VALUE", "AREA"], axis=1) # These were renamed in the nhdTable section GRIDCODE = COMID, AREA DNE WITH XARRAY-SPATIAL
     cols = result.columns[1:]
     result.columns = np.append("COMID", "Cat" + cols.values)
     result.fillna(0, inplace=True)
     # result.compute() ? if necessary
+    # Could also convert to dask here with .from_pandas with n partitions then return and concat to main dataframe in 
     return result  # ALL NAs need to be filled w/ zero here for Accumulation!!
 
 
@@ -1316,8 +1328,8 @@ def swapper(coms, upStream):
     coms                  : numpy array of all COMIDs in the zone
     upstream              : numpy array of all upstream COMIDs for each local catchment
     """
-    bsort = cp.argsort(coms)
-    apos = cp.searchsorted(coms[bsort], upStream)
+    bsort = np.argsort(coms)
+    apos = np.searchsorted(coms[bsort], upStream)
     indices = bsort[apos]
     return indices
 
