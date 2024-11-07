@@ -1001,9 +1001,8 @@ def createCatStats(
     try:
         # arcpy.env.cellSize = "30"
         # arcpy.env.snapRaster = inZoneData
-        cellSize = 30
-        snapRaster = inZoneData
-        #izd_df = dg.read_file(inZoneData, npartitions=16)
+        # cellSize = 30
+        # snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
                 outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.csv" % (
@@ -1033,15 +1032,13 @@ def createCatStats(
                     
                     outTable = stats(izd_array, ll_array)
                     outTable.round(2, inplace=True)
-                    #outTable = pd.read_csv('outTable_NE_Canals_rasterio.csv')
 
             try:
                 if isinstance(outTable, pd.DataFrame):
-                    print(outTable.columns)
-
+                    # Memory cleanup
                     del izd_array 
                     del ll_array
-                    # Memory cleanup
+                    
                     outTable.to_csv(outTable_path)
                 # else:
                 #     table = dbf2DF(outTable)
