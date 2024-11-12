@@ -10,12 +10,13 @@ from rasterio.features import rasterize
 from dask.distributed import Client, LocalCluster
 import dask.array as da
 import time
+from geocube.api.core import make_geocube
 
 def load_raster(vpu_id, layer):
     raster_path = f'high_res_data/NHDPLUS_H_{vpu_id}_HU4_RASTERS/HRNHDPlusRasters{vpu_id}/{layer}.tif'
     if not os.path.exists(raster_path):
         raise FileNotFoundError(f"Raster file not found: {raster_path}")
-    return rioxarray.open_rasterio(raster_path, chunks=True).sel(band=1).drop_vars('band') #, chunks=True
+    return rioxarray.open_rasterio(raster_path).sel(band=1).drop_vars('band') #, chunks=True
 
 def load_vector_data(in_zone_data_path, vpu_id=None):
     #TODO add layer parameter so we can do all layers in the dask_geopandas file
@@ -32,23 +33,11 @@ def compute_zonal_stats(raster, vector_data):
     vector_data = vector_data.to_crs(raster.rio.crs)
     
     # Convert vector data to a rasterized form
-    # zones = raster.rio.clip(vector_data.geometry, vector_data.crs, drop=False)
-    # zones.values = vector_data['nhdplusid'].values
     bounds = raster.rio.bounds()
     bbox = box(*bounds)
 
     vector_data_clipped = vector_data[vector_data.geometry.intersects(bbox)]
-    # print(raster.rio.profile)
-    # Rasterize the vector data to create the zones array
-    # zones = raster.rio.reproject_match(vector_data_clipped, resampling='nearest')
-    # zones = zones.where(zones != zones.rio.nodata, 0)
-    
-    # # Assign the nhdplusid values to the rasterized zones
-    # zones = zones.rio.clip(vector_data_clipped.geometry, vector_data_clipped.crs, drop=False, invert=False)
-    # zones.values = vector_data_clipped['NHDPlusID'].values
-    
-    # # Ensure the zones array has the same shape as the values array
-    # zones = zones.rio.reproject_match(raster, resampling='nearest')
+   
 
     transform = raster.rio.transform()
     width = raster.sizes['x']
@@ -89,7 +78,7 @@ def compute_zonal_stats(raster, vector_data):
     #     values=values_dask,
     #     stats_funcs=['mean', 'sum', 'min', 'max', 'count']
     # )
-    
+
     # Compute zonal statistics
     stats_df = stats(
         zones=zones_da,
@@ -98,12 +87,10 @@ def compute_zonal_stats(raster, vector_data):
         nodata_values=raster.rio.nodata
     )
 
-    stats_df = stats_df.repartition(npartitions=8)
-    #print(stats_df.head())
-    final_df = stats_df.compute()
-    #print("Result", stats_df.compute())
+    # stats_df = stats_df.repartition(npartitions=8)
+    # final_df = stats_df.compute()
     
-    return final_df
+    return stats_df #final_df
 
 
 def process_vpu(vpu_id, layer, in_zone_data_path, output_path):
