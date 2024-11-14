@@ -857,8 +857,9 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
 
 def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Ryan Hill <hill.ryan@epa.gov>"
+    __author__ =  "Ryan Hill <hill.ryan@epa.gov>"
+                  "Marc Weber <weber.marc@epa.gov>"
+                  
     Uses the 'Cat' and 'UpCat' columns to caluculate watershed values and returns those values in 'Cat' columns
         so they can be appended to 'CatResult' tables in other zones before accumulation.
 
