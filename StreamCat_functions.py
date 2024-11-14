@@ -56,8 +56,9 @@ class LicenseError(Exception):
 
 def UpcomDict(nhd, interVPUtbl, zone):
     """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
+    __author__ = "Marc Weber <weber.marc@epa.gov>"
+                 "Ryan Hill <hill.ryan@epa.gov>"
+                 
 
     Creates a dictionary of all catchment connections in a major NHDPlus basin.
     For example, the function combines all from-to typology tables in the Mississippi
@@ -106,8 +107,9 @@ def UpcomDict(nhd, interVPUtbl, zone):
 
 def children(token, tree, chkset=None):
     """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
+    __author__ = "Marc Weber <weber.marc@epa.gov>"
+                 "Ryan Hill <hill.ryan@epa.gov>"
+                 
     returns a list of every child
 
     Arguments
@@ -136,8 +138,9 @@ def children(token, tree, chkset=None):
 
 def bastards(token, tree):
     """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
+    __author__ = "Marc Weber <weber.marc@epa.gov>"
+                 "Ryan Hill <hill.ryan@epa.gov>"
+                 
     returns a list of every child w/ out father (key) included
 
     Arguments
