@@ -6,7 +6,6 @@ from collections import OrderedDict, defaultdict, deque
 from typing import Generator
 import numpy as np
 import pandas as pd
-
 import rasterio
 # maybe switch from rasterio to rioxarray
 import rasterio.windows
@@ -41,7 +40,7 @@ import xarray as xr
 ##############################################################################
 
 ### GPU / RAPIDS imports
-import cupy as cp
+# import cupy as cp
 # import cudf
 # import cuspatial
 
@@ -49,6 +48,9 @@ import cupy as cp
 import dask_geopandas as dg
 import dask.dataframe as dd
 from dask.distributed import progress
+
+from numba import njit
+from joblib import Parallel, delayed
 ##############################################################################
 
 
@@ -86,9 +88,9 @@ def UpcomDict(nhd, interVPUtbl, zone):
     flow = flow[~flow.FROMCOMID.isin(remove)]
     # find values that are coming from other zones and remove the ones that
     # aren't in the interVPU table
-    out = cp.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
-    out = out[cp.nonzero(out)]
-    flow = flow[~flow.FROMCOMID.isin(cp.setdiff1d(out, interVPUtbl.thruCOMIDs.values))]
+    out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
+    out = out[np.nonzero(out)]
+    flow = flow[~flow.FROMCOMID.isin(np.setdiff1d(out, interVPUtbl.thruCOMIDs.values))]
     # Now table is ready for processing and the UpCOMs dict can be created
     fcom, tcom = flow.FROMCOMID.values, flow.TOCOMID.values
     UpCOMs = defaultdict(list)
@@ -107,7 +109,7 @@ def UpcomDict(nhd, interVPUtbl, zone):
 
 ##############################################################################
 
-
+@njit(parallel=True)
 def children(token, tree, chkset=None):
     """
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
@@ -137,7 +139,7 @@ def children(token, tree, chkset=None):
 
 ##############################################################################
 
-
+@njit(parallel=True)
 def bastards(token, tree):
     """
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
@@ -259,10 +261,10 @@ def Reclass(inras, outras, reclass_dict, dtype=None):
             dtype = src.meta["dtype"]
         else:
             try:
-                nd = eval("cp.iinfo(cp." + dtype + ").max")
+                nd = eval("np.iinfo(np." + dtype + ").max")
             except:
-                nd = eval("cp.finfo(cp." + dtype + ").max")
-            # exec 'nd = cp.iinfo(cp.'+out_dtype+').max'
+                nd = eval("np.finfo(np." + dtype + ").max")
+            # exec 'nd = np.iinfo(np.'+out_dtype+').max'
         kwargs = src.meta.copy()
         kwargs.update(
             driver="GTiff",
@@ -279,18 +281,18 @@ def Reclass(inras, outras, reclass_dict, dtype=None):
             for idx, window in windows:
                 src_data = src.read(1, window=window)
                 # Convert values
-                # src_data = cp.where(src_data == in_nodata, nd, src_data).astype(dtype)
+                # src_data = np.where(src_data == in_nodata, nd, src_data).astype(dtype)
                 for inval, outval in reclass_dict.iteritems():
-                    if cp.isnan(outval).any():
-                        # src_data = cp.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
-                        src_data = cp.where(src_data == inval, nd, src_data).astype(
+                    if np.isnan(outval).any():
+                        # src_data = np.where(src_data != inval, src_data, kwargs['nodata']).astype(dtype)
+                        src_data = np.where(src_data == inval, nd, src_data).astype(
                             dtype
                         )
                     else:
-                        src_data = cp.where(src_data == inval, outval, src_data).astype(
+                        src_data = np.where(src_data == inval, outval, src_data).astype(
                             dtype
                         )
-                # src_data = cp.where(src_data == inval, outval, src_data)
+                # src_data = np.where(src_data == inval, outval, src_data)
                 dst_data = src_data
                 dst.write_band(1, dst_data, window=window)
 
@@ -327,10 +329,10 @@ def rasterMath(inras, outras, expression=None, out_dtype=None):
                 dt = src.meta["dtype"]
             else:
                 try:
-                    nd = eval("cp.iinfo(cp." + out_dtype + ").max")
+                    nd = eval("np.iinfo(np." + out_dtype + ").max")
                 except:
-                    nd = eval("cp.finfo(cp." + out_dtype + ").max")
-                # exec 'nd = cp.iinfo(cp.'+out_dtype+').max'
+                    nd = eval("np.finfo(np." + out_dtype + ").max")
+                # exec 'nd = np.iinfo(np.'+out_dtype+').max'
                 dt = out_dtype
             kwargs = src.meta.copy()
             kwargs.update(driver="GTiff", count=1, compress="lzw", dtype=dt, nodata=nd)
@@ -343,11 +345,11 @@ def rasterMath(inras, outras, expression=None, out_dtype=None):
                     # Where src not eq to orig nodata, multiply by val, else set to new nodata. Set dtype
                     if expression == None:
                         # No expression produces copy of original raster (can use new data type)
-                        dst_data = cp.where(
+                        dst_data = np.where(
                             src_data != src.meta["nodata"], src_data, kwargs["nodata"]
                         ).astype(dt)
                     else:
-                        dst_data = cp.where(
+                        dst_data = np.where(
                             src_data != src.meta["nodata"],
                             eval(expression),
                             kwargs["nodata"],
@@ -699,7 +701,7 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
         point_poly_join = sjoin(points2, polys, how="left", predicate="within")
         fld = "GRIDCODE"
     except:
-        polys["link"] = cp.nan
+        polys["link"] = np.nan
         point_poly_join = polys
         fld = "link"
     # Create group of all points in catchment
@@ -741,7 +743,7 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
     for name in final.columns:
         if "AreaSqKm" in name:
             area = name
-    final.loc[(final[area] == 0), final.columns[2:]] = cp.nan
+    final.loc[(final[area] == 0), final.columns[2:]] = np.nan
     return final
 
 
@@ -877,7 +879,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     icol                  : column in arr object to index
     """
     # RuntimeWarning: invalid value encountered in double_scalars
-    # cp.seterr(all="ignore")
+    # np.seterr(all="ignore")
     
     coms = tbl[icol].values.astype("int32")  # Read in comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
@@ -886,9 +888,9 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     z = np.zeros(comids.shape)  # Make empty vector for placing values
     data = np.zeros((len(comids), len(tbl.columns)))
     data[:, 0] = comids  # Define first column as comids
-    accumulated_indexes = cp.add.accumulate(lengths)[:-1]
-    # accumulated_indexes = cp.ufunc.accumulate(lengths)[:-1]
-    # accumulated_indexes = cp.cumsum(lengths)[:-1]
+    accumulated_indexes = np.add.accumulate(lengths)[:-1]
+    # accumulated_indexes = np.ufunc.accumulate(lengths)[:-1]
+    # accumulated_indexes = np.cumsum(lengths)[:-1]
     # Loop and accumulate values
     for index, column in enumerate(cols, 1):
         col_values = tbl[column].values.astype("float")
@@ -900,13 +902,13 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
                 dtype=object,
             )
 
-            # all_values = [cp.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+            # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
 
         if index == 1:
             area = all_values.copy()
         if "PctFull" in column:
             values = [
-                np.average(np.nan_to_num(val), weights=w) # changed from cp.ma.average
+                np.average(np.nan_to_num(val), weights=w) # changed from np.ma.average
                 for val, w in zip(all_values, area)
             ]
         elif "MIN" in column or "MAX" in column:
@@ -1297,10 +1299,10 @@ def appendConnectors(cat, Connector, zone, interVPUtbl):
             cat = cat.drop(cat[cat.COMID == comidx].index)
     con = con.loc[
         con.COMID.isin(
-            cp.append(
+            np.append(
                 interVPUtbl.loc[interVPUtbl.ToZone.values == zone].thruCOMIDs.values,
                 interVPUtbl.loc[interVPUtbl.ToZone.values == zone].toCOMIDs.values[
-                    cp.nonzero(
+                    np.nonzero(
                         interVPUtbl.loc[
                             interVPUtbl.ToZone.values == zone
                         ].toCOMIDs.values
@@ -1335,15 +1337,30 @@ def swapper(coms, upStream):
 
 
 ##############################################################################
+def make_zone_cat_comids(nhd, zone, hr):
+    pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
+    cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
+    return cats.FEATUREID.values.astype(int)
+
 def make_all_cat_comids(nhd, inputs):
-    print("Making allFLOWCOMs numpy file, reading zones...", end="", flush=True)
-    all_comids = cp.array([], dtype=cp.int32)
-    for zone, hr in inputs.items():
-        print(zone, end=", ", flush=True)
-        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
-        all_comids = cp.append(all_comids, cats.FEATUREID.values.astype(int))
-    cp.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
+    #TODO speedups 
+    # this currently takes ~80 minutes on VPN
+    print("Making allFLOWCOMs numpy file")
+    results = Parallel(n_jobs=-1)(
+        delayed(make_zone_cat_comids)(nhd, zone, hr) for zone, hr in inputs.items()
+    )
+    all_comids = np.concatenate(results)
+    np.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
+    
+    # TODO remove old unparallelized code
+    # all_comids = np.array([], dtype=np.int32)
+    # for zone, hr in inputs.items():
+    #     print(zone, end=", ", flush=True)
+    #     pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
+    #     cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
+    #     all_comids = np.append(all_comids, cats.FEATUREID.values.astype(int))
+    # np.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
+    
     print("...done!")
     return set(all_comids)  # RETURN A SET FOR NO REPEATS!
 
@@ -1358,12 +1375,12 @@ def makeVectors(inter_tbl, nhd):
     inter_tbl   : table of inter-VPU connections
     nhd         : directory where NHD is stored
     """
-    if not os.path.exists("accum_npy"):
-        os.mkdir("accum_npy")
+    os.makedirs("accum_npy", exist_ok=True)
     inputs = nhd_dict(nhd)
     all_comids = make_all_cat_comids(nhd, inputs)
-    
-    for zone, hr in inputs.items():
+
+    @njit(parallel=True)
+    def process_zone(zone, hr, nhd, inter_tbl, all_comids):
         print(f"Making numpy files in zone {zone}\n")
         pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
         flow = dbf2DF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
@@ -1371,43 +1388,39 @@ def makeVectors(inter_tbl, nhd):
         fls = dbf2DF(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
         coastfl = fls.COMID[fls.FTYPE == "Coastline"]
         flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
-        # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs
-        # here that won't get filtered out any other way
         flow = flow[~flow.FROMCOMID.isin(inter_tbl.removeCOMs)]
-        # find values that are coming from other zones and remove the ones that
-        # aren't in the interVPU table
-        out = cp.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
-        out = out[
-            cp.nonzero(out)
-        ]  # this should be what combines zones and above^, but we force connections with inter_tbl
-        flow = flow[
-            ~flow.FROMCOMID.isin(cp.setdiff1d(out, inter_tbl.thruCOMIDs.values))
-        ]
-        # Table is ready for processing and flow connection dict can be created
+        out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
+        out = out[np.nonzero(out)]
+        flow = flow[~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))]
+        
         flow_dict = defaultdict(list)
         for _, row in flow.iterrows():
             flow_dict[row.TOCOMID].append(row.FROMCOMID)
-        # add IDs from UpCOMadd column if working in ToZone, forces the flowtable connection though not there
+        
         for interLine in inter_tbl.values:
             if interLine[6] > 0 and interLine[2] == zone:
                 flow_dict[int(interLine[6])].append(int(interLine[0]))
+        
         out_of_vpus = inter_tbl.loc[
             (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
         ].thruCOMIDs.values
         cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf").set_index("FEATUREID")
         comids = cats.index.values
-        comids = cp.append(comids, out_of_vpus)
-        # list of upstream lists, filter comids in all_comids
+        comids = np.append(comids, out_of_vpus)
+        
         ups = [list(all_comids.intersection(bastards(x, flow_dict))) for x in comids]
-        lengths = cp.array([len(u) for u in ups])
-        upstream = cp.hstack(ups).astype(cp.int32)  # Convert to 1d vector
+        lengths = np.array([len(u) for u in ups])
+        upstream = np.hstack(ups).astype(np.int32)
+        
         assert len(ups) == len(lengths) == len(comids)
-        cp.savez_compressed(
+        np.savez_compressed(
             f"./accum_npy/accum_{zone}.npz",
             comids=comids,
             lengths=lengths,
             upstream=upstream,
         )
+
+    Parallel(n_jobs=-1)(delayed(process_zone)(zone, hr, nhd, inter_tbl, all_comids) for zone, hr in inputs.items())
 
 
 ##############################################################################
@@ -1433,12 +1446,19 @@ def nhd_dict(nhd, unit="VPU"):
     bounds = dbf2DF(f"{nhd}/NHDPlusGlobalData/BoundaryUnit.dbf")
     remove = bounds.loc[bounds.DRAINAGEID.isin(["HI", "CI"])].index
     bounds = bounds.drop(remove, axis=0)
+
+    def process_row(row):
+        return (row.UNITID, row.DRAINAGEID)
     if unit == "VPU":
         vpu_bounds = bounds.loc[bounds.UNITTYPE == "VPU"].sort_values(
             "HYDROSEQ", ascending=False
         )
-        for idx, row in vpu_bounds.iterrows():
-            inputs[row.UNITID] = row.DRAINAGEID
+        results = Parallel(n_jobs=-1)(
+            delayed(process_row)(row) for _, row in vpu_bounds.iterrows()
+        )
+        # for idx, row in vpu_bounds.iterrows():
+        #     inputs[row.UNITID] = row.DRAINAGEID
+        inputs = OrderedDict(results)
         np.save("./accum_npy/vpu_inputs.npy", inputs)
         return inputs
 
@@ -1471,11 +1491,11 @@ def findUpstreamNpy(zone, com, numpy_dir):
     com                   : COMID of NHD Catchment, integer
     numpy_dir             : directory where .npy files are stored
     """
-    accum = cp.load(numpy_dir + "/accum_" + zone + ".npz")
+    accum = np.load(numpy_dir + "/accum_" + zone + ".npz")
     comids = accum["comids"]
     lengths = accum["lengths"]
     upStream = accum["upstream"]
-    itemindex = int(cp.where(comids == com)[0])
+    itemindex = int(np.where(comids == com)[0])
     n = lengths[:itemindex].sum()
     arrlen = lengths[itemindex]
     return upStream[n : n + arrlen]
