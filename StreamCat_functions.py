@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 #from gdalconst import *
-from osgeo import gdal, ogr, osr
+# from osgeo import gdal, ogr, osr
 from rasterio import transform
 
 if rasterio.__version__[0] == "0":
@@ -39,14 +39,16 @@ import fiona
 import geopandas as gpd
 from geopandas.tools import sjoin
 
-os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
-sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
+# os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
+# sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
 # import arcpy
 # from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 
 import xarray as xr
 import rioxarray
 from xrspatial.zonal import stats, crosstab
+import pyogrio
+import pprint
 
 ##############################################################################
 
@@ -165,7 +167,19 @@ def bastards(token, tree):
 
 ##############################################################################
 
-
+def getRasterInfo_xarray(file):
+    raster = rioxarray.open_rasterio(file).sel(band=1).drop_vars('band')
+    
+    NDV = raster.rio.nodata
+    xsize = raster.x.size
+    ysize = raster.y.size
+    GeoT = raster.rio.transform()
+    Proj_projcs = raster.rio.crs
+    Proj_geogcs = raster.rio.get_gcps()
+    DataType = raster.dtype # .name
+    bounds = raster.rio.bounds()
+    stats = raster.attrs
+    return raster, NDV, stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType, bounds
 def getRasterInfo(FileName):
     """
     __author__ =   "Marc Weber <weber.marc@epa.gov>"
@@ -956,12 +970,16 @@ def xarrayZonalStatsPrep(izd_path, landscape_layer_path):
     # Used rasterio because windowed reading with rioxarray was not working.
     # Also attempted to use rioxarray and rio.clip & mask however this took 5-6 minutes for the NE region so was a huge slowdown.
     # rasterio window read then DataArray conversion is simplest and fastest and does not require us loading a new GeoDataFrame for a shapely box.
-    with rasterio.open(landscape_layer_path) as src:
+    #with rasterio.open(landscape_layer_path) as src:
         # Open LandscapeLayer raster, window read band 1
-        ll_rio_array = src.read(1, window=window)
-
+        #ll_rio_array = src.read(1, window=window)
     # Convert numpy array to xarray DataArray with x and y as the dimensions to match izd_array
-    ll_array = xr.DataArray(ll_rio_array, dims=['y', 'x'])
+    #ll_array = xr.DataArray(ll_rio_array, dims=['y', 'x'])
+    
+    # Rioxarray window selection is much faster than rasterio
+    ll_array = rioxarray.open_rasterio(landscape_layer_path).sel(band=1).drop_vars('band')
+    ll_array = ll_array.rio.isel_window(window)
+    
 
     # Return the DataArrays to use in xrspatial.zonal.stats, and xrspatial.zonal.crosstab
     return izd_array, ll_array
@@ -1473,7 +1491,7 @@ def findUpstreamNpy(zone, com, numpy_dir):
 
 
 def dbf2DF(f, upper=True):
-    data = gpd.read_file(f).drop("geometry", axis=1)
+    data = pyogrio.read_dataframe(f, read_geometry=False, use_arrow=True) # gpd.read_file(f).drop("geometry", axis=1)
     if upper is True:
         data.columns = data.columns.str.upper()
     return data
