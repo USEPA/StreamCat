@@ -40,6 +40,7 @@ FieldCalcTable = pd.read_csv(ControlTable.DirectoryLocations[5])
 #FieldCalcTable =pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/FieldCalcTable.csv')
 
 #####################################################################################################################
+
 # Populate variables from control table
 InDir = ControlTable.DirectoryLocations[0]
 TempDir = ControlTable.DirectoryLocations[1]

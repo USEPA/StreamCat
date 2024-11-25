@@ -67,6 +67,7 @@ def main(args):
     already_processed = []
     
     for i, row in control_table.query("run == 1").iterrows():
+        print(row.FullTableName)
         apm = "" if row.AppendMetric == "none" else row.AppendMetric
         if row.use_mask == 1:
             mask_dir = config.MASK_DIR_RP100
@@ -186,7 +187,7 @@ def main(args):
             # Could create a dict / array / named array for each zone
             # When done with zones concat above array
             # write concatenated dataframe to database
-            # 
+
             
         print(end="") if processed else print("done!")
     if already_processed:

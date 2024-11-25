@@ -10,6 +10,7 @@ import rasterio
 # maybe switch from rasterio to rioxarray
 import rasterio.windows
 import rioxarray
+import pyogrio
 #from gdalconst import *
 #from osgeo import gdal, ogr, osr
 from rasterio import transform
@@ -109,7 +110,7 @@ def UpcomDict(nhd, interVPUtbl, zone):
 
 ##############################################################################
 
-@njit(parallel=True)
+# @njit(parallel=True)
 def children(token, tree, chkset=None):
     """
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
@@ -139,7 +140,27 @@ def children(token, tree, chkset=None):
 
 ##############################################################################
 
-@njit(parallel=True)
+
+def gpu_bastards(token, tree):
+    import cupy as cp
+    nodes = list(tree.keys())
+    index_map = {node: i for i, node in enumerate(nodes)}
+    visited = cp.zeros(len(nodes), dtype=cp.bool_)
+    to_crawl = [token] 
+    
+    while to_crawl:
+        current = to_crawl.pop(0)
+        if visited[index_map[current]]:
+            continue
+        visited[index_map[current]] = True
+        node_children = tree[current]
+        for child in node_children:
+            if not visited[index_map[child]]:
+                to_crawl.insert(0, child)
+    
+    result = [nodes[i] for i, visited_flag in enumerate(visited) if visited_flag and nodes[i] != token]
+    return result
+
 def bastards(token, tree):
     """
     __author__ = "Ryan Hill <hill.ryan@epa.gov>"
@@ -1338,9 +1359,9 @@ def swapper(coms, upStream):
 
 ##############################################################################
 def make_zone_cat_comids(nhd, zone, hr):
-    pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-    cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
-    return cats.FEATUREID.values.astype(int)
+    path = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}/NHDPlusCatchment/Catchment.dbf"
+    cats = pyogrio.read_dataframe(path, columns=['FEATUREID'], read_geometry=False, use_arrow=True)
+    return cats.values.astype(int)
 
 def make_all_cat_comids(nhd, inputs):
     #TODO speedups 
@@ -1379,7 +1400,9 @@ def makeVectors(inter_tbl, nhd):
     inputs = nhd_dict(nhd)
     all_comids = make_all_cat_comids(nhd, inputs)
 
-    @njit(parallel=True)
+    #TODO replace 
+    # for zone, hr in inputs.items():
+    # with parallel processes
     def process_zone(zone, hr, nhd, inter_tbl, all_comids):
         print(f"Making numpy files in zone {zone}\n")
         pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
