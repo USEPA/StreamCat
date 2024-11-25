@@ -1,6 +1,8 @@
 from database import DatabaseConnection
 import customtkinter as ctk
 from CTkListbox import *
+from CTkMessagebox import CTkMessagebox
+
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
@@ -803,6 +805,47 @@ class EditMetricInfoFrame(ctk.CTkScrollableFrame):
         self.updates_window = DbUpdatesFrame(self)
         self.updates_window.focus()
 
+class CreateChangelogFrame(ctk.CTkScrollableFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+
+        self.label = ctk.CTkLabel(self, text="Database Update Form")
+        self.label.pack(side=ctk.TOP, padx=20, pady=20)
+
+        self.partition_label = ctk.CTkLabel(self, text="Is this update for streamcat or lakecat?")
+        self.partition_label.pack(padx=10, pady=5)
+        self.partition_var = ctk.StringVar()
+        self.partition_var.set('streamcat')
+        self.partition_radio_streamcat = ctk.CTkRadioButton(self, text="StreamCat", variable=self.partition_var, value='streamcat')
+        self.partition_radio_streamcat.pack(padx=10, pady=5)
+        self.partition_radio_lakecat = ctk.CTkRadioButton(self, text="LakeCat", variable=self.partition_var, value='lakecat')
+        self.partition_radio_lakecat.pack(padx=10, pady=5)
+
+        self.internal_update_label = ctk.CTkLabel(self, text="Internal database update (what changes did you make?): ")
+        self.internal_update_label.pack(padx=10, pady=5)
+
+        self.internal_update_entry = ctk.CTkEntry(self, width=280, placeholder_text='No database change this is for the public updates drupal page.') # maybe change to textbox
+        self.internal_update_entry.pack(padx=10, pady=5)
+
+        self.public_update_label = ctk.CTkLabel(self, text="Public database update, this will be displayed on the streamcat or lakecat updates webpage, be specific: ")
+        self.public_update_label.pack(padx=10, pady=5)
+
+        self.public_update_entry = ctk.CTkEntry(self, width=280) # maybe change to textbox
+        self.public_update_entry.pack(padx=10, pady=5)
+
+        self.submit_button = ctk.CTkButton(self, text="Submit", command=self.add_to_changelog)
+        self.submit_button.pack(fill=ctk.X, padx=10, pady=5)
+
+    def add_to_changelog(self):
+        change_desc = self.internal_update_entry.get()
+        public_desc = self.public_update_entry.get()
+        partition = self.partition_var.get()
+        if len(public_desc) == 0 or len(change_desc) == 0:
+            CTkMessagebox(self, title="Missing required fields", message="All fields are required to be filled out for this form", icon="warning")
+        else:     
+            result = db_conn.newChangelogRow(partition, public_desc, change_desc)
+            print(result)
 
 class DatabaseApp(ctk.CTk):
     def __init__(self):
@@ -828,7 +871,8 @@ class DatabaseApp(ctk.CTk):
             'Activate/Deactivate Dataset',
             'Add File Data to Table',
             'Create Metric Info',
-            'Edit Metric Info'
+            'Edit Metric Info',
+            'Create Public Update'
         ]
         self.action_var.set(self.actions[0]) # could add a default / info frame to be actions[0] called '--'
         self.action_dropdown = ctk.CTkComboBox(self, width=200, variable=self.action_var, values=self.actions)
@@ -861,6 +905,8 @@ class DatabaseApp(ctk.CTk):
                 self.action_frames[action] = CreateMetricInfoFrame(self)
             elif action == 'Edit Metric Info':
                 self.action_frames[action] = EditMetricInfoFrame(self)
+            elif action == 'Create Public Update':
+                self.action_frames[action] = CreateChangelogFrame(self)
             
 
         if self.current_frame:

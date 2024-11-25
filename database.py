@@ -117,7 +117,7 @@ class DatabaseConnection():
                 result = str(query.compile(dialect=self.engine.dialect, compile_kwargs={"literal_binds": True}))
 
             #print(result)
-            with open(f'db_updates_{datetime.today().strftime("%m_%d_%Y")}.sql', 'a') as db_file:
+            with open(f'logs/db_updates_{datetime.today().strftime("%m_%d_%Y")}.sql', 'a') as db_file:
                 db_file.write(result + ';\n')
         return result, self.execute # Return statement and whether or not it was executed
     
@@ -300,7 +300,7 @@ class DatabaseConnection():
         
         if self.inspector.has_table(table_name):
             table = self.metadata.tables[table_name]
-            query = insert(table).values(values).returning(*table.c)
+            query = insert(table).values(values) # .returning(*table.c)
             result, executed = self.RunQuery(query)
             if executed:
                 return result.fetchall()

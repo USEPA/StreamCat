@@ -12,3 +12,5 @@ StreamCat.Rproj
 /logs
 /__pycache__
 /high_res_data
+/.vscode
+/config_tables
