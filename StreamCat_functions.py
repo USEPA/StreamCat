@@ -44,6 +44,11 @@ sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
 import arcpy
 from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 
+###
+# Speed up imports
+import pyogrio 
+from joblib import Parallel, delayed
+
 ##############################################################################
 
 
@@ -1253,18 +1258,61 @@ def swapper(coms, upStream):
 
 
 ##############################################################################
-def make_all_cat_comids(nhd, inputs):
-    print("Making allFLOWCOMs numpy file, reading zones...", end="", flush=True)
-    all_comids = np.array([], dtype=np.int32)
-    for zone, hr in inputs.items():
-        print(zone, end=", ", flush=True)
-        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
-        all_comids = np.append(all_comids, cats.FEATUREID.values.astype(int))
-    np.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
-    print("...done!")
-    return set(all_comids)  # RETURN A SET!
+def make_zone_cat_comids(nhd, zone, hr):
+    path = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}/NHDPlusCatchment/Catchment.dbf"
+    cats = pyogrio.read_dataframe(path, columns=['FEATUREID'], read_geometry=False, use_arrow=True)
+    
+    return cats.values.astype(int)
 
+def make_all_cat_comids(nhd, inputs):
+    results = Parallel(n_jobs=-1)(
+        delayed(make_zone_cat_comids)(nhd, zone, hr) for zone, hr in inputs.items()
+    )
+    all_comids = np.concatenate(results)
+    return set(all_comids.flatten())
+
+def processZone(zone, hr, nhd, inter_tbl, all_comids):
+    pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
+    flow = pyogrio.read_dataframe(f"{pre}/NHDPlusAttributes/PlusFlow.dbf", columns=["TOCOMID", "FROMCOMID"], read_geometry=False, use_arrow=True)
+    flow.columns = flow.columns.str.upper()
+    flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
+    fls = pyogrio.read_dataframe(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf", read_geometry=False, use_arrow=True)
+    fls.columns = fls.columns.str.upper()
+    coastfl = fls.COMID[fls.FTYPE == "Coastline"]
+    flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
+    flow = flow[~flow.FROMCOMID.isin(inter_tbl.removeCOMs)]
+    out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
+    out = out[np.nonzero(out)]
+    flow = flow[~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))]
+    
+    flow_dict = defaultdict(list)
+    for _, row in flow.iterrows():
+        flow_dict[row.TOCOMID].append(row.FROMCOMID)
+    
+    for interLine in inter_tbl.values:
+        if interLine[6] > 0 and interLine[2] == zone:
+            flow_dict[int(interLine[6])].append(int(interLine[0]))
+    
+    out_of_vpus = inter_tbl.loc[
+        (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
+    ].thruCOMIDs.values
+    cats = pyogrio.read_dataframe(f"{pre}/NHDPlusCatchment/Catchment.dbf", read_geometry=False, use_arrow=True)
+    cats.columns = cats.columns.str.upper()
+    cats = cats.set_index("FEATUREID")
+    comids = cats.index.values
+    comids = np.append(comids, out_of_vpus)
+    
+    ups = [list(all_comids.intersection(bastards(x, flow_dict))) for x in comids]
+    lengths = np.array([len(u) for u in ups])
+    upstream = np.hstack(ups).astype(np.int32)
+    
+    assert len(ups) == len(lengths) == len(comids)
+    np.savez_compressed(
+        f"./accum_npy/accum_{zone}.npz",
+        comids=comids,
+        lengths=lengths,
+        upstream=upstream,
+    )
 
 def makeNumpyVectors(inter_tbl, nhd):
     """
@@ -1276,55 +1324,20 @@ def makeNumpyVectors(inter_tbl, nhd):
     inter_tbl   : table of inter-VPU connections
     nhd         : directory where NHD is stored
     """
-    os.mkdir("accum_npy")
+    os.makedirs("accum_npy", exist_ok=True)
     inputs = nhd_dict(nhd)
     all_comids = make_all_cat_comids(nhd, inputs)
-    print("Making numpy files in zone...", end="", flush=True)
-    for zone, hr in inputs.items():
-        print(zone, end=", ", flush=True)
-        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        flow = dbf2DF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
-        flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
-        fls = dbf2DF(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
-        coastfl = fls.COMID[fls.FTYPE == "Coastline"]
-        flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
-        # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs
-        # here that won't get filtered out any other way
-        flow = flow[~flow.FROMCOMID.isin(inter_tbl.removeCOMs)]
-        # find values that are coming from other zones and remove the ones that
-        # aren't in the interVPU table
-        out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
-        out = out[
-            np.nonzero(out)
-        ]  # this should be what combines zones and above^, but we force connections with inter_tbl
-        flow = flow[
-            ~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))
-        ]
-        # Table is ready for processing and flow connection dict can be created
-        flow_dict = defaultdict(list)
-        for _, row in flow.iterrows():
-            flow_dict[row.TOCOMID].append(row.FROMCOMID)
-        # add IDs from UpCOMadd column if working in ToZone, forces the flowtable connection though not there
-        for interLine in inter_tbl.values:
-            if interLine[6] > 0 and interLine[2] == zone:
-                flow_dict[int(interLine[6])].append(int(interLine[0]))
-        out_of_vpus = inter_tbl.loc[
-            (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
-        ].thruCOMIDs.values
-        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf").set_index("FEATUREID")
-        comids = cats.index.values
-        comids = np.append(comids, out_of_vpus)
-        # list of upstream lists, filter comids in all_comids
-        ups = [list(all_comids.intersection(bastards(x, flow_dict))) for x in comids]
-        lengths = np.array([len(u) for u in ups])
-        upstream = np.hstack(ups).astype(np.int32)  # Convert to 1d vector
-        assert len(ups) == len(lengths) == len(comids)
-        np.savez_compressed(
-            f"./accum_npy/accum_{zone}.npz",
-            comids=comids,
-            lengths=lengths,
-            upstream=upstream,
-        )
+    print(f"Making numpy files for zones {inputs.keys()}: ")
+
+    # Parallel Processing w/ joblib
+    print("Begining parallel execution:")
+    start_time = time.time()
+    Parallel(n_jobs=-1)(
+        delayed(processZone)(zone, hr, nhd, inter_tbl, all_comids) for zone, hr in inputs.items()
+    )
+    end_time = time.time()
+    print(f"Time elapsed to process all zones: {end_time - start_time} seconds")
+        
 
 
 ##############################################################################
