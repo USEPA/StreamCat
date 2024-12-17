@@ -165,6 +165,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                            resamp_type='NEAREST'
                        snapping_pnt = "%f %f"%(desc.extent.XMin,desc.extent.YMin)
                        arcpy.ProjectRaster_management(tempras, finalras, out_coor_system, resamp_type, ConvertRes, "", snapping_pnt)
+                       
                    if UseStatesMask == 'Yes':
                         # Execute ExtractByMask
                        desc = arcpy.Describe(tempras)
@@ -179,6 +180,15 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                        arcpy.ProjectRaster_management(tempras, finalras, out_coor_system, resamp_type, ConvertRes, "", snapping_pnt)
                if UseArcpy == 'No':
                    # Need to add ability to mask as well with gdal / rasterio approach...
+                   if Proj_projcs = dst_crs:
+                        startTime = dt.now()
+                        target_espg = 5070
+                        creation_options = {
+                       'COMPRESS': 'LZW',
+                       'TFW': 'YES'}
+                        gdal.Warp(finalras, tempras, resampleAlg = gdal.GRA_NearestNeighbour,dstSRS="EPSG:{}".format(target_epsg), dstNodata=0, creationOptions=creation_options)
+                        #call(resamp_string)
+                        print "elapsed time " + str(dt.now()-startTime)
                    if not Proj_projcs==dst_crs:
                         resamp_ras = FinalDir + '/' + OutFile + '.tif'
                         resamp_string = "gdalwarp --config GDAL_DATA " + '"C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data" ' +' -tr ' + str(ConvertRes) + ' -' + str(ConvertRes) + " -te " + bounds + " -srcnodata " + str(outNDV) +  " -dstnodata "  + str(outNDV) +  " -of GTiff -r near -t_srs " + dst_crs + " -co COMPRESS=DEFLATE -co TFW=YES -co TILED=YES -co TIFF_USE_OVR=TRUE -ot " + outDataType + " " + tempras + " " + resamp_ras
