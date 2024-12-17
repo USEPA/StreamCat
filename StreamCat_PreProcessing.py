@@ -164,7 +164,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                        if DataCategory == 'categorical':
                            resamp_type='NEAREST'
                        snapping_pnt = "%f %f"%(desc.extent.XMin,desc.extent.YMin)
-                       arcpy.ProjectRaster_management(tempras, finalras, out_coor_system, resamp_type, ConvertRes, "", snapping_pnt)
+                       arcpy.ProjectRaster_management(finalras, tempras, out_coor_system, resamp_type, ConvertRes, "", snapping_pnt)
                        
                    if UseStatesMask == 'Yes':
                         # Execute ExtractByMask
@@ -179,23 +179,37 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                        snapping_pnt = "%f %f"%(desc.extent.XMin,desc.extent.YMin)
                        arcpy.ProjectRaster_management(tempras, finalras, out_coor_system, resamp_type, ConvertRes, "", snapping_pnt)
                if UseArcpy == 'No':
+                   input_raster = InDir + '/' + OutFile + '.tif'
+                   temp_raster = TempDir + '/' + OutFile + '.tif'
+                   final_raster = FinalDir + '/' + OutFile + '.tif'
+                   mask_shp = gdal.Open('O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/LandscapeRasters/QAComplete/Masks/land_mask.shp')
                    # Need to add ability to mask as well with gdal / rasterio approach...
-                   if Proj_projcs = dst_crs:
-                        startTime = dt.now()
-                        target_espg = 5070
-                        creation_options = {
+                   if DataCategory == 'categorical':
+                       startTime = dt.now()
+                       target_espg = 5070
+                       creation_options = {'COMPRESS': 'LZW', 'TFW': 'YES'}
+                       gdal.Warp(input_raster, final_raster, resampleAlg = gdal.GRA_NearestNeighbour,dstSRS="EPSG:{}".format(target_epsg), dstNodata=0, creationOptions=creation_options)
+                       #call(resamp_string)
+                       print "elapsed time " + str(dt.now()-startTime)
+                   if DataCategory == 'continuous':
+                       startTime = dt.now()
+                       target_espg = 5070
+                       creation_options = {
                        'COMPRESS': 'LZW',
                        'TFW': 'YES'}
-                        gdal.Warp(finalras, tempras, resampleAlg = gdal.GRA_NearestNeighbour,dstSRS="EPSG:{}".format(target_epsg), dstNodata=0, creationOptions=creation_options)
-                        #call(resamp_string)
-                        print "elapsed time " + str(dt.now()-startTime)
-                   if not Proj_projcs==dst_crs:
-                        resamp_ras = FinalDir + '/' + OutFile + '.tif'
-                        resamp_string = "gdalwarp --config GDAL_DATA " + '"C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data" ' +' -tr ' + str(ConvertRes) + ' -' + str(ConvertRes) + " -te " + bounds + " -srcnodata " + str(outNDV) +  " -dstnodata "  + str(outNDV) +  " -of GTiff -r near -t_srs " + dst_crs + " -co COMPRESS=DEFLATE -co TFW=YES -co TILED=YES -co TIFF_USE_OVR=TRUE -ot " + outDataType + " " + tempras + " " + resamp_ras
-                        startTime = dt.now()
-                        call(resamp_string)
-                        print "elapsed time " + str(dt.now()-startTime)
-
+                       gdal.Warp(input_raster, temp_raster,resampleAlg = "bilinear",
+                       dstSRS="EPSG:{}".format(target_epsg),creationOptions=["TFW=YES"])
+                       gdal.Warp(output_raster, final_raster, cutlineDSName=mask_shp, 
+                       cropToCutline=True, creationOptions=["TFW=YES",'COMPRESS=LZW'])
+                       print "elapsed time " + str(dt.now()-startTime)
+                   # if not Proj_projcs==dst_crs:
+                   #      resamp_ras = FinalDir + '/' + OutFile + '.tif'
+                   #      resamp_string = "gdalwarp --config GDAL_DATA " + '"C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data" ' +' -tr ' + str(ConvertRes) + ' -' + str(ConvertRes) + " -te " + bounds + " -srcnodata " + str(outNDV) +  " -dstnodata "  + str(outNDV) +  " -of GTiff -r near -t_srs " + dst_crs + " -co COMPRESS=DEFLATE -co TFW=YES -co TILED=YES -co TIFF_USE_OVR=TRUE -ot " + outDataType + " " + tempras + " " + resamp_ras
+                   #      startTime = dt.now()
+                   #      call(resamp_string)
+                   #      print "elapsed time " + str(dt.now()-startTime)
+                   
+                        
         # Processes for vector features
         if FileType == 'ESRI Shapefile':
             Feat = gpd.GeoDataFrame.from_file(InDir + '/' + InFile + '.shp')
