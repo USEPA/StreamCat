@@ -11,23 +11,31 @@ Users will need the following programs installed in order to run the code in the
 **Programs:**
 Python,  ArcGIS Pro (used to run ZonalStatisticsAsTable and TabulateArea tools with arcpy)
 
-We recommend using the specific conda package management that comes with ArcGIS Pro. You can use the package manager in ArcGIS Pro or conda package management available via the python command prompt with ArcGIS Pro (Start > ArcGIS > Python command prompt). Using either approach, clone the base ArcGIS Pro environment, then install geopandas and rasterio (and optionally spyder) to the new environment. *NOTE - the following steps have been verified to work using ArcGIS Pro 3.2.1*.  In the python command prompt use the following steps (replacing 'myclone' with the environment name of your choice): 
+There are two options for installing the required dependencies.  As shown below both create
+a conda environment called `streamcat`, although you can use any name you want.
 
-     1. conda create --clone arcgispro-py3 -p %localappdata%\esri\conda\envs\myclone --pinned
-     2. activate myclone
+### Option 1: clone the default ArcGIS environment
+
+We recommend using the specific conda package management that comes with ArcGIS Pro. You can use the package manager in ArcGIS Pro or conda package management available via the python command prompt with ArcGIS Pro (Start > ArcGIS > Python command prompt). Using either approach, clone the base ArcGIS Pro environment, then install geopandas and rasterio (and optionally spyder) to the new environment. *NOTE - the following steps have been verified to work using ArcGIS Pro 3.2.1*.  In the python command prompt use the following steps (replacing 'streamcat' with the environment name of your choice): 
+
+     1. conda create --clone arcgispro-py3 -p %localappdata%\esri\conda\envs\streamcat --pinned
+     2. activate streamcat
      3. conda install geopandas rasterio 
           * optional: conda install spyder
+
+### Option 2: Install all requirements in a fresh conda environment
      
 We list these specific Python packages needed in the StreamCat code are listed in the [spec-file.txt](https://github.com/USEPA/StreamCat/blob/master/spec-file.txt) in the StreamCat GitHub repository.  Users can use this .txt file to create an environment with the necessary Python libraries by running the following lines at a conda prompt:
 
 1.  Change directory to where you have downloaded the [spec-file.txt](https://github.com/USEPA/StreamCat/blob/master/spec-file.txt) file:
      - for instance: cd C:/UserName/StreamCat
 2.  Use the .txt file to create a new environment
-     - conda create --name myenv --file spec-file.txt
+     - conda create --name streamcat --file spec-file.txt
 3.  Use the spec file to install all of its listed packages into this environment
-     - conda install --name myenv --file spec-file.txt
+     - conda install --name streamcat --file spec-file.txt
 
-**Local directories and files:**
+## Local directories and files
+
 Create a local directory for your working files.  
 
 Make local copies of the [NHDPlusV2 hydrology data](https://www.epa.gov/waterdata/nhdplus-national-hydrography-dataset-plus) and the [StreamCat repository](https://github.com/USEPA/StreamCat.git) and store these in directories on your local machine.
