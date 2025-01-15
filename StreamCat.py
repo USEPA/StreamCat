@@ -31,6 +31,8 @@ import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 control = "ControlTable_StreamCat.csv"
 
 
@@ -44,6 +46,7 @@ from stream_cat_config import (
     OUT_DIR,
     PCT_FULL_FILE,
     PCT_FULL_FILE_RP100,
+    SKIP_AQUIRING_CATSTATS
 )
 from StreamCat_functions import (
     Accumulation,
@@ -62,6 +65,9 @@ ctl = pd.read_csv(control)
 
 # Load table of inter vpu connections
 inter_vpu = pd.read_csv("InterVPU.csv")
+
+# Skip to accumulation if PartitionDownscaledResults ran
+skip_aquiring_catstats = True
 
 if not os.path.exists(OUT_DIR):
     os.mkdir(OUT_DIR)
@@ -108,44 +114,45 @@ for _, row in ctl.query("run == 1").iterrows():
             points = mask_points(points, mask_dir, INPUTS)
     # File string to store InterVPUs needed for adjustments
     Connector = f"{OUT_DIR}/{row.FullTableName}_connectors.csv"
-    print(
-        f"Acquiring `{row.FullTableName}` catchment statistics...",
-        end="",
-        flush=True,
-    )
-    for zone, hydroregion in INPUTS.items():
-        if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
-            print(zone, end=", ", flush=True)
-            pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
-            if not row.accum_type == "Point":
-                izd = (
-                    f"{mask_dir}/{zone}.tif"
-                    if mask_dir
-                    else f"{pre}/NHDPlusCatchment/cat"
-                )
-                cat = createCatStats(
-                    row.accum_type,
-                    layer,
-                    izd,
-                    OUT_DIR,
-                    zone,
-                    row.by_RPU,
-                    mask_dir,
-                    NHD_DIR,
-                    hydroregion,
-                    apm,
-                )
-            if row.accum_type == "Point":
-                izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
-                cat = PointInPoly(
-                    points, zone, izd, pct_full, mask_dir, apm, summary
-                )
-            cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
-    print("done!")
+    if not skip_aquiring_catstats:
+        print(
+            f"Acquiring `{row.FullTableName}` catchment statistics...",
+            end="",
+            flush=True,
+        )
+        for zone, hydroregion in INPUTS.items():
+            if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
+                print(zone, end=", ", flush=True)
+                pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
+                if not row.accum_type == "Point":
+                    izd = (
+                        f"{mask_dir}/{zone}.tif"
+                        if mask_dir
+                        else f"{pre}/NHDPlusCatchment/cat"
+                    )
+                    cat = createCatStats(
+                        row.accum_type,
+                        layer,
+                        izd,
+                        OUT_DIR,
+                        zone,
+                        row.by_RPU,
+                        mask_dir,
+                        NHD_DIR,
+                        hydroregion,
+                        apm,
+                    )
+                if row.accum_type == "Point":
+                    izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
+                    cat = PointInPoly(
+                        points, zone, izd, pct_full, mask_dir, apm, summary
+                    )
+                cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+        print("done!")
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:
-        fn = f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"
-        cat = pd.read_csv(fn)
+        fn = f"{OUT_DIR}/{row.FullTableName}_{zone}.parquet"
+        cat = pd.read_parquet(fn)
         processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().bool()
         if processed:
             print("skipping!")
@@ -170,7 +177,7 @@ for _, row in ctl.query("run == 1").iterrows():
         )
 
         if zone in inter_vpu.ToZone.values:
-            cat = pd.read_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv")
+            cat = pd.read_parquet(f"{OUT_DIR}/{row.FullTableName}_{zone}.parquet")
         if zone in inter_vpu.FromZone.values:
             interVPU(
                 ws,
@@ -182,7 +189,8 @@ for _, row in ctl.query("run == 1").iterrows():
             )
         upFinal = pd.merge(up, ws, on="COMID")
         final = pd.merge(cat, upFinal, on="COMID")
-        final.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+        finaltable = pa.Table.from_pandas(final)
+        pq.write_table(finaltable, f"{OUT_DIR}/{row.FullTableName}_{zone}.parquet")
     print(end="") if processed else print("done!")
     if already_processed:
         print(

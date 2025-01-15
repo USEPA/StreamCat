@@ -29,6 +29,8 @@ import rasterio
 #from gdalconst import *
 from osgeo import gdal, ogr, osr
 from rasterio import transform
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 if rasterio.__version__[0] == "0":
     from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
@@ -804,11 +806,11 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl):
     # COMIDs in the toCOMID column need to swap values with COMIDs in other
     # zones, those COMIDS are then sorted in toVPUS
     if any(interVPUtbl.toCOMIDs.values > 0):
-        interAlloc = "%s_%s.csv" % (
+        interAlloc = "%s_%s.parquet" % (
             Connector[: Connector.find("_connectors")],
             interVPUtbl.ToZone.values[0],
         )
-        tbl = pd.read_csv(interAlloc).set_index("COMID")
+        tbl = pd.read_parquet(interAlloc).set_index("COMID")
         toVPUs = tbl[tbl.index.isin([x for x in interVPUtbl.toCOMIDs if x > 0])].copy()
     for _, row in interVPUtbl.iterrows():
         # Loop through sub-setted interVPUtbl to make adjustments to COMIDS listed in the table
