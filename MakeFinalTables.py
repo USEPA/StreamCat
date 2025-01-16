@@ -17,8 +17,6 @@ examples:
 import math
 import os
 import sys
-import click
-import zipfile
 from pathlib import Path
 
 import numpy as np
@@ -30,11 +28,10 @@ from stream_cat_config import(
     # LOCAL_DIR,
     FINAL_DIR,
     ACCUM_DIR,
-    LENGTHS,
     OUT_DIR
     )
 control = "ControlTable_StreamCat.csv"
-
+FINAL_DIR = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/NutrientInventory/CountyCatResultsData/Final_Tables'
 
 def build_stats(tbl, stats):
     if not stats:
@@ -49,10 +46,6 @@ def build_stats(tbl, stats):
     return stats
 
 
-LENGTH_ERROR_MESSAGE = (
-    "Table {} length vpu {} incorrect!!!!"
-    "...check Allocation and Accumulation results"
-)
 
 OUT_DIR = Path(OUT_DIR)
 FINAL_DIR = Path(FINAL_DIR)
@@ -71,10 +64,12 @@ missing = []
 fn = "{}_{}.parquet"
 for table, metrics in tables.items():  # make sure all tables exist
     for vpu in inputs:
+        print(vpu)
         for metric in metrics:
-            accumulated_file = OUT_DIR / fn.format(metric, vpu)
-            if not accumulated_file.exists():
-                missing = pd.concat([missing,accumulated_file], axis=0, ignore_index=False)
+            print(metric)
+            accumulated_file = OUT_DIR + "/" + fn.format(metric, vpu)
+            if not os.path.exists(accumulated_file):
+                missing.append(accumulated_file)
 
 if len(missing) > 0:
     for miss in missing:
@@ -93,7 +88,10 @@ for table, metrics in tables.items():
 
             a_m = "" if row.AppendMetric == "none" else row.AppendMetric
             # Read in the StreamCat allocation and accumulation table
-            tbl = pd.read_parquet(OUT_DIR / fn.format(metric, vpu))
+            files = [f for f in os.listdir(OUT_DIR) if f.count(metric) and not f.count('connectors')]
+            dfs = [pd.read_parquet(OUT_DIR + "/" + files) for files in files]
+            tbl = pd.concat(dfs, ignore_index=True)
+            
             front_cols = [
                 title
                 for title in tbl.columns
