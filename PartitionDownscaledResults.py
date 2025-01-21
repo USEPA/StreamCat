@@ -14,6 +14,9 @@ import pyarrow.parquet as pq
 lookupdir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/'
 COMID_VPU = pd.read_csv(lookupdir + 'COMID_HydroRegion.csv')
 
+# Read in template set of StreamCat COMIDS and restrict our COMID_VPU COMIDS to just those COMIDS
+StreamCat_template = pd.read_parquet('O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/FinalTables/STATSGO_Set1.parquet')
+COMID_VPU = COMID_VPU[COMID_VPU['COMID'].isin(StreamCat_template['COMID'])]
 COMID_VPU.head()
 COMID_VPU['VPU'].replace({4: '04', 5: '05', 6: '06', 7: '07', 8: '08', 
              9: '09', 11: '11', 12: '12', 13: '13', 14: '14', 15: '15', 
