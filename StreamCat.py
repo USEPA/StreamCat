@@ -46,7 +46,7 @@ from stream_cat_config import (
     OUT_DIR,
     PCT_FULL_FILE,
     PCT_FULL_FILE_RP100,
-    SKIP_AQUIRING_CATSTATS
+    #SKIP_AQUIRING_CATSTATS
 )
 from StreamCat_functions import (
     Accumulation,
