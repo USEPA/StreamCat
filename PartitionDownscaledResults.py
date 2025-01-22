@@ -32,11 +32,10 @@ VPU = COMID_VPU['VPU'].unique()
 nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/NutrientInventory/CountyCatResultsData/'
 nut = pd.read_parquet(nut_dir + 'P_Fert_FarmCountyCatResults.parquet')
 
-cat_area = pd.read_csv('O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/NutrientInventory/Inputs/COMID_Scaled_AgVars.csv')
-cat_area = cat_area[['COMID','CatAreaSqKm']]
+cat_area = StreamCat_template[['COMID','CatAreaSqKm']]
 cat_area.head()
 # add VPU using lookup table
-nut = pd.merge(nut, COMID_VPU, how='right', left_on=['COMID'], right_on=['COMID'])
+nut = pd.merge(COMID_VPU, nut, how='left', left_on=['COMID'], right_on=['COMID'])
 nut = pd.merge(nut, cat_area, how='left', left_on=['COMID'], right_on=['COMID'])
 # nut = nut.drop('Unnamed: 0', axis=1)
 # nut = nut.drop('...1', axis=1)
