@@ -44,6 +44,7 @@ from stream_cat_config import (
     OUT_DIR,
     PCT_FULL_FILE,
     PCT_FULL_FILE_RP100,
+    USER_ZONES,
 )
 from StreamCat_functions import (
     Accumulation,
@@ -71,7 +72,7 @@ if not os.path.exists(OUT_DIR + "/DBF_stash"):
 
 if not os.path.exists(ACCUM_DIR):
     # TODO: work out children OR bastards only
-    makeNumpyVectors(inter_vpu, NHD_DIR)
+    makeNumpyVectors(inter_vpu, NHD_DIR, USER_ZONES)
 
 INPUTS = np.load(ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 
