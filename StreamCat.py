@@ -90,7 +90,7 @@ for _, row in ctl.query("run == 1").iterrows():
         mask_dir = ""
     layer = (
         row.LandscapeLayer
-        if os.sep in row.LandscapeLayer
+        if "/" in row.LandscapeLayer or "\\" in row.LandscapeLayer
         else (f"{LYR_DIR}/{row.LandscapeLayer}")
     )  # use abspath
     if isinstance(row.summaryfield, str):

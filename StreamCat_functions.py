@@ -21,6 +21,7 @@ import os
 import sys
 import time
 from collections import OrderedDict, defaultdict, deque
+from pathlib import Path
 from typing import Generator
 
 import numpy as np
@@ -965,16 +966,18 @@ def createCatStats(
         arcpy.env.snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
+                landscape_layer = Path(LandscapeLayer).stem  # / vs. \ agnostic
                 outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
                     out_dir,
-                    LandscapeLayer.split("/")[-1].split(".")[0],
+                    landscape_layer,
                     appendMetric,
                     zone,
                 )
             else:
+                landscape_layer = Path(LandscapeLayer).name  # / vs. \ agnostic
                 outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
                     out_dir,
-                    LandscapeLayer.split("/")[-1],
+                    landscape_layer,
                     appendMetric,
                     zone,
                 )
