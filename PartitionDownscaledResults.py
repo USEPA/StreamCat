@@ -9,13 +9,17 @@ Created on Wed Jan 31 12:19:11 2024
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+import os
 
 # Read in lookup table for COMIDs and Hydroregions
 lookupdir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/'
 COMID_VPU = pd.read_csv(lookupdir + 'COMID_HydroRegion.csv')
 
 # Read in template set of StreamCat COMIDS and restrict our COMID_VPU COMIDS to just those COMIDS
-StreamCat_template = pd.read_parquet('O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/FinalTables/STATSGO_Set1.parquet')
+alloc_dir = "O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/Allocation_and_Accumulation"
+# Get a list of matching files
+files = [alloc_dir + '/' + f for f in os.listdir(alloc_dir) if f.count('Clay') and not f.count('connectors')]
+StreamCat_template = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
 COMID_VPU = COMID_VPU[COMID_VPU['COMID'].isin(StreamCat_template['COMID'])]
 COMID_VPU.head()
 COMID_VPU['VPU'].replace({4: '04', 5: '05', 6: '06', 7: '07', 8: '08', 
