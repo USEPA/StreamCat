@@ -67,7 +67,7 @@ for table, metrics in tables.items():  # make sure all tables exist
         print(vpu)
         for metric in metrics:
             print(metric)
-            accumulated_file = OUT_DIR + "/" + fn.format(metric, vpu)
+            accumulated_file = OUT_DIR / fn.format(metric, vpu)
             if not os.path.exists(accumulated_file):
                 missing.append(accumulated_file)
 
@@ -88,8 +88,8 @@ for table, metrics in tables.items():
 
             a_m = "" if row.AppendMetric == "none" else row.AppendMetric
             # Read in the StreamCat allocation and accumulation table
-            files = [f for f in os.listdir(OUT_DIR) if f.count(metric) and not f.count('connectors')]
-            dfs = [pd.read_parquet(OUT_DIR + "/" + files) for files in files]
+            files = [f for f in OUT_DIR.iterdir() if metric in f.name and 'connectors' not in f.name]
+            dfs = [pd.read_parquet(OUT_DIR / file) for file in files]
             tbl = pd.concat(dfs, ignore_index=True)
             
             front_cols = [
