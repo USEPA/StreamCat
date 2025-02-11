@@ -20,7 +20,7 @@ alloc_dir = "O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamC
 # Get a list of matching files
 files = [alloc_dir + '/' + f for f in os.listdir(alloc_dir) if f.count('Clay') and not f.count('connectors')]
 StreamCat_template = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
-COMID_VPU = COMID_VPU[COMID_VPU['COMID'].isin(StreamCat_template['COMID'])]
+#COMID_VPU = COMID_VPU[COMID_VPU['COMID'].isin(StreamCat_template['COMID'])]
 COMID_VPU.head()
 COMID_VPU['VPU'].replace({4: '04', 5: '05', 6: '06', 7: '07', 8: '08', 
              9: '09', 11: '11', 12: '12', 13: '13', 14: '14', 15: '15', 
@@ -34,7 +34,7 @@ VPU = COMID_VPU['VPU'].unique()
 # nut = pd.read_csv(nut_dir + 'ClimTerms_2012_10.csv')
 #nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/AmaliaHandler/'
 nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/NutrientInventory/CountyCatResultsData/'
-nut = pd.read_parquet(nut_dir + 'P_Fert_FarmCountyCatResults.parquet')
+nut = pd.read_parquet(nut_dir + 'P_Fert_NonFarmCountyCatResults.parquet')
 
 cat_area = StreamCat_template[['COMID','CatAreaSqKm']]
 cat_area.head()
@@ -61,6 +61,6 @@ for col in cols:
         df = final[final['VPU'] == i]
         df = df.drop(columns=['VPU'])
         table = pa.Table.from_pandas(df)
-        pq.write_table(table, nut_dir + 'test/' + col + '_' + str(i) + '.parquet')
+        pq.write_table(table, nut_dir + 'Allocation_and_Accumulation/' + col + '_' + str(i) + '.parquet')
         #df.to_csv(nut_dir + '/Allocation_and_Accumulation/' + col + '_' + str(i) + '.csv',
         #          index=False)

@@ -197,6 +197,7 @@ for table, metrics in tables.items():
                     final2.columns = ["COMID"] + cat_named + ws_named
                     final = pd.merge(final, final2, on="COMID")
 
-        final = final.set_index("COMID")
+        final['COMID'] = final.index
+        #final = final.set_index("COMID")
         final_table = pa.Table.from_pandas(final)
         pq.write_table(final_table, final_file)
