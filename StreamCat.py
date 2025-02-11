@@ -33,6 +33,9 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+
+from joblib import Parallel, delayed
+
 control = "ControlTable_StreamCat.csv"
 
 
@@ -83,8 +86,9 @@ INPUTS = np.load(ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 
 already_processed = []
 
-for _, row in ctl.query("run == 1").iterrows():
+# for _, row in ctl.query("run == 1").iterrows():
 
+def process_row(row):
     apm = "" if row.AppendMetric == "none" else row.AppendMetric
     if row.use_mask == 1:
         mask_dir = MASK_DIR_RP100
@@ -120,7 +124,8 @@ for _, row in ctl.query("run == 1").iterrows():
             end="",
             flush=True,
         )
-        for zone, hydroregion in INPUTS.items():
+        #for zone, hydroregion in INPUTS.items():
+        def zonal_stats(zone, hydroregion, row, OUT_DIR, NHD_DIR):
             if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
                 print(zone, end=", ", flush=True)
                 pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
@@ -148,6 +153,9 @@ for _, row in ctl.query("run == 1").iterrows():
                         points, zone, izd, pct_full, mask_dir, apm, summary
                     )
                 cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+        zonal_results = Parallel(os.cpu_count()/2)(
+            delayed(zonal_stats)(zone, hydroregion, row, OUT_DIR, NHD_DIR) for zone, hydroregion in INPUTS.items()
+        )
         print("done!")
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:
@@ -200,3 +208,7 @@ for _, row in ctl.query("run == 1").iterrows():
             f"\n\t> {OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
             f"output used in 'Continuous' and 'Categorical' metrics!!!"
         )
+
+row_results = Parallel(n_jobs=os.cpu_count/2)(
+    delayed(process_row)(row) for _, row in ctl.query("run == 1").iterrows()
+)
