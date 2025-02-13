@@ -25,7 +25,7 @@ if __name__ == '__main__':
         date_downloaded = metric_row['Date Added']
 
         path = DATASET_PATH + metric_name + '.parquet'
-        dataset_results = db_conn.CreateDatasetFromFiles('streamcat', ds_name, path, 1)
+        dataset_results = db_conn.CreateDatasetFromFiles('streamcat', ds_name, path, 0)
         print(dataset_results)
 
     
