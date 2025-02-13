@@ -1383,7 +1383,7 @@ def make_all_cat_comids(nhd, inputs):
     # np.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
     
     print("...done!")
-    return set(all_comids)  # RETURN A SET FOR NO REPEATS!
+    return set(all_comids.flatten())  # RETURN A SET FOR NO REPEATS!
 
 
 def makeVectors(inter_tbl, nhd):
@@ -1540,7 +1540,7 @@ def dbf2GPUDF(f, upper=True):
     return data
 
 def dbf2DF(f, upper=True):
-    data = gpd.read_file(f).drop("geometry", axis=1)
+    data = pyogrio.read_dataframe(f, read_geometry=False, use_arrow=True) #gpd.read_file(f).drop("geometry", axis=1)
     if upper is True:
         data.columns = data.columns.str.upper()
     return data

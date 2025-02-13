@@ -12,11 +12,12 @@ import geopandas as gpd
 import numpy as np
 
 import dask
-
 from dask.distributed import Client, LocalCluster
 import dask.dataframe as dd
 from dask_jobqueue import SLURMCluster
 from dask_jobqueue.slurm import SLURMRunner, SLURMJob
+
+from joblib import Parallel, delayed
 
 from StreamCat_functions_gpu import Accumulation, AdjustCOMs, PointInPoly, appendConnectors, createCatStats, interVPU, makeVectors, mask_points, nhd_dict
 # from config_tables.stream_cat_config import (
@@ -30,10 +31,134 @@ from StreamCat_functions_gpu import Accumulation, AdjustCOMs, PointInPoly, appen
 #     PCT_FULL_FILE,
 #     PCT_FULL_FILE_RP100,
 # )
-from config_tables.stream_cat_config import ConfigArgs
+from config_tables.stream_cat_config import ConfigArgs, DebugArgs
 from database import DatabaseConnection
 from itertools import islice
 from collections import OrderedDict
+
+def process_metric(row, config, INPUTS, already_processed, inter_vpu):
+    print(row.FullTableName)
+    apm = "" if row.AppendMetric == "none" else row.AppendMetric
+    if row.use_mask == 1:
+        mask_dir = config.MASK_DIR_RP100
+    elif row.use_mask == 2:
+        mask_dir = config.MASK_DIR_SLP10
+    elif row.use_mask == 3:
+        mask_dir = config.MASK_DIR_SLP20
+    else:
+        mask_dir = ""
+    layer = (
+        row.LandscapeLayer
+        if os.sep in row.LandscapeLayer
+        else (f"{config.LYR_DIR}/QAComplete/{row.LandscapeLayer}")
+    )  # TODO use abspath
+    if isinstance(row.summaryfield, str):
+        summary = row.summaryfield.split(";")
+    else:
+        summary = None
+    if row.accum_type == "Point":
+        # Load in point geopandas table and Pct_Full table
+        # TODO: script to create this PCT_FULL_FILE
+        pct_full = pd.read_csv(
+            config.PCT_FULL_FILE if row.use_mask == 0 else config.PCT_FULL_FILE_RP100
+        )
+        points = gpd.read_file(layer) #TODO could add from_pandas or dg.read_file for dask conversion
+        if mask_dir:
+            points = mask_points(points, mask_dir, INPUTS)
+    # File string to store InterVPUs needed for adjustments
+    # Currently stored in Streamcat Accumulation_and_Allocation
+    Connector = f"{config.FINAL_OUT_DIR}/{row.FullTableName}_connectors.csv"
+    print(
+        f"Acquiring `{row.FullTableName}` catchment statistics...",
+        end="",
+        flush=True,
+    )
+
+    for zone, hydroregion in INPUTS.items():
+        if not os.path.exists(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"):
+            print(f"Region {zone}, ")
+            pre = f"{config.NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
+            if not row.accum_type == "Point":
+                izd = (
+                    f"{mask_dir}/{zone}.tif"
+                    if mask_dir
+                    else f"{pre}/NHDPlusCatchment/cat"
+                )
+                cat = createCatStats(
+                    row.accum_type,
+                    layer,
+                    izd,
+                    config.OUT_DIR,
+                    zone,
+                    row.by_RPU,
+                    mask_dir,
+                    config.NHD_DIR,
+                    hydroregion,
+                    apm,
+                )
+            if row.accum_type == "Point":
+                izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
+                cat = PointInPoly(
+                    points, zone, izd, pct_full, mask_dir, apm, summary
+                )
+            # TODO instead of writing to csv add cat to dask dataframe and persist()
+            # This is because dask dataframes are a collection of pandas dataframes
+            # This dataframe should have be named {row.FullTableName}_{zone} then below in the next loop we should 
+            # get fn / cat dataframe by name 
+            cat.to_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False) 
+    print("done!\n")
+    print("Accumulating...")
+    #TODO if we change cats to be parititons in a dask dataframe then we need to change from zones to iterating through the dask sections
+    # Also consider writing large dask dataframe out to parquet file here as a checkpoint of sorts
+    for zone in INPUTS:
+        # TODO 
+        # read fn table from database 
+        print(f"Region {zone}, ")
+        fn = f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"
+        cat = pd.read_csv(fn)
+        processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().item() #TODO .bool() is depreciated change to .item()
+        if processed:
+            print("skipping!")
+            already_processed.append(row.FullTableName)
+            break
+        # print(zone, end=", ", flush=True)
+
+        if zone in inter_vpu.ToZone.values:
+            cat = appendConnectors(cat, Connector, zone, inter_vpu)
+        accum = np.load(f"{config.ACCUM_DIR}/accum_{zone}.npz")
+
+        cat.COMID = cat.COMID.astype(accum["comids"].dtype)
+        cat.set_index("COMID", inplace=True)
+        cat = cat.loc[accum["comids"]].reset_index().copy()
+
+        up = Accumulation(
+            cat, accum["comids"], accum["lengths"], accum["upstream"], "Up"
+        )
+
+        ws = Accumulation(
+            cat, accum["comids"], accum["lengths"], accum["upstream"], "Ws"
+        )
+
+        if zone in inter_vpu.ToZone.values:
+            cat = pd.read_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv")
+        if zone in inter_vpu.FromZone.values:
+            interVPU(
+                ws,
+                cat.columns[1:],
+                row.accum_type,
+                zone,
+                Connector,
+                inter_vpu.copy(),
+            )
+        upFinal = pd.merge(up, ws, on="COMID")
+        final = pd.merge(cat, upFinal, on="COMID")
+        final.to_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+        # TODO Instead of to csv we should Create DB table here
+        # Could create a dict / array / named array for each zone
+        # When done with zones concat above array
+        # write concatenated dataframe to database
+    return processed
+
 
 def main(args):
     print("----- Welcome to the StreamCat high res data pipeline ----- \n")
@@ -65,154 +190,150 @@ def main(args):
     INPUTS = OrderedDict(sliced)
     #INPUTS = OrderedDict([('01', 'NE')])
     already_processed = []
+    metric_results = Parallel(n_jobs=2) (
+        delayed(process_metric)(row, config, INPUTS, already_processed, inter_vpu) for _, row in control_table.query("run == 1").iterrows()
+    )
+
+    for processed in metric_results:
+        print(processed)
+        # if already_processed:
+        #     print(
+        #         "\n!!!Processing Problem!!!\n\n"
+        #         f"{', '.join(already_processed)} already run!\n"
+        #         "Be sure to delete the associated files in your `OUTDIR` to rerun:"
+        #         f"\n\t> {config.OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
+        #         f"output used in 'Continuous' and 'Categorical' metrics!!!"
+        # )
     
-    for i, row in control_table.query("run == 1").iterrows():
-        print(row.FullTableName)
-        apm = "" if row.AppendMetric == "none" else row.AppendMetric
-        if row.use_mask == 1:
-            mask_dir = config.MASK_DIR_RP100
-        elif row.use_mask == 2:
-            mask_dir = config.MASK_DIR_SLP10
-        elif row.use_mask == 3:
-            mask_dir = config.MASK_DIR_SLP20
-        else:
-            mask_dir = ""
-        layer = (
-            row.LandscapeLayer
-            if os.sep in row.LandscapeLayer
-            else (f"{config.LYR_DIR}/QAComplete/{row.LandscapeLayer}")
-        )  # TODO use abspath
-        if isinstance(row.summaryfield, str):
-            summary = row.summaryfield.split(";")
-        else:
-            summary = None
-        if row.accum_type == "Point":
-            # Load in point geopandas table and Pct_Full table
-            # TODO: script to create this PCT_FULL_FILE
-            pct_full = pd.read_csv(
-                config.PCT_FULL_FILE if row.use_mask == 0 else config.PCT_FULL_FILE_RP100
-            )
-            points = gpd.read_file(layer) #TODO could add from_pandas or dg.read_file for dask conversion
-            if mask_dir:
-                points = mask_points(points, mask_dir, INPUTS)
-        # File string to store InterVPUs needed for adjustments
-        # Currently stored in Streamcat Accumulation_and_Allocation
-        Connector = f"{config.FINAL_OUT_DIR}/{row.FullTableName}_connectors.csv"
-        print(
-            f"Acquiring `{row.FullTableName}` catchment statistics...",
-            end="",
-            flush=True,
-        )
+    # for i, row in control_table.query("run == 1").iterrows():
+    #     print(row.FullTableName)
+    #     apm = "" if row.AppendMetric == "none" else row.AppendMetric
+    #     if row.use_mask == 1:
+    #         mask_dir = config.MASK_DIR_RP100
+    #     elif row.use_mask == 2:
+    #         mask_dir = config.MASK_DIR_SLP10
+    #     elif row.use_mask == 3:
+    #         mask_dir = config.MASK_DIR_SLP20
+    #     else:
+    #         mask_dir = ""
+    #     layer = (
+    #         row.LandscapeLayer
+    #         if os.sep in row.LandscapeLayer
+    #         else (f"{config.LYR_DIR}/QAComplete/{row.LandscapeLayer}")
+    #     )  # TODO use abspath
+    #     if isinstance(row.summaryfield, str):
+    #         summary = row.summaryfield.split(";")
+    #     else:
+    #         summary = None
+    #     if row.accum_type == "Point":
+    #         # Load in point geopandas table and Pct_Full table
+    #         # TODO: script to create this PCT_FULL_FILE
+    #         pct_full = pd.read_csv(
+    #             config.PCT_FULL_FILE if row.use_mask == 0 else config.PCT_FULL_FILE_RP100
+    #         )
+    #         points = gpd.read_file(layer) #TODO could add from_pandas or dg.read_file for dask conversion
+    #         if mask_dir:
+    #             points = mask_points(points, mask_dir, INPUTS)
+    #     # File string to store InterVPUs needed for adjustments
+    #     # Currently stored in Streamcat Accumulation_and_Allocation
+    #     Connector = f"{config.FINAL_OUT_DIR}/{row.FullTableName}_connectors.csv"
+    #     print(
+    #         f"Acquiring `{row.FullTableName}` catchment statistics...",
+    #         end="",
+    #         flush=True,
+    #     )
     
-        for zone, hydroregion in INPUTS.items():
-            if not os.path.exists(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"):
-                print(f"Region {zone}, ")
-                pre = f"{config.NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
-                if not row.accum_type == "Point":
-                    izd = (
-                        f"{mask_dir}/{zone}.tif"
-                        if mask_dir
-                        else f"{pre}/NHDPlusCatchment/cat"
-                    )
-                    cat = createCatStats(
-                        row.accum_type,
-                        layer,
-                        izd,
-                        config.OUT_DIR,
-                        zone,
-                        row.by_RPU,
-                        mask_dir,
-                        config.NHD_DIR,
-                        hydroregion,
-                        apm,
-                    )
-                if row.accum_type == "Point":
-                    izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
-                    cat = PointInPoly(
-                        points, zone, izd, pct_full, mask_dir, apm, summary
-                    )
-                # TODO instead of writing to csv add cat to dask dataframe and persist()
-                # This is because dask dataframes are a collection of pandas dataframes
-                # This dataframe should have be named {row.FullTableName}_{zone} then below in the next loop we should 
-                # get fn / cat dataframe by name 
-                cat.to_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False) 
-        print("done!\n")
-        print("Accumulating...")
-        #TODO if we change cats to be parititons in a dask dataframe then we need to change from zones to iterating through the dask sections
-        # Also consider writing large dask dataframe out to parquet file here as a checkpoint of sorts
-        for zone in INPUTS:
-            # TODO 
-            # read fn table from database 
-            print(f"Region {zone}, ")
-            fn = f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"
-            cat = pd.read_csv(fn)
-            processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().item() #TODO .bool() is depreciated change to .item()
-            if processed:
-                print("skipping!")
-                already_processed.append(row.FullTableName)
-                break
-            # print(zone, end=", ", flush=True)
+    #     for zone, hydroregion in INPUTS.items():
+    #         if not os.path.exists(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"):
+    #             print(f"Region {zone}, ")
+    #             pre = f"{config.NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
+    #             if not row.accum_type == "Point":
+    #                 izd = (
+    #                     f"{mask_dir}/{zone}.tif"
+    #                     if mask_dir
+    #                     else f"{pre}/NHDPlusCatchment/cat"
+    #                 )
+    #                 cat = createCatStats(
+    #                     row.accum_type,
+    #                     layer,
+    #                     izd,
+    #                     config.OUT_DIR,
+    #                     zone,
+    #                     row.by_RPU,
+    #                     mask_dir,
+    #                     config.NHD_DIR,
+    #                     hydroregion,
+    #                     apm,
+    #                 )
+    #             if row.accum_type == "Point":
+    #                 izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
+    #                 cat = PointInPoly(
+    #                     points, zone, izd, pct_full, mask_dir, apm, summary
+    #                 )
+    #             # TODO instead of writing to csv add cat to dask dataframe and persist()
+    #             # This is because dask dataframes are a collection of pandas dataframes
+    #             # This dataframe should have be named {row.FullTableName}_{zone} then below in the next loop we should 
+    #             # get fn / cat dataframe by name 
+    #             cat.to_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False) 
+    #     print("done!\n")
+    #     print("Accumulating...")
+    #     #TODO if we change cats to be parititons in a dask dataframe then we need to change from zones to iterating through the dask sections
+    #     # Also consider writing large dask dataframe out to parquet file here as a checkpoint of sorts
+    #     for zone in INPUTS:
+    #         # TODO 
+    #         # read fn table from database 
+    #         print(f"Region {zone}, ")
+    #         fn = f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv"
+    #         cat = pd.read_csv(fn)
+    #         processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().item() #TODO .bool() is depreciated change to .item()
+    #         if processed:
+    #             print("skipping!")
+    #             already_processed.append(row.FullTableName)
+    #             break
+    #         # print(zone, end=", ", flush=True)
 
-            if zone in inter_vpu.ToZone.values:
-                cat = appendConnectors(cat, Connector, zone, inter_vpu)
-            accum = np.load(f"{config.ACCUM_DIR}/accum_{zone}.npz")
+    #         if zone in inter_vpu.ToZone.values:
+    #             cat = appendConnectors(cat, Connector, zone, inter_vpu)
+    #         accum = np.load(f"{config.ACCUM_DIR}/accum_{zone}.npz")
 
-            cat.COMID = cat.COMID.astype(accum["comids"].dtype)
-            cat.set_index("COMID", inplace=True)
-            cat = cat.loc[accum["comids"]].reset_index().copy()
+    #         cat.COMID = cat.COMID.astype(accum["comids"].dtype)
+    #         cat.set_index("COMID", inplace=True)
+    #         cat = cat.loc[accum["comids"]].reset_index().copy()
 
-            up = Accumulation(
-                cat, accum["comids"], accum["lengths"], accum["upstream"], "Up"
-            )
+    #         up = Accumulation(
+    #             cat, accum["comids"], accum["lengths"], accum["upstream"], "Up"
+    #         )
 
-            ws = Accumulation(
-                cat, accum["comids"], accum["lengths"], accum["upstream"], "Ws"
-            )
+    #         ws = Accumulation(
+    #             cat, accum["comids"], accum["lengths"], accum["upstream"], "Ws"
+    #         )
 
-            if zone in inter_vpu.ToZone.values:
-                cat = pd.read_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv")
-            if zone in inter_vpu.FromZone.values:
-                interVPU(
-                    ws,
-                    cat.columns[1:],
-                    row.accum_type,
-                    zone,
-                    Connector,
-                    inter_vpu.copy(),
-                )
-            upFinal = pd.merge(up, ws, on="COMID")
-            final = pd.merge(cat, upFinal, on="COMID")
-            final.to_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
-            # TODO Instead of to csv we should Create DB table here
-            # Could create a dict / array / named array for each zone
-            # When done with zones concat above array
-            # write concatenated dataframe to database
+    #         if zone in inter_vpu.ToZone.values:
+    #             cat = pd.read_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv")
+    #         if zone in inter_vpu.FromZone.values:
+    #             interVPU(
+    #                 ws,
+    #                 cat.columns[1:],
+    #                 row.accum_type,
+    #                 zone,
+    #                 Connector,
+    #                 inter_vpu.copy(),
+    #             )
+    #         upFinal = pd.merge(up, ws, on="COMID")
+    #         final = pd.merge(cat, upFinal, on="COMID")
+    #         final.to_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+    #         # TODO Instead of to csv we should Create DB table here
+    #         # Could create a dict / array / named array for each zone
+    #         # When done with zones concat above array
+    #         # write concatenated dataframe to database
 
             
-        print(end="") if processed else print("done!")
-    if already_processed:
-        print(
-            "\n!!!Processing Problem!!!\n\n"
-            f"{', '.join(already_processed)} already run!\n"
-            "Be sure to delete the associated files in your `OUTDIR` to rerun:"
-            f"\n\t> {config.OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
-            f"output used in 'Continuous' and 'Categorical' metrics!!!"
-    )
-        
-class DebugArgs():
-    def __init__(self) -> None:
-        self.control_table = 'config_tables/ControlTable_StreamCat.csv'
-        self.inter_vpu = 'config_tables/InterVPU.csv'
-        self.config = 'config_tables/streamcat_config.json'
+    #     print(end="") if processed else print("done!")
+    
+
 
 if __name__ == '__main__':
-    # add arg parser for config file and control table layer info
-    
-    #print(os.environ.get("CUDA_PATH"))
-    # print(cp.cuda.is_available(), cp.cuda.Device(0).mem_info)
-    # print(cp.cuda.runtime.getDevice())
-    # print(cp.cuda.runtime.getDeviceProperties(0)['name'])
-
+    # #TODO move this to a CLI type script called streamcat_cli.py
     # parser = argparse.ArgumentParser()
     # parser.add_argument('control_table', type=str, default='config_tables/ControlTable_StreamCat.csv', help="Path to control table csv")
     # # parser.add_argument('running_layer_name', nargs='+', type=str, help="Name of layers (space delimited) in control table to set run = 1")
