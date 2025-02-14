@@ -14,7 +14,7 @@ import pyogrio
 #from gdalconst import *
 #from osgeo import gdal, ogr, osr
 from rasterio import transform
-
+from itertools import islice
 if rasterio.__version__[0] == "0":
     from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
 if rasterio.__version__[0] == "1":
@@ -41,7 +41,6 @@ import xarray as xr
 ##############################################################################
 
 ### GPU / RAPIDS imports
-# import cupy as cp
 # import cudf
 # import cuspatial
 
@@ -141,25 +140,25 @@ def children(token, tree, chkset=None):
 ##############################################################################
 
 
-def gpu_bastards(token, tree):
-    import cupy as cp
-    nodes = list(tree.keys())
-    index_map = {node: i for i, node in enumerate(nodes)}
-    visited = cp.zeros(len(nodes), dtype=cp.bool_)
-    to_crawl = [token] 
+# def gpu_bastards(token, tree):
+#     import cupy as cp
+#     nodes = list(tree.keys())
+#     index_map = {node: i for i, node in enumerate(nodes)}
+#     visited = cp.zeros(len(nodes), dtype=cp.bool_)
+#     to_crawl = [token] 
     
-    while to_crawl:
-        current = to_crawl.pop(0)
-        if visited[index_map[current]]:
-            continue
-        visited[index_map[current]] = True
-        node_children = tree[current]
-        for child in node_children:
-            if not visited[index_map[child]]:
-                to_crawl.insert(0, child)
+#     while to_crawl:
+#         current = to_crawl.pop(0)
+#         if visited[index_map[current]]:
+#             continue
+#         visited[index_map[current]] = True
+#         node_children = tree[current]
+#         for child in node_children:
+#             if not visited[index_map[child]]:
+#                 to_crawl.insert(0, child)
     
-    result = [nodes[i] for i, visited_flag in enumerate(visited) if visited_flag and nodes[i] != token]
-    return result
+#     result = [nodes[i] for i, visited_flag in enumerate(visited) if visited_flag and nodes[i] != token]
+#     return result
 
 def bastards(token, tree):
     """
@@ -882,6 +881,43 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
 
 ##############################################################################
 
+def accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths):
+    # Function used to parallelize accumulation step
+
+    col_values = tbl[column].values.astype("float")
+    all_values = np.split(col_values[indices], accumulated_indexes)
+    if tbl_type == "Ws":
+        # add identity value to each array for full watershed
+        all_values = np.array(
+            [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
+            dtype=object,
+        )
+
+        # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+
+    # if index == 1:
+    area = all_values.copy()
+    if "PctFull" in column:
+        values = [
+            np.ma.average(np.nan_to_num(val), weights=w) # changed from np.ma.average
+            for val, w in zip(all_values, area)
+        ]
+    elif "MIN" in column or "MAX" in column:
+        func = np.max if "MAX" in column else np.min
+        # initial is necessary to eval empty upstream arrays
+        # these values will be overwritten w/ nan later
+
+        # initial = -999 if "MAX" in column else 999999
+
+        initial = -999999 if "MAX" in column else 999999
+
+        values = np.array([func(val, initial=initial) for val in all_values])
+        values[lengths == 0] = col_values[lengths == 0]
+    else:
+        values = np.array([np.nansum(val) for val in all_values])
+    
+    return index, values
+
 
 def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     """
@@ -912,40 +948,60 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     accumulated_indexes = np.add.accumulate(lengths)[:-1]
     # accumulated_indexes = np.ufunc.accumulate(lengths)[:-1]
     # accumulated_indexes = np.cumsum(lengths)[:-1]
+    accum_results = []
     # Loop and accumulate values
-    for index, column in enumerate(cols, 1):
-        col_values = tbl[column].values.astype("float")
-        all_values = np.split(col_values[indices], accumulated_indexes)
-        if tbl_type == "Ws":
-            # add identity value to each array for full watershed
-            all_values = np.array(
-                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
-                dtype=object,
-            )
+    # for index, column in enumerate(cols, 1):
+    process_start = time.time()
+    accum_results = Parallel(n_jobs=-1)(
+        delayed(accum_values)(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths) for index, column in enumerate(cols, 1)
+    )
+    # for index, column in enumerate(cols, 1):
+    #     accum_results.append(accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths))
+    process_end = time.time()
+    print(f"Finished accumulating {len(coms)} COMIDS for {len(cols)} columns in {process_end - process_start} seconds with {os.cpu_count()} parallel processes")
 
-            # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+    # TODO
+    # Remove all unparallelized code
+        # col_values = tbl[column].values.astype("float")
+        # all_values = np.split(col_values[indices], accumulated_indexes)
+        # if tbl_type == "Ws":
+        #     # add identity value to each array for full watershed
+        #     all_values = np.array(
+        #         [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
+        #         dtype=object,
+        #     )
 
-        if index == 1:
-            area = all_values.copy()
-        if "PctFull" in column:
-            values = [
-                np.average(np.nan_to_num(val), weights=w) # changed from np.ma.average
-                for val, w in zip(all_values, area)
-            ]
-        elif "MIN" in column or "MAX" in column:
-            func = np.max if "MAX" in column else np.min
-            # initial is necessary to eval empty upstream arrays
-            # these values will be overwritten w/ nan later
+        #     # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
 
-            # initial = -999 if "MAX" in column else 999999
+        # if index == 1:
+        #     area = all_values.copy()
+        # if "PctFull" in column:
+        #     values = [
+        #         np.average(np.nan_to_num(val), weights=w) # changed from np.ma.average
+        #         for val, w in zip(all_values, area)
+        #     ]
+        # elif "MIN" in column or "MAX" in column:
+        #     func = np.max if "MAX" in column else np.min
+        #     # initial is necessary to eval empty upstream arrays
+        #     # these values will be overwritten w/ nan later
 
-            initial = -999999 if "MAX" in column else 999999
+        #     # initial = -999 if "MAX" in column else 999999
 
-            values = np.array([func(val, initial=initial) for val in all_values])
-            values[lengths == 0] = col_values[lengths == 0]
-        else:
-            values = np.array([np.nansum(val) for val in all_values])
-        data[:, index] = values
+        #     initial = -999999 if "MAX" in column else 999999
+
+        #     values = np.array([func(val, initial=initial) for val in all_values])
+        #     values[lengths == 0] = col_values[lengths == 0]
+        # else:
+        #     values = np.array([np.nansum(val) for val in all_values])
+    
+        #data[:, index] = values
+    
+    # Extract indices and values
+    all_indices = [index for index, _ in accum_results]
+    all_values = np.array([value for _, value in accum_results]).T
+
+    # Update data using advanced indexing
+    data[:, all_indices] = all_values
     data = data[np.in1d(data[:, 0], coms), :]  # Remove the extra comids
     outDF = pd.DataFrame(data)
     prefix = "UpCat" if tbl_type == "Up" else "Ws"
@@ -1033,6 +1089,7 @@ def createCatStats(
         # arcpy.env.snapRaster = inZoneData
         cellSize = 30
         snapRaster = inZoneData
+        outTable = pd.DataFrame()
         #izd_df = dg.read_file(inZoneData, npartitions=16)
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
@@ -1062,7 +1119,7 @@ def createCatStats(
                     izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
                     
                     outTable = stats(izd_array, ll_array)
-                    outTable.round(2, inplace=True)
+                    outTable = outTable.round(2)
                     #outTable = pd.read_csv('outTable_NE_Canals_rasterio.csv')
 
             try:
@@ -1073,6 +1130,7 @@ def createCatStats(
                     del ll_array
                     # Memory cleanup
                     outTable.to_csv(outTable_path)
+                    table = outTable
                 # else:
                 #     table = dbf2DF(outTable)
             except fiona.errors.DriverError as e:
@@ -1115,7 +1173,7 @@ def createCatStats(
     # except arcpy.ExecuteError:
     #     print("Failing at the ExecuteError!")
     #     print(arcpy.GetMessages(2))
-    table = outTable[1:].drop('Unnamed: 0', axis=1)
+    table = outTable[1:] # .drop('Unnamed: 0', axis=1)
     if mask_dir:
         nhdtbl = dbf2DF(
             f"{NHD_dir}/NHDPlus{hydroregion}/NHDPlus{zone}"
@@ -1398,11 +1456,16 @@ def makeVectors(inter_tbl, nhd):
     """
     os.makedirs("accum_npy", exist_ok=True)
     inputs = nhd_dict(nhd)
-    all_comids = make_all_cat_comids(nhd, inputs)
+    print(inputs)
+    sliced = islice(inputs.items(), 7, 8)
+    inputs = OrderedDict(sliced)
+    all_comids = np.load("accum_npy/allCatCOMs.npz")['all_comids'] # make_all_cat_comids(nhd, inputs)
+    all_comids = set(all_comids.flatten())
 
     #TODO replace 
     # for zone, hr in inputs.items():
     # with parallel processes
+    
     def process_zone(zone, hr, nhd, inter_tbl, all_comids):
         print(f"Making numpy files in zone {zone}\n")
         pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
@@ -1482,7 +1545,7 @@ def nhd_dict(nhd, unit="VPU"):
         # for idx, row in vpu_bounds.iterrows():
         #     inputs[row.UNITID] = row.DRAINAGEID
         inputs = OrderedDict(results)
-        np.save("./accum_npy/vpu_inputs.npy", inputs)
+        np.save("./accum_npy/vpu_inputs.npy", inputs, allow_pickle=True)
         return inputs
 
     if unit == "RPU":

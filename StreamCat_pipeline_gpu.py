@@ -32,7 +32,7 @@ from StreamCat_functions_gpu import Accumulation, AdjustCOMs, PointInPoly, appen
 #     PCT_FULL_FILE_RP100,
 # )
 from config_tables.stream_cat_config import ConfigArgs, DebugArgs
-from database import DatabaseConnection
+#from database import DatabaseConnection
 from itertools import islice
 from collections import OrderedDict
 
@@ -130,7 +130,8 @@ def process_metric(row, config, INPUTS, already_processed, inter_vpu):
         cat.COMID = cat.COMID.astype(accum["comids"].dtype)
         cat.set_index("COMID", inplace=True)
         cat = cat.loc[accum["comids"]].reset_index().copy()
-
+        print(f"Starting Accumulation for {row.FullTableName} in region {zone}")
+        start_accum = time.time()
         up = Accumulation(
             cat, accum["comids"], accum["lengths"], accum["upstream"], "Up"
         )
@@ -138,6 +139,8 @@ def process_metric(row, config, INPUTS, already_processed, inter_vpu):
         ws = Accumulation(
             cat, accum["comids"], accum["lengths"], accum["upstream"], "Ws"
         )
+        end_accum = time.time()
+        print(f"Finished Parallel accumulation in {end_accum - start_accum} seconds")
 
         if zone in inter_vpu.ToZone.values:
             cat = pd.read_csv(f"{config.OUT_DIR}/{row.FullTableName}_{zone}.csv")
@@ -185,25 +188,28 @@ def main(args):
         makeVectors(inter_vpu, config.NHD_DIR)
     
     INPUTS = np.load(config.ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
+    # C:\Users\thudso02\repositories\parallel_streamcat\StreamCat\accum_npy\vpu_inputs.npy
     
     sliced = islice(INPUTS.items(), 7, 8)
     INPUTS = OrderedDict(sliced)
     #INPUTS = OrderedDict([('01', 'NE')])
     already_processed = []
-    metric_results = Parallel(n_jobs=2) (
-        delayed(process_metric)(row, config, INPUTS, already_processed, inter_vpu) for _, row in control_table.query("run == 1").iterrows()
-    )
+    # metric_results = Parallel(n_jobs=2) (
+    #     delayed(process_metric)(row, config, INPUTS, already_processed, inter_vpu) for _, row in control_table.query("run == 1").iterrows()
+    # )
+    for _, row in control_table.query("run == 1").iterrows():
+        metric_results = process_metric(row, config, INPUTS, already_processed, inter_vpu)
 
     for processed in metric_results:
         print(processed)
-        # if already_processed:
-        #     print(
-        #         "\n!!!Processing Problem!!!\n\n"
-        #         f"{', '.join(already_processed)} already run!\n"
-        #         "Be sure to delete the associated files in your `OUTDIR` to rerun:"
-        #         f"\n\t> {config.OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
-        #         f"output used in 'Continuous' and 'Categorical' metrics!!!"
-        # )
+        if processed:
+            print(
+                "\n!!!Processing Problem!!!\n\n"
+                f"{', '.join(already_processed)} already run!\n"
+                "Be sure to delete the associated files in your `OUTDIR` to rerun:"
+                f"\n\t> {config.OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
+                f"output used in 'Continuous' and 'Categorical' metrics!!!"
+        )
     
     # for i, row in control_table.query("run == 1").iterrows():
     #     print(row.FullTableName)
@@ -333,6 +339,9 @@ def main(args):
 
 
 if __name__ == '__main__':
+
+    # test = np.load('C:\\Users\\thudso02\\repositories\\parallel_streamcat\\StreamCat\\accum_npy\\vpu_inputs.npy')
+    # print(test)
     # #TODO move this to a CLI type script called streamcat_cli.py
     # parser = argparse.ArgumentParser()
     # parser.add_argument('control_table', type=str, default='config_tables/ControlTable_StreamCat.csv', help="Path to control table csv")
