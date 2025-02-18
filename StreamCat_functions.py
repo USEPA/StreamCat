@@ -45,6 +45,7 @@ os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
 sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
 import arcpy
 from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
+from joblib import Parallel, delayed
 
 ##############################################################################
 
@@ -855,19 +856,54 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
 
 
 ##############################################################################
+def accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths):
+    # Function used to parallelize accumulation step
+
+    col_values = tbl[column].values.astype("float")
+    all_values = np.split(col_values[indices], accumulated_indexes)
+    if tbl_type == "Ws":
+        # add identity value to each array for full watershed
+        all_values = np.array(
+            [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
+            dtype=object,
+        )
+
+        # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+
+    # if index == 1:
+    area = all_values.copy()
+    if "PctFull" in column:
+        values = [
+            np.ma.average(np.nan_to_num(val), weights=w) # changed from np.ma.average
+            for val, w in zip(all_values, area)
+        ]
+    elif "MIN" in column or "MAX" in column:
+        func = np.max if "MAX" in column else np.min
+        # initial is necessary to eval empty upstream arrays
+        # these values will be overwritten w/ nan later
+
+        # initial = -999 if "MAX" in column else 999999
+
+        initial = -999999 if "MAX" in column else 999999
+
+        values = np.array([func(val, initial=initial) for val in all_values])
+        values[lengths == 0] = col_values[lengths == 0]
+    else:
+        values = np.array([np.nansum(val) for val in all_values])
+    
+    return index, values
 
 
 def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     """
-    __author__ =  "Ryan Hill <hill.ryan@epa.gov>"
-                  "Marc Weber <weber.marc@epa.gov>"
-                  
+    __author__ =  "Marc Weber <weber.marc@epa.gov>"
+                  "Ryan Hill <hill.ryan@epa.gov>"
     Uses the 'Cat' and 'UpCat' columns to caluculate watershed values and returns those values in 'Cat' columns
         so they can be appended to 'CatResult' tables in other zones before accumulation.
 
     Arguments
     ---------
-    arr                   : table containing watershed values
+    tbl                   : table containing watershed values
     comids                : numpy array of all zones comids
     lengths               : numpy array with lengths of upstream comids
     upstream              : numpy array of all upstream arrays for each COMID
@@ -875,7 +911,8 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     icol                  : column in arr object to index
     """
     # RuntimeWarning: invalid value encountered in double_scalars
-    np.seterr(all="ignore")
+    # np.seterr(all="ignore")
+    
     coms = tbl[icol].values.astype("int32")  # Read in comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
     del upstream  # a and indices are big - clean up to minimize RAM
@@ -884,40 +921,62 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     data = np.zeros((len(comids), len(tbl.columns)))
     data[:, 0] = comids  # Define first column as comids
     accumulated_indexes = np.add.accumulate(lengths)[:-1]
+    # accumulated_indexes = np.ufunc.accumulate(lengths)[:-1]
+    # accumulated_indexes = np.cumsum(lengths)[:-1]
+    accum_results = []
     # Loop and accumulate values
-    for index, column in enumerate(cols, 1):
-        col_values = tbl[column].values.astype("float")
-        all_values = np.split(col_values[indices], accumulated_indexes)
-        if tbl_type == "Ws":
-            # add identity value to each array for full watershed
-            all_values = np.array(
-                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
-                dtype=object,
-            )
+    # for index, column in enumerate(cols, 1):
+    process_start = time.time()
+    accum_results = Parallel(n_jobs=-1)(
+        delayed(accum_values)(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths) for index, column in enumerate(cols, 1)
+    )
+    # for index, column in enumerate(cols, 1):
+    #     accum_results.append(accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths))
+    process_end = time.time()
+    print(f"Finished accumulating {len(coms)} COMIDS for {len(cols)} columns in {process_end - process_start} seconds with {os.cpu_count()} parallel processes")
 
-            # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+    # TODO
+    # Remove all unparallelized code
+        # col_values = tbl[column].values.astype("float")
+        # all_values = np.split(col_values[indices], accumulated_indexes)
+        # if tbl_type == "Ws":
+        #     # add identity value to each array for full watershed
+        #     all_values = np.array(
+        #         [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
+        #         dtype=object,
+        #     )
 
-        if index == 1:
-            area = all_values.copy()
-        if "PctFull" in column:
-            values = [
-                np.ma.average(np.nan_to_num(val), weights=w)
-                for val, w in zip(all_values, area)
-            ]
-        elif "MIN" in column or "MAX" in column:
-            func = np.max if "MAX" in column else np.min
-            # initial is necessary to eval empty upstream arrays
-            # these values will be overwritten w/ nan later
+        #     # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
 
-            # initial = -999 if "MAX" in column else 999999
+        # if index == 1:
+        #     area = all_values.copy()
+        # if "PctFull" in column:
+        #     values = [
+        #         np.average(np.nan_to_num(val), weights=w) # changed from np.ma.average
+        #         for val, w in zip(all_values, area)
+        #     ]
+        # elif "MIN" in column or "MAX" in column:
+        #     func = np.max if "MAX" in column else np.min
+        #     # initial is necessary to eval empty upstream arrays
+        #     # these values will be overwritten w/ nan later
 
-            initial = -999999 if "MAX" in column else 999999
+        #     # initial = -999 if "MAX" in column else 999999
 
-            values = np.array([func(val, initial=initial) for val in all_values])
-            values[lengths == 0] = col_values[lengths == 0]
-        else:
-            values = np.array([np.nansum(val) for val in all_values])
-        data[:, index] = values
+        #     initial = -999999 if "MAX" in column else 999999
+
+        #     values = np.array([func(val, initial=initial) for val in all_values])
+        #     values[lengths == 0] = col_values[lengths == 0]
+        # else:
+        #     values = np.array([np.nansum(val) for val in all_values])
+    
+        #data[:, index] = values
+    
+    # Extract indices and values
+    all_indices = [index for index, _ in accum_results]
+    all_values = np.array([value for _, value in accum_results]).T
+
+    # Update data using advanced indexing
+    data[:, all_indices] = all_values
     data = data[np.in1d(data[:, 0], coms), :]  # Remove the extra comids
     outDF = pd.DataFrame(data)
     prefix = "UpCat" if tbl_type == "Up" else "Ws"
@@ -929,7 +988,6 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     no_area_rows, na_columns = (outDF[areaName] == 0), outDF.columns[2:]
     outDF.loc[no_area_rows, na_columns] = np.nan
     return outDF
-
 
 ##############################################################################
 
