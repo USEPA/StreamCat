@@ -116,11 +116,11 @@ for table, metrics in tables.items():
                 cat_colname = row.MetricName + "Cat" + a_m
                 ws_colname = row.MetricName + "Ws" + a_m
                 tbl[cat_colname] = (
-                    tbl["CatSum%s" % a_m] / tbl["CatCount%s" % a_m]
-                ) * row.Conversion
+                    tbl["CatSum%s" % a_m] #/ tbl["CatCount%s" % a_m]
+                ) #* row.Conversion
                 tbl[ws_colname] = (
-                    tbl["WsSum%s" % a_m] / tbl["WsCount%s" % a_m]
-                ) * row.Conversion
+                    tbl["WsSum%s" % a_m] #/ tbl["WsCount%s" % a_m]
+                ) #* row.Conversion
                 if metric_count == 0:
                     final = tbl[front_cols + [cat_colname] + [ws_colname]]
                 else:
@@ -197,7 +197,7 @@ for table, metrics in tables.items():
                     final2.columns = ["COMID"] + cat_named + ws_named
                     final = pd.merge(final, final2, on="COMID")
 
-        final['COMID'] = final.index
+        #final['COMID'] = final.index
         #final = final.set_index("COMID")
         final_table = pa.Table.from_pandas(final)
         pq.write_table(final_table, final_file)

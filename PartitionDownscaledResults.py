@@ -47,11 +47,11 @@ nut = pd.merge(nut, cat_area, how='left', left_on=['COMID'], right_on=['COMID'])
 # select columns - this part we can modify to iterate through columns
 nut.columns = nut.columns.str.replace('_Cat','')
 cols = [i for i in nut.columns if i not in ["COMID", "VPU", "CatAreaSqKm"]]
-
+cols = cols[27:28]
 for col in cols:
     final = nut[['COMID', col, 'CatAreaSqKm', 'VPU']]
     final = final.rename(columns={col: 'CatSum'})
-    final['CatCount'] = final['CatAreaSqKm']
+    final['CatCount'] = 1
     final['CatSum'] = final['CatSum'] * final['CatCount']
     final['CatPctFull'] = 100
     final = final[['COMID', 'CatAreaSqKm', 'CatCount', 'CatSum', 'CatPctFull', 'VPU']]
