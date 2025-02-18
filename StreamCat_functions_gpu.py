@@ -1118,7 +1118,7 @@ def createCatStats(
 
                     izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
                     
-                    outTable = stats(izd_array, ll_array)
+                    outTable = stats(izd_array, ll_array, return_type='pandas.DataFrame')
                     outTable = outTable.round(2)
                     #outTable = pd.read_csv('outTable_NE_Canals_rasterio.csv')
 
