@@ -54,6 +54,7 @@ from stream_cat_config import (
 
 from StreamCat_functions import (
     Accumulation,
+    accum_values,
     AdjustCOMs,
     PointInPoly,
     appendConnectors,
@@ -63,6 +64,7 @@ from StreamCat_functions import (
     mask_points,
     nhd_dict,
 )
+
 
 # Load table of layers to be run...
 ctl = pd.read_csv(control)
@@ -87,8 +89,7 @@ INPUTS = np.load(ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 
 already_processed = []
 
-# for _, row in ctl.query("run == 1").iterrows():
-
+#for _, row in ctl.query("run == 1").iterrows():
 def process_row(row):
     apm = "" if row.AppendMetric == "none" else row.AppendMetric
     if row.use_mask == 1:
@@ -125,8 +126,8 @@ def process_row(row):
             end="",
             flush=True,
         )
-        #for zone, hydroregion in INPUTS.items():
-        def zonal_stats(zone, hydroregion, row, OUT_DIR, NHD_DIR):
+        for zone, hydroregion in INPUTS.items():
+        #def zonal_stats(zone, hydroregion, row, OUT_DIR, NHD_DIR):
             if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
                 print(zone, end=", ", flush=True)
                 pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
@@ -154,9 +155,9 @@ def process_row(row):
                         points, zone, izd, pct_full, mask_dir, apm, summary
                     )
                 cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
-        zonal_results = Parallel(os.cpu_count()/2)(
-            delayed(zonal_stats)(zone, hydroregion, row, OUT_DIR, NHD_DIR) for zone, hydroregion in INPUTS.items()
-        )
+        #zonal_results = Parallel(os.cpu_count()/2)(
+            #delayed(zonal_stats)(zone, hydroregion, row, OUT_DIR, NHD_DIR) for zone, hydroregion in INPUTS.items()
+        #)
         print("done!")
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:

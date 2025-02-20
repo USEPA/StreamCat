@@ -41,11 +41,10 @@ import fiona
 import geopandas as gpd
 from geopandas.tools import sjoin
 
-# os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
-# sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
-# import arcpy
-# from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
-
+os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
+sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
+import arcpy
+from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 from joblib import Parallel, delayed
 
 ##############################################################################
@@ -857,9 +856,9 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
 
 
 ##############################################################################
-
 def accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths):
     # Function used to parallelize accumulation step
+
     col_values = tbl[column].values.astype("float")
     all_values = np.split(col_values[indices], accumulated_indexes)
     if tbl_type == "Ws":
@@ -989,8 +988,6 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     no_area_rows, na_columns = (outDF[areaName] == 0), outDF.columns[2:]
     outDF.loc[no_area_rows, na_columns] = np.nan
     return outDF
-
-
 
 ##############################################################################
 
