@@ -51,6 +51,7 @@ from stream_cat_config import (
     PCT_FULL_FILE_RP100,
     #SKIP_AQUIRING_CATSTATS
 )
+
 from StreamCat_functions import (
     Accumulation,
     AdjustCOMs,
@@ -72,11 +73,11 @@ inter_vpu = pd.read_csv("InterVPU.csv")
 # Skip to accumulation if PartitionDownscaledResults ran
 skip_aquiring_catstats = True
 
-if not os.path.exists(OUT_DIR):
-    os.mkdir(OUT_DIR)
+# if not os.path.exists(OUT_DIR):
+#     os.mkdir(OUT_DIR)
 
-if not os.path.exists(OUT_DIR + "/DBF_stash"):
-    os.mkdir(OUT_DIR + "/DBF_stash")
+# if not os.path.exists(OUT_DIR + "/DBF_stash"):
+#     os.mkdir(OUT_DIR + "/DBF_stash")
 
 if not os.path.exists(ACCUM_DIR):
     # TODO: work out children OR bastards only
@@ -209,6 +210,9 @@ def process_row(row):
             f"output used in 'Continuous' and 'Categorical' metrics!!!"
         )
 
-row_results = Parallel(n_jobs=os.cpu_count/2)(
-    delayed(process_row)(row) for _, row in ctl.query("run == 1").iterrows()
-)
+# row_results = Parallel(n_jobs=os.cpu_count/2)(
+#     delayed(process_row)(row) for _, row in ctl.query("run == 1").iterrows()
+# )
+if __name__ == '__main__':
+    for _, row in ctl.query("run == 1").iterrows():
+        process_row(row)
