@@ -53,7 +53,7 @@ from stream_cat_config import (
 )
 from StreamCat_functions import (
     Accumulation,
-    accum_values,
+    #accum_values,
     AdjustCOMs,
     PointInPoly,
     appendConnectors,
