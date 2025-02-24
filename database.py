@@ -141,7 +141,7 @@ class DatabaseConnection():
             if 'distinct' in function.keys():
                 query = text(f"SELECT DISTINCT({col_str}) FROM {table_name}")
             elif 'count' in function.keys():
-                col_str += f'COUNT({function['count']})' #TODO reorganize function to do something like this then add FROM then do any function that would happen after FROM like groupby and orderby
+                col_str += f"COUNT({function['count']})" #TODO reorganize function to do something like this then add FROM then do any function that would happen after FROM like groupby and orderby
                 query = text(f"SELECT {col_str} FROM {table_name}")
             elif 'orderby' in function.keys():
                 query = text(f"SELECT {col_str} FROM {table_name} ORDER BY {function['orderby']}")
@@ -796,7 +796,7 @@ class DatabaseConnection():
 
 
         # Need to make full metric name array then use those to update the column names
-        dataset_table_name = f'{prefix}_ds_{tg_info['dsid']}'
+        dataset_table_name = f"{prefix}_ds_{tg_info['dsid']}"
         dataset_table = self.metadata.tables[dataset_table_name]
         alter_table_results = []
         for year in tg_info['year']:
