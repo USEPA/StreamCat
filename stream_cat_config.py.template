@@ -18,6 +18,9 @@ STATES_FILE = "/path/to/file/tl_2008_us_state.shp"
 
 ACCUM_DIR = "path/to/local/repository/accump_npy/"
 
+# to run other than all NHD zones, set this dict to e.g. {"04": "GL", "12": "TX"}
+# keys are UnitID and values are DrainageID, see ...\NHDPlusGlobalData\BoundaryUnit.dbf
+USER_ZONES = {}
 
 # location to write out accumulated StreamCat data <- this is intermediate
 OUT_DIR = "/path/to/write/out/files/to"

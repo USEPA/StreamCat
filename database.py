@@ -117,7 +117,7 @@ class DatabaseConnection():
                 result = str(query.compile(dialect=self.engine.dialect, compile_kwargs={"literal_binds": True}))
 
             #print(result)
-            with open(f'db_updates_{datetime.today().strftime("%m_%d_%Y")}.sql', 'a') as db_file:
+            with open(f'logs/db_updates_{datetime.today().strftime("%m_%d_%Y")}.sql', 'a') as db_file:
                 db_file.write(result + ';\n')
         return result, self.execute # Return statement and whether or not it was executed
     
@@ -267,7 +267,7 @@ class DatabaseConnection():
             return True
         
     def CreateTableFromFile(self, table_name, file_path):
-        df = pd.read_csv(file_path)
+        df = pd.read_parquet(file_path)
         result = self.CreateNewTable(table_name, df)
         if result:
             return True
@@ -300,7 +300,7 @@ class DatabaseConnection():
         
         if self.inspector.has_table(table_name):
             table = self.metadata.tables[table_name]
-            query = insert(table).values(values).returning(*table.c)
+            query = insert(table).values(values) # .returning(*table.c)
             result, executed = self.RunQuery(query)
             if executed:
                 return result.fetchall()
@@ -387,7 +387,7 @@ class DatabaseConnection():
         # Then BULK INSERT
         # Else if some
         # BULK UPDATE
-        df = pd.read_csv(file_path)
+        df = pd.read_parquet(file_path)
         if self.inspector.has_table(table_name):
             table = self.metadata.tables[table_name]
             if all(table.c) in df.columns:
@@ -609,11 +609,11 @@ class DatabaseConnection():
             files = files.split(', ')
         
         if isinstance(files, list):
-            dfs = [pd.read_csv(path) for path in files]
+            dfs = [pd.read_parquet(path) for path in files]
             df = pd.concat(dfs)
             # dsname = files[0].split('/')[-1].removesuffix('.csv')
         else:
-            df = pd.read_csv(files)
+            df = pd.read_parquet(files)
             # dsname = files.split('/')[-1].removesuffix('.csv')
 
         # if '_' in dsname:
@@ -634,15 +634,10 @@ class DatabaseConnection():
             list: all metrics found in dataset tables
         """
         full_available_metrics = []
-        if partition.lower() == 'streamcat':
-            prefix = 'sc_ds'
-        elif partition.lower() == 'lakecat':
-            prefix = 'lc_ds'
-        else:
-            ValueError("Invalid partition, needs to be either streamcat or lakecat")
-
+        prefix = "sc_ds" if partition == 'streamcat' else 'lakecat'
+        
         for table in self.metadata.sorted_tables:
-            if 'sc_ds' in table.name:
+            if prefix in table.name:
                 columns = table.columns
                 # print(columns.keys())
                 for col in columns.keys():
@@ -650,9 +645,10 @@ class DatabaseConnection():
                     full_available_metrics.append(col_name)
         return full_available_metrics
 
-    def FindMissingMetrics(self):
-        full_available_metrics = self.FindAllMetrics()
-        names = pd.read_sql('SELECT metricname FROM SC_METRICS', con=self.engine)
+    def FindMissingMetrics(self, partition):
+        prefix = "sc" if partition == 'streamcat' else 'lakecat'
+        full_available_metrics = self.FindAllMetrics(partition)
+        names = pd.read_sql(f'SELECT metricname FROM {prefix}_metrics', con=self.engine)
         current_metric_names = names['metricname'].apply(lambda x: str(x).lower())
         missing_from_sc_metrics = set(full_available_metrics) - set(current_metric_names)
         return ''.join(missing_from_sc_metrics) # could return just the set as well
@@ -714,7 +710,11 @@ class DatabaseConnection():
     #     return row
 
     def GetAllDatasetNames(self):
+        """Utility function to get all dataset names in streamcat and lakecat. Used in GUI to select datasets to update.
 
+        Returns:
+            list: all dataset names (dsname) from sc_datasets and lc_datasets tables
+        """
         sc_dsnames = []
         lc_dsnames = []
         sc_select_stmt = text("SELECT dsname FROM sc_datasets")
@@ -728,6 +728,25 @@ class DatabaseConnection():
             lc_dsnames.append(row._t[0])
         
         return sc_dsnames + lc_dsnames
+    
+    def GetDatasetTableByMetricName(self, metric_name: str, partition: str) -> str:
+        """Get table name of dataset given the metric name in said dataset
+
+        Args:
+            metric_name (str): the metric to query
+            partition (str): either 'streamcat' or 'lakecat' lets us know to search for sc_ds table or lc_ds table
+
+        Returns:
+            ds_tablename (str): the tablename row from the datasets table where metric
+        """
+        prefix = "sc" if partition == 'streamcat' else "lc"
+        dataset_info_tablename = f"{prefix}_datasets"
+        result = self.SelectColWhere(dataset_info_tablename, "dsid", {"metric_alias": metric_name.lower()})
+        for row in result:
+            dsid = row._t[0]
+        ds_tablename = f"{prefix}_ds_{dsid}"
+        return ds_tablename
+
     
     def UpdateMetricName(self, partition, old_name, new_name):
         # call this in the edit metric info fucntion if name is updated. 
@@ -870,3 +889,4 @@ class DatabaseConnection():
         }
         result = self.InsertRow(table_name, values)
         return result
+    
