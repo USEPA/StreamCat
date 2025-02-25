@@ -267,6 +267,15 @@ class DatabaseConnection():
             return True
         
     def CreateTableFromFile(self, table_name, file_path):
+        """_summary_
+
+        Args:
+            table_name (_type_): _description_
+            file_path (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         df = pd.read_parquet(file_path)
         result = self.CreateNewTable(table_name, df)
         if result:
