@@ -1,6 +1,8 @@
 from database import DatabaseConnection
 import customtkinter as ctk
 from CTkListbox import *
+from CTkMessagebox import CTkMessagebox
+
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
@@ -233,6 +235,9 @@ class DbUpdatesFrame(ctk.CTkToplevel):
         change_desc = self.internal_update_entry.get()
         public_desc = self.public_update_entry.get()
         partition = self.partition_var.get()
+        if change_desc == '' or partition == '':
+            self.parent.warning_box("An internal database change is required")
+            return 
         result = db_conn.newChangelogRow(partition, public_desc, change_desc)
         
     
@@ -315,16 +320,15 @@ class CreateDatasetFrame(ctk.CTkScrollableFrame):
         dsname = self.dataset_entry.get()
         visible = self.visible_var.get()
         active = 1 if visible == 'visible' else 0
-        progressbar.start()
+        if partition == '' or dsname == '' or active == '' or files == '':
+            self.parent.warning_box("All fields must be filled out!")
+            return 
         ds_result, metric_result, display_result = db_conn.CreateDatasetFromFiles(partition, dsname, files, active)
-        progressbar.stop()
-        # print(ds_result)
-        # print(metric_result)
-        # print(display_result)
+        
         results = (ds_result, metric_result, display_result)
         self.results_window = DbResultsFrame(self, results)
         self.results_window.focus()
-        #after this move to the create metric info frame.
+        # after this move to the create metric info frame.
         # prepopulate final table (dataset name) and dsid from this functions results
         known_info = {}
         known_info['final_table'] = self.dataset_entry.get()
@@ -371,6 +375,9 @@ class CreateTableFrame(ctk.CTkScrollableFrame):
     def create_table(self):
         table_name = self.table_name_entry.get()
         files = self.files_entry.get()
+        if table_name == '' or files == '':
+            self.parent.warning_box("All fields must be filled out and at least one file must be uploaded!")
+            return 
         results = db_conn.CreateTableFromFile(table_name, files)
 
         self.results_window = DbResultsFrame(self, results)
@@ -436,6 +443,9 @@ class RenameStreamCatMetricFrame(ctk.CTkScrollableFrame):
         partition = self.partition_var.get()
         old_name = self.metric_name_var.get()
         new_name = self.new_name.get()
+        if old_name == '' or new_name == '' or partition == '':
+            self.parent.warning_box("All fields must be filled out!")
+            return 
         results = db_conn.UpdateMetricName(partition, old_name, new_name)
 
         self.results_window = DbResultsFrame(self, results)
@@ -479,19 +489,11 @@ class ActivateDatasetFrame(ctk.CTkScrollableFrame):
         options = []
         if self.partition_var.get() == 'both':
             options = db_conn.GetAllDatasetNames()
-            
-            
         else:
             table = 'sc_datasets' if self.partition_var.get() == 'streamcat' else 'lc_datasets'
             dsnames = db_conn.SelectColsFromTable(['dsname'], table)
             for row in dsnames:
                 options.append(row._t[0])
-        # full_list = list(db_conn.metadata.tables.keys())
-        # if self.partition_var.get() == 'both':
-        #     return full_list
-        
-        # prefix = 'sc_ds' if self.partition_var.get() == 'streamcat' else 'lc_ds'
-        # options = [x for x in full_list if x.startswith(prefix)]
         return options
 
     def get_current_active_value(self, choice):
@@ -506,6 +508,9 @@ class ActivateDatasetFrame(ctk.CTkScrollableFrame):
     def update_active_dataset(self):
         dsname = self.dsname_var.get()
         partition = self.partition_var.get()
+        if dsname == '' or partition == '':
+            self.parent.warning_box("All fields must be filled out!")
+            return 
         results = db_conn.UpdateActiveDataset(dsname, partition)
 
         self.results_window = DbResultsFrame(self, results)
@@ -564,6 +569,9 @@ class UpdateTableFrame(ctk.CTkScrollableFrame):
     def update_table(self):
         table_name = self.table_var.get()
         file = self.files_entry.get()
+        if table_name == '' or file == '':
+            self.parent.warning_box("All fields must be filled out and file must be uploaded!")
+            return 
         results = db_conn.BulkInsertFromFile(table_name, file)
 
         self.results_window = DbResultsFrame(self, results)
@@ -713,6 +721,10 @@ class CreateMetricInfoFrame(ctk.CTkScrollableFrame):
         metric_data['source_url'] = self.source_url_entry.get()
         metric_data['date_downloaded'] = self.date_entry.get()
         metric_data['dsid'] = self.dsid_entry.get()
+
+        if not all(metric_data.values()):
+            self.parent.warning_box("All fields must be filled out!")
+            return 
         results = db_conn.InsertRow(table_name, metric_data)
 
         self.results_window = DbResultsFrame(self, results)
@@ -795,6 +807,9 @@ class EditMetricInfoFrame(ctk.CTkScrollableFrame):
         col_name = self.tg_col_var.get()
         metric_name = self.metric_name_var.get()
         new_val = self.new_val_entry.get()
+        if col_name == '' or metric_name == '' or new_val == '':
+            self.parent.warning_box("All fields must be filled out!")
+            return 
         results = db_conn.UpdateRow(table_name, col_name, 'metric_name', metric_name, new_val)
 
         self.results_window = DbResultsFrame(self, results)
@@ -803,6 +818,47 @@ class EditMetricInfoFrame(ctk.CTkScrollableFrame):
         self.updates_window = DbUpdatesFrame(self)
         self.updates_window.focus()
 
+class CreateChangelogFrame(ctk.CTkScrollableFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+
+        self.label = ctk.CTkLabel(self, text="Database Update Form")
+        self.label.pack(side=ctk.TOP, padx=20, pady=20)
+
+        self.partition_label = ctk.CTkLabel(self, text="Is this update for streamcat or lakecat?")
+        self.partition_label.pack(padx=10, pady=5)
+        self.partition_var = ctk.StringVar()
+        self.partition_var.set('streamcat')
+        self.partition_radio_streamcat = ctk.CTkRadioButton(self, text="StreamCat", variable=self.partition_var, value='streamcat')
+        self.partition_radio_streamcat.pack(padx=10, pady=5)
+        self.partition_radio_lakecat = ctk.CTkRadioButton(self, text="LakeCat", variable=self.partition_var, value='lakecat')
+        self.partition_radio_lakecat.pack(padx=10, pady=5)
+
+        self.internal_update_label = ctk.CTkLabel(self, text="Internal database update (what changes did you make?): ")
+        self.internal_update_label.pack(padx=10, pady=5)
+
+        self.internal_update_entry = ctk.CTkEntry(self, width=280, placeholder_text='No database change this is for the public updates drupal page.') # maybe change to textbox
+        self.internal_update_entry.pack(padx=10, pady=5)
+
+        self.public_update_label = ctk.CTkLabel(self, text="Public database update, this will be displayed on the streamcat or lakecat updates webpage, be specific: ")
+        self.public_update_label.pack(padx=10, pady=5)
+
+        self.public_update_entry = ctk.CTkEntry(self, width=280) # maybe change to textbox
+        self.public_update_entry.pack(padx=10, pady=5)
+
+        self.submit_button = ctk.CTkButton(self, text="Submit", command=self.add_to_changelog)
+        self.submit_button.pack(fill=ctk.X, padx=10, pady=5)
+
+    def add_to_changelog(self):
+        change_desc = self.internal_update_entry.get()
+        public_desc = self.public_update_entry.get()
+        partition = self.partition_var.get()
+        if len(public_desc) == 0 or len(change_desc) == 0:
+            CTkMessagebox(self, title="Missing required fields", message="All fields are required to be filled out for this form", icon="warning")
+        else:     
+            result = db_conn.newChangelogRow(partition, public_desc, change_desc)
+            print(result)
 
 class DatabaseApp(ctk.CTk):
     def __init__(self):
@@ -828,7 +884,8 @@ class DatabaseApp(ctk.CTk):
             'Activate/Deactivate Dataset',
             'Add File Data to Table',
             'Create Metric Info',
-            'Edit Metric Info'
+            'Edit Metric Info',
+            'Create Public Update'
         ]
         self.action_var.set(self.actions[0]) # could add a default / info frame to be actions[0] called '--'
         self.action_dropdown = ctk.CTkComboBox(self, width=200, variable=self.action_var, values=self.actions)
@@ -861,6 +918,8 @@ class DatabaseApp(ctk.CTk):
                 self.action_frames[action] = CreateMetricInfoFrame(self)
             elif action == 'Edit Metric Info':
                 self.action_frames[action] = EditMetricInfoFrame(self)
+            elif action == 'Create Public Update':
+                self.action_frames[action] = CreateChangelogFrame(self)
             
 
         if self.current_frame:
@@ -868,6 +927,9 @@ class DatabaseApp(ctk.CTk):
 
         self.current_frame = self.action_frames[action]
         self.current_frame.pack(fill='both', expand=True)
+
+    def warning_box(self, message):
+        CTkMessagebox(self, title="Warning!", message=message, icon="warning")
 
 if __name__ == '__main__':
     db_conn = DatabaseConnection()

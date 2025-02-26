@@ -21,6 +21,7 @@ import os
 import sys
 import time
 from collections import OrderedDict, defaultdict, deque
+from pathlib import Path
 from typing import Generator
 
 import numpy as np
@@ -61,8 +62,9 @@ class LicenseError(Exception):
 
 def UpcomDict(nhd, interVPUtbl, zone):
     """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
+    __author__ = "Marc Weber <weber.marc@epa.gov>"
+                 "Ryan Hill <hill.ryan@epa.gov>"
+                 
 
     Creates a dictionary of all catchment connections in a major NHDPlus basin.
     For example, the function combines all from-to typology tables in the Mississippi
@@ -111,8 +113,9 @@ def UpcomDict(nhd, interVPUtbl, zone):
 
 def children(token, tree, chkset=None):
     """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
+    __author__ = "Marc Weber <weber.marc@epa.gov>"
+                 "Ryan Hill <hill.ryan@epa.gov>"
+                 
     returns a list of every child
 
     Arguments
@@ -141,8 +144,9 @@ def children(token, tree, chkset=None):
 
 def bastards(token, tree):
     """
-    __author__ = "Ryan Hill <hill.ryan@epa.gov>"
-                 "Marc Weber <weber.marc@epa.gov>"
+    __author__ = "Marc Weber <weber.marc@epa.gov>"
+                 "Ryan Hill <hill.ryan@epa.gov>"
+                 
     returns a list of every child w/ out father (key) included
 
     Arguments
@@ -897,8 +901,9 @@ def accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, len
 
 def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     """
-    __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                  "Ryan Hill <hill.ryan@epa.gov>"
+    __author__ =  "Ryan Hill <hill.ryan@epa.gov>"
+                  "Marc Weber <weber.marc@epa.gov>"
+                  
     Uses the 'Cat' and 'UpCat' columns to caluculate watershed values and returns those values in 'Cat' columns
         so they can be appended to 'CatResult' tables in other zones before accumulation.
 
@@ -993,16 +998,18 @@ def createCatStats(
         arcpy.env.snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
+                landscape_layer = Path(LandscapeLayer).stem  # / vs. \ agnostic
                 outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
                     out_dir,
-                    LandscapeLayer.split("/")[-1].split(".")[0],
+                    landscape_layer,
                     appendMetric,
                     zone,
                 )
             else:
+                landscape_layer = Path(LandscapeLayer).name  # / vs. \ agnostic
                 outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
                     out_dir,
-                    LandscapeLayer.split("/")[-1],
+                    landscape_layer,
                     appendMetric,
                     zone,
                 )
@@ -1341,7 +1348,7 @@ def processZone(zone, hr, nhd, inter_tbl, all_comids):
         upstream=upstream,
     )
 
-def makeNumpyVectors(inter_tbl, nhd):
+def makeNumpyVectors(inter_tbl, nhd, user_zones):
     """
     Uses the NHD tables to create arrays of upstream catchments which are used
     in the Accumulation function
@@ -1352,7 +1359,8 @@ def makeNumpyVectors(inter_tbl, nhd):
     nhd         : directory where NHD is stored
     """
     os.makedirs("accum_npy", exist_ok=True)
-    inputs = nhd_dict(nhd)
+    inputs = nhd_dict(nhd, user_zones=user_zones)
+
     all_comids = make_all_cat_comids(nhd, inputs)
     print(f"Making numpy files for zones {inputs.keys()}: ")
 
@@ -1370,7 +1378,7 @@ def makeNumpyVectors(inter_tbl, nhd):
 ##############################################################################
 
 
-def nhd_dict(nhd, unit="VPU"):
+def nhd_dict(nhd, unit="VPU", user_zones=None):
     """
     __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
     Creates an OrderdDict for looping through regions of the NHD to carry
@@ -1387,7 +1395,12 @@ def nhd_dict(nhd, unit="VPU"):
     """
 
     inputs = OrderedDict()
+    if user_zones:  # Use user specified zones
+        inputs |= user_zones
+        np.save("./accum_npy/vpu_inputs.npy", inputs)
+        return inputs
     bounds = dbf2DF(f"{nhd}/NHDPlusGlobalData/BoundaryUnit.dbf")
+    # Drop Hawaii and Cayman Islands.
     remove = bounds.loc[bounds.DRAINAGEID.isin(["HI", "CI"])].index
     bounds = bounds.drop(remove, axis=0)
     if unit == "VPU":
@@ -1439,7 +1452,9 @@ def findUpstreamNpy(zone, com, numpy_dir):
 
 
 def dbf2DF(f, upper=True):
-    data = gpd.read_file(f).drop("geometry", axis=1)
+    data = gpd.read_file(f)
+    if "geometry" in data:
+        data.drop("geometry", axis=1, inplace=True)
     if upper is True:
         data.columns = data.columns.str.upper()
     return data
