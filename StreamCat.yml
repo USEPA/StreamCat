@@ -1,335 +1,342 @@
-# This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file>
-# platform: win-64
-@EXPLICIT
-https://conda.anaconda.org/esri/win-64/arcgispro-3.1-0.tar.bz2
-https://conda.anaconda.org/esri/win-64/arrow-1.0.1-4.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/blas-1.0-mkl.conda
-https://conda.anaconda.org/esri/win-64/icc_rt-2019.0.5-arcgispro_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/intel-openmp-2020.0-arcgispro_166.tar.bz2
-https://conda.anaconda.org/esri/win-64/libbrotlicommon-1.0.9-0.conda
-https://conda.anaconda.org/esri/win-64/libsodium-1.0.18-5.conda
-https://conda.anaconda.org/esri/win-64/lz4-c-1.9.4-0.conda
-https://conda.anaconda.org/esri/win-64/nlohmann_json-3.7.0-2.tar.bz2
-https://conda.anaconda.org/esri/win-64/openssl-1.1.1n-0.tar.bz2
-https://conda.anaconda.org/esri/win-64/pybind11-2.7.1-1.tar.bz2
-https://conda.anaconda.org/esri/win-64/pybind11_json-0.2.6-3.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/tzdata-2023c-h04d1e81_0.conda
-https://conda.anaconda.org/esri/win-64/vs2015_runtime-14.27.29016-h5e58377_2.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/winpty-0.4.3-4.conda
-https://conda.anaconda.org/esri/win-64/xeus-0.24.1-8.tar.bz2
-https://conda.anaconda.org/esri/win-64/xeus-python-0.8.2-10.tar.bz2
-https://conda.anaconda.org/esri/win-64/xtl-0.6.15-1.tar.bz2
-https://conda.anaconda.org/esri/win-64/geos-3.5.0-arcgispro_2.tar.bz2
-https://conda.anaconda.org/esri/win-64/libbrotlidec-1.0.9-0.conda
-https://conda.anaconda.org/esri/win-64/libbrotlienc-1.0.9-0.conda
-https://conda.anaconda.org/esri/win-64/mkl-2020.0-arcgispro_167.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/vc-14.2-h21ff451_1.conda
-https://conda.anaconda.org/esri/win-64/zeromq-4.3.4-1.conda
-https://conda.anaconda.org/esri/win-64/brotli-bin-1.0.9-0.conda
-https://conda.anaconda.org/esri/win-64/cppzmq-4.4.1-4.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/icu-58.2-ha925a31_3.conda
-https://conda.anaconda.org/esri/win-64/jpeg-9e-0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/krb5-1.19.4-h5b6d351_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/libdeflate-1.17-h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/libspatialindex-1.9.3-h6c2663c_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/libssh2-1.10.0-hcd4344a_0.conda
-https://conda.anaconda.org/esri/win-64/sqlite-3.41.2-0.conda
-https://repo.anaconda.com/pkgs/main/win-64/xz-5.4.2-h8cc25b3_0.conda
-https://conda.anaconda.org/esri/win-64/yaml-0.2.5-0.tar.bz2
-https://conda.anaconda.org/esri/win-64/zlib-1.2.13-0.tar.bz2
-https://conda.anaconda.org/esri/win-64/zlib-ng-2.0.7-0.conda
-https://conda.anaconda.org/esri/win-64/brotli-1.0.9-0.conda
-https://repo.anaconda.com/pkgs/main/win-64/libcurl-8.2.1-h86230a5_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/libpng-1.6.39-h8cc25b3_0.conda
-https://conda.anaconda.org/esri/win-64/libprotobuf-3.19.4-0.tar.bz2
-https://conda.anaconda.org/esri/win-64/libxml2-2.10.4-arcgispro_0.conda
-https://conda.anaconda.org/esri/win-64/python-3.9.11-2.tar.bz2
-https://conda.anaconda.org/esri/win-64/zstd-1.5.5-0.conda
-https://repo.anaconda.com/pkgs/main/noarch/affine-2.3.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/alabaster-0.7.12-pyhd3eb1b0_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/appdirs-1.4.4-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/win-64/arrow-cpp-11.0.0-0.conda
-https://repo.anaconda.com/pkgs/main/noarch/atomicwrites-1.4.0-py_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/attrs-23.1.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/backcall-0.2.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/blinker-1.4-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/cachetools-4.2.2-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/certifi-2023.7.22-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/chardet-4.0.0-py39haa95532_1003.conda
-https://repo.anaconda.com/pkgs/main/noarch/charset-normalizer-2.0.4-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/cloudpickle-2.2.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/colorama-0.4.6-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/cycler-0.11.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/debugpy-1.6.7-py39hd77b12b_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/decorator-5.1.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/defusedxml-0.7.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/diff-match-patch-20200713-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/docutils-0.18.1-py39haa95532_3.conda
-https://repo.anaconda.com/pkgs/main/win-64/entrypoints-0.4-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/et_xmlfile-1.1.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/exceptiongroup-1.0.0rc9-pyhd8ed1ab_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/executing-0.8.3-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/win-64/freetype-2.12.1-4.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/fsspec-2023.9.2-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/future-0.18.2-py39_2.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/greenlet-2.0.1-py39hd77b12b_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/heapdict-1.0.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/idna-3.4-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/imagesize-1.4.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/inflection-0.5.1-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/iniconfig-1.1.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/ipython_genutils-0.2.0-pyhd3eb1b0_1.conda
-https://repo.anaconda.com/pkgs/main/noarch/isort-5.9.3-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/jdcal-1.4.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/joblib-1.2.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/json5-0.9.5-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyterlab_widgets-3.0.3-py_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/kiwisolver-1.4.4-py39hd77b12b_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/lazy-object-proxy-1.6.0-py39h2bbff1b_0.conda
-https://conda.anaconda.org/esri/win-64/libtiff-4.5.1-0.conda
-https://conda.anaconda.org/esri/win-64/libxslt-1.1.37-3.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/locket-1.0.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/lz4-3.1.3-py39h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/markupsafe-2.1.1-py39h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/mccabe-0.6.1-py39haa95532_2.conda
-https://repo.anaconda.com/pkgs/main/win-64/mistune-2.0.4-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/mpmath-1.2.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/msgpack-python-1.0.3-py39h59b6b97_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/munkres-1.1.4-py_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/mypy_extensions-1.0.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/nest-asyncio-1.5.6-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/networkx-3.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/nose-1.3.7-pyhd3eb1b0_1008.conda
-https://conda.anaconda.org/esri/win-64/numpy-base-1.20.1-py39_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/olefile-0.46-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/packaging-23.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/pandocfilters-1.5.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/parso-0.8.3-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/pathspec-0.9.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/pickleshare-0.7.5-pyhd3eb1b0_1003.conda
-https://repo.anaconda.com/pkgs/main/win-64/platformdirs-3.10.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/pluggy-1.0.0-py39haa95532_1.conda
-https://repo.anaconda.com/pkgs/main/noarch/poyo-0.5.0-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/prometheus_client-0.8.0-py_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/protobuf-3.19.4-py39_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/psutil-5.9.0-py39h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/ptyprocess-0.7.0-pyhd3eb1b0_2.conda
-https://repo.anaconda.com/pkgs/main/noarch/pure_eval-0.2.2-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/pycodestyle-2.7.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/pycparser-2.21-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/pyflakes-2.3.1-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/pyjwt-2.4.0-py_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/pyodbc-4.0.34-py39hd77b12b_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/pyparsing-3.0.9-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/pypdf2-1.26.0-py_4.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/pyrsistent-0.18.0-py39h196d8e1_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/pyshp-2.1.3-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/python-fastjsonschema-2.16.2-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/python_abi-3.9-1_cp39.tar.bz2
-https://conda.anaconda.org/esri/win-64/pytz-2022.6-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/pywin32-ctypes-0.2.0-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/pywin32-security-302-py39_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/pyyaml-6.0-py39h2bbff1b_1.conda
-https://repo.anaconda.com/pkgs/main/noarch/qdarkstyle-3.0.2-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/qt-5.9.7-vc14h73c81de_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/regex-2022.7.9-py39h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/rtree-1.0.1-py39h2eaa2aa_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/send2trash-1.8.0-pyhd3eb1b0_1.conda
-https://conda.anaconda.org/esri/win-64/setuptools-67.7.2-py39_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/sip-4.19.13-py39hd77b12b_0.conda
-https://conda.anaconda.org/esri/noarch/six-1.16.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/sniffio-1.2.0-py39haa95532_1.conda
-https://repo.anaconda.com/pkgs/main/noarch/snowballstemmer-2.2.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/sortedcontainers-2.4.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/soupsieve-2.4-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/sphinxcontrib-applehelp-1.0.2-pyhd3eb1b0_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/sphinxcontrib-devhelp-1.0.2-pyhd3eb1b0_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/sphinxcontrib-htmlhelp-2.0.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/sphinxcontrib-jsmath-1.0.1-pyhd3eb1b0_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/sphinxcontrib-qthelp-1.0.3-pyhd3eb1b0_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/sphinxcontrib-serializinghtml-1.1.5-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/tblib-1.7.0-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/testpath-0.5.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/text-unidecode-1.3-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/textdistance-4.2.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/threadpoolctl-2.2.0-pyh0d69192_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/toml-0.10.2-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/tomli-2.0.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/toolz-0.11.2-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/tornado-6.1-py39h2bbff1b_0.conda
-https://conda.anaconda.org/esri/noarch/traitlets-5.5.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/typed-ast-1.4.3-py39h2bbff1b_1.conda
-https://repo.anaconda.com/pkgs/main/win-64/typing_extensions-4.7.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/ujson-5.4.0-py39hd77b12b_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/unidecode-1.2.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/wcwidth-0.2.5-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/webencodings-0.5.1-py39haa95532_1.conda
-https://repo.anaconda.com/pkgs/main/win-64/wheel-0.41.2-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/widgetsnbextension-3.6.1-py_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/win_inet_pton-1.1.0-py39_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/wincertstore-0.2-py39haa95532_2.conda
-https://conda.anaconda.org/esri/win-64/winkerberos-0.8.0-py39_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/wrapt-1.14.1-py39h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/xlrd-2.0.1-pyhd3eb1b0_1.conda
-https://repo.anaconda.com/pkgs/main/win-64/xlwt-1.3.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/xyzservices-2022.9.0-py39haa95532_1.conda
-https://repo.anaconda.com/pkgs/main/noarch/yapf-0.31.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/zipp-3.11.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/anyio-3.5.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/astroid-2.5-py39haa95532_1.conda
-https://repo.anaconda.com/pkgs/main/noarch/asttokens-2.0.5-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/autopep8-1.6.0-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/win-64/babel-2.11.0-py39_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/beautifulsoup4-4.12.2-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/binaryornot-0.4.4-pyhd3eb1b0_1.conda
-https://repo.anaconda.com/pkgs/main/noarch/bleach-4.1.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/cffi-1.15.1-py39h2bbff1b_3.conda
-https://repo.anaconda.com/pkgs/main/win-64/click-8.0.4-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/cytoolz-0.11.0-py39h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/fonttools-4.25.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/importlib-metadata-6.0.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/intervaltree-3.1.0-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/isodate-0.6.0-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/jedi-0.18.2-py_1.conda
-https://repo.anaconda.com/pkgs/main/noarch/jinja2-3.0.3-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/jsonschema-4.17.3-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/lxml-4.9.1-py39_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/matplotlib-inline-0.1.6-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/mkl-service-2.3.0-py39_2.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/munch-2.5.0-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/ntlm-auth-1.4.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/openpyxl-3.0.10-py39h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/partd-1.2.0-pyhd3eb1b0_1.conda
-https://conda.anaconda.org/esri/noarch/pefile-2022.5.30-pyhd8ed1ab_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/pexpect-4.8.0-pyhd3eb1b0_3.conda
-https://conda.anaconda.org/esri/win-64/pillow-9.3.0-py39_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/pip-23.2.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/proj-8.2.1-h5ed7ab8_0.conda
-https://conda.anaconda.org/esri/win-64/pyarrow-11.0.0-2.conda
-https://repo.anaconda.com/pkgs/main/win-64/pydocstyle-6.3.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/pygments-2.14.0-py_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/pyqt-5.9.2-py39hd77b12b_6.conda
-https://repo.anaconda.com/pkgs/main/win-64/pysocks-1.7.1-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/pytest-7.2.0-py39_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/python-certifi-win32-1.6-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/python-dateutil-2.8.2-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/win-64/python-gssapi-1.8.1-py39_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/python-lsp-jsonrpc-1.0.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/python-slugify-5.0.2-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/pytoolconfig-1.2.5-py39haa95532_1.conda
-https://conda.anaconda.org/esri/win-64/pywinpty-2.0.1-py39_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/qtpy-2.2.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/sqlalchemy-1.4.39-py39h2bbff1b_0.conda
-https://conda.anaconda.org/esri/win-64/sympy-1.9-py39_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/three-merge-0.1.1-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/tinycss2-1.1.1-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/tqdm-4.64.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/typing-extensions-4.7.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/watchdog-2.1.6-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/websocket-client-0.58.0-py39haa95532_4.conda
-https://conda.anaconda.org/esri/win-64/x86cpu-0.4-py39_1.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/zict-2.1.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/argon2-cffi-bindings-21.2.0-py39h2bbff1b_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/bcrypt-3.2.0-py39h2bbff1b_1.conda
-https://conda.anaconda.org/esri/win-64/black-22.1.0-py39_3.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/branca-0.6.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/brotlipy-0.7.0-py39h2bbff1b_1003.conda
-https://repo.anaconda.com/pkgs/main/noarch/click-plugins-1.1.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/cligj-0.7.2-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/cryptography-41.0.3-py39_2.conda
-https://repo.anaconda.com/pkgs/main/win-64/dask-core-2022.7.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/despatch-0.2.0-py39_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/flake8-3.9.2-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/geomet-1.0.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/importlib_metadata-6.0.0-hd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/jinja2-time-0.2.0-pyhd3eb1b0_3.conda
-https://conda.anaconda.org/esri/win-64/jupyter_core-4.11.2-py39_1.conda
-https://conda.anaconda.org/esri/noarch/jupyterlab_pygments-0.2.2-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/prompt_toolkit-3.0.5-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/pylint-2.7.4-py39haa95532_1.conda
-https://repo.anaconda.com/pkgs/main/win-64/pynacl-1.5.0-py39h8cc25b3_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/pyproj-3.4.1-py39hb622704_0.conda
-https://conda.anaconda.org/esri/win-64/pyzmq-25.0.2-py39_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/qstylizer-0.2.2-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/qtawesome-1.2.2-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/rope-1.7.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/stack_data-0.5.1-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/terminado-0.17.1-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/argon2-cffi-21.3.0-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/ipython-7.34.0-pyhbfea036_1.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyter_client-6.1.12-py_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/keyring-23.4.0-py39_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/nbformat-5.6.1-py_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/oauthlib-3.2.0-py39_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/paramiko-2.8.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/pyopenssl-23.2.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/python-lsp-server-1.2.4-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/ipykernel-6.16.0-py_1.tar.bz2
-https://conda.anaconda.org/esri/noarch/nbclient-0.7.0-py_3.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/pyls-spyder-0.4.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/python-lsp-black-1.0.0-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/urllib3-1.26.16-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/distributed-2022.7.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/ipywidgets-7.7.2-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyter_console-6.4.2-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/nbconvert-7.2.1-py_2.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/qtconsole-5.4.2-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/requests-2.31.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/spyder-kernels-2.1.3-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/azure-core-1.12.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/cookiecutter-1.7.3-pyhd3eb1b0_0.conda
-https://conda.anaconda.org/esri/noarch/jupyter_server-1.21.0-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/notebook-6.4.12-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/requests-gssapi-1.2.3-py_2.tar.bz2
-https://conda.anaconda.org/esri/win-64/requests-kerberos-0.12.0-0.tar.bz2
-https://conda.anaconda.org/esri/win-64/requests-negotiate-sspi-0.5.3-py39_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/requests-oauthlib-1.3.0-py_0.conda
-https://repo.anaconda.com/pkgs/main/noarch/requests-toolbelt-0.9.1-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/sphinx-5.0.2-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/jupyter_contrib_core-0.4.0-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyterlab_server-2.16.0-py_1.tar.bz2
-https://conda.anaconda.org/esri/noarch/msrest-0.6.21-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/notebook-shim-0.1.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/numpydoc-1.5.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/azure-storage-blob-12.8.0-py_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyter_highlight_selected_word-0.2.0-py_4.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyter_latex_envs-1.4.6-py_5.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyter_nbextensions_configurator-0.4.1-py_3.tar.bz2
-https://conda.anaconda.org/esri/noarch/nbclassic-0.4.8-py_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/spyder-5.1.5-py39haa95532_1.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyter_contrib_nbextensions-0.6.0-py_2.tar.bz2
-https://conda.anaconda.org/esri/noarch/jupyterlab-3.4.8-py_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/pro_notebook_integration-3.1-py39_12.tar.bz2
-https://repo.anaconda.com/pkgs/main/noarch/snuggs-1.4.7-pyhd3eb1b0_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/bottleneck-1.3.5-py39h080aedc_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/contourpy-1.0.5-py39h59b6b97_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/folium-0.14.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/noarch/lerc-4.0-pyh39e3cac_0.tar.bz2
-https://conda.anaconda.org/esri/noarch/saspy-4.3.2-py_1.tar.bz2
-https://conda.anaconda.org/esri/win-64/cftime-1.6.2-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/gdal-3.4.0-arcgispro_py39_17150.tar.bz2
-https://conda.anaconda.org/esri/win-64/h5py-3.7.0-arcgispro_py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/matplotlib-3.6.0-py39_arcgispro_3.tar.bz2
-https://conda.anaconda.org/esri/win-64/matplotlib-base-3.6.0-py39_arcgispro_4.tar.bz2
-https://conda.anaconda.org/esri/win-64/mkl_fft-1.3.0-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/mkl_random-1.2.2-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/numpy-1.20.1-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/netcdf4-1.6.1-py39_arcgispro_1.tar.bz2
-https://conda.anaconda.org/esri/win-64/numexpr-2.8.1-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/rasterio-1.2.10-py39_arcgispro_5.tar.bz2
-https://conda.anaconda.org/esri/win-64/scipy-1.6.2-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/shapely-1.7.1-py39_arcgispro_4.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/pandas-1.4.4-py39hd77b12b_0.conda
-https://conda.anaconda.org/esri/win-64/scikit-learn-1.0.2-py39_0.tar.bz2
-https://conda.anaconda.org/esri/win-64/arcpy-base-3.1-py39_41759.tar.bz2
-https://conda.anaconda.org/esri/noarch/dask-2022.7.0-py_0.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/mapclassify-2.5.0-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/seaborn-0.12.1-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/swat-1.12.0-py39_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/xarray-2022.11.0-py39haa95532_0.conda
-https://conda.anaconda.org/esri/win-64/arcgis-2.1.0.2-py39_14.tar.bz2
-https://conda.anaconda.org/esri/win-64/fiona-1.8.21-py39_4.tar.bz2
-https://conda.anaconda.org/esri/win-64/arcpy-3.1-py39_arcgispro_41759.tar.bz2
-https://repo.anaconda.com/pkgs/main/win-64/geopandas-base-0.12.2-py39haa95532_0.conda
-https://repo.anaconda.com/pkgs/main/win-64/geopandas-0.12.2-py39haa95532_0.conda
+name: streamcat
+channels:
+  - conda-forge
+  - esri
+  - defaults
+dependencies:
+  - _libavif_api=1.1.1=h57928b3_3
+  - affine=2.4.0=pyhd8ed1ab_1
+  - annotated-types=0.6.0=py_2
+  - anyio=3.5.0=py311haa95532_0
+  - anywidget=0.9.13=py_1
+  - aom=3.9.1=he0c23c2_0
+  - appdirs=1.4.4=pyhd3eb1b0_0
+  - arcgis=2.4.0.1=py311_103
+  - arcgis-mapping=4.30.0=py_305
+  - arcgispro=3.4=0
+  - arcpy=3.4=py311_arcgispro_55347
+  - arcpy-base=3.4=py311_55347
+  - argon2-cffi=21.3.0=pyhd3eb1b0_0
+  - argon2-cffi-bindings=21.2.0=py311h2bbff1b_0
+  - arrow-cpp=16.1.0=4
+  - asttokens=2.0.5=pyhd3eb1b0_0
+  - async-lru=2.0.4=py_0
+  - attrs=24.3.0=py311haa95532_0
+  - aws-crt-cpp=0.27.4=0
+  - aws-sdk-cpp-base=1.11.386=1
+  - azure-core=1.12.0=py_0
+  - azure-storage-blob=12.8.0=py_0
+  - babel=2.11.0=py311_1
+  - beautifulsoup4=4.12.3=py311haa95532_0
+  - black=23.10.1=py311_2
+  - blas=1.0=mkl
+  - bleach=6.2.0=py311haa95532_0
+  - blinker=1.9.0=py311haa95532_0
+  - blosc=1.21.6=h85f69ea_0
+  - bottleneck=1.3.7=py311hd7041d2_0
+  - branca=0.8.1=pyhd8ed1ab_0
+  - brotli=1.1.0=1
+  - brotli-bin=1.1.0=1
+  - brotli-python=1.0.9=py311hd77b12b_8
+  - bzip2=1.0.8=h2466b09_7
+  - c-ares=1.19.1=0
+  - ca-certificates=2025.1.31=h56e8100_0
+  - cachetools=5.5.1=py311haa95532_0
+  - certifi=2025.1.31=pyhd8ed1ab_0
+  - cffi=1.16.0=py311h2bbff1b_1
+  - cftime=1.6.3=py311_0
+  - chardet=4.0.0=py311haa95532_1003
+  - charset-normalizer=3.3.2=pyhd3eb1b0_0
+  - click=8.1.7=py311haa95532_0
+  - click-plugins=1.1.1=pyhd8ed1ab_1
+  - cligj=0.7.2=pyhd8ed1ab_2
+  - cloudpickle=3.0.0=py311haa95532_0
+  - colorama=0.4.6=py311haa95532_0
+  - comm=0.2.2=py_0
+  - contourpy=1.2.0=py311h59b6b97_0
+  - cppzmq=4.9.0=0
+  - cryptography=44.0.1=py311hfd75b31_0
+  - cycler=0.11.0=pyhd3eb1b0_0
+  - cytoolz=0.12.2=py311h2bbff1b_0
+  - dask=2023.3.2=py_0
+  - dask-core=2023.3.2=py_0
+  - dav1d=1.2.1=hcfcfb64_0
+  - debugpy=1.6.7=py311hd77b12b_0
+  - decorator=5.1.1=pyhd3eb1b0_0
+  - defusedxml=0.7.1=pyhd3eb1b0_0
+  - distributed=2023.3.2=py_0
+  - dpcpp-cpp-rt=2022.2.1=arcgispro_19741
+  - entrypoints=0.4=py311haa95532_0
+  - et_xmlfile=1.1.0=py311haa95532_0
+  - exceptiongroup=1.0.0rc9=pyhd8ed1ab_0
+  - executing=0.8.3=pyhd3eb1b0_0
+  - flake8=7.1.1=py311haa95532_0
+  - folium=0.19.4=pyhd8ed1ab_0
+  - fonttools=4.51.0=py311h2bbff1b_0
+  - freetype=2.13.2=1
+  - freexl=2.0.0=hf297d47_2
+  - fsspec=2024.12.0=py311haa95532_0
+  - future=0.18.3=py311_0
+  - gdal=3.9.2=arcgispro_py311_17844
+  - geomet=1.0.0=py_0
+  - geopandas=1.0.1=pyhd8ed1ab_3
+  - geopandas-base=1.0.1=pyha770c72_3
+  - geos=3.13.0=h5a68840_0
+  - geotiff=1.7.4=h887f4e7_0
+  - greenlet=3.0.1=py311hd77b12b_0
+  - h11=0.14.0=py311haa95532_0
+  - h5py=3.10.0=arcgispro_py311_0
+  - httpcore=1.0.2=py311haa95532_0
+  - httpx=0.27.0=py311haa95532_0
+  - icc_rt=2022.2.1=arcgispro_19741
+  - idna=3.7=py311haa95532_0
+  - importlib-metadata=8.5.0=py311haa95532_0
+  - importlib_metadata=8.5.0=hd3eb1b0_0
+  - importlib_resources=6.4.0=py311haa95532_0
+  - iniconfig=1.1.1=pyhd3eb1b0_0
+  - intel-cmplr-lib-rt=2022.2.1=arcgispro_19741
+  - intel-fortran-rt=2022.2.1=arcgispro_19741
+  - intel-openmp=2022.2.1=arcgispro_19741
+  - ipykernel=6.29.5=pyh5f5efe1_0
+  - ipython=8.18.1=pyh3a91677_1
+  - ipython_genutils=0.2.0=pyhd3eb1b0_1
+  - ipywidgets=8.1.5=py_0
+  - isodate=0.6.0=py_0
+  - jdcal=1.4.1=pyhd3eb1b0_0
+  - jedi=0.18.2=py_1
+  - jinja2=3.1.5=py311haa95532_0
+  - joblib=1.4.2=pyhd8ed1ab_1
+  - jpeg=9e=0
+  - json5=0.9.25=py_0
+  - jsonschema=4.23.0=py311haa95532_0
+  - jsonschema-specifications=2023.7.1=py311haa95532_0
+  - jupyter-lsp=2.2.0=py_0
+  - jupyter_client=8.6.0=py_0
+  - jupyter_console=6.6.3=py_0
+  - jupyter_core=5.5.1=py311_1
+  - jupyter_events=0.10.0=py_0
+  - jupyter_server=2.14.2=py_0
+  - jupyter_server_terminals=0.4.4=py311haa95532_1
+  - jupyterlab=4.2.5=py_0
+  - jupyterlab_pygments=0.3.0=py_1
+  - jupyterlab_server=2.27.3=py_0
+  - jupyterlab_widgets=3.0.13=py_0
+  - keyring=24.3.0=py311_1
+  - kiwisolver=1.4.4=py311hd77b12b_0
+  - krb5=1.21.3=1
+  - lerc=4.0.0=h63175ca_0
+  - libabseil=20230125.3=0
+  - libarchive=3.7.7=h88ece9c_0
+  - libavif16=1.1.1=h551e529_3
+  - libbrotlicommon=1.1.0=1
+  - libbrotlidec=1.1.0=1
+  - libbrotlienc=1.1.0=1
+  - libcurl=8.12.1=h88aaa65_0
+  - libde265=1.0.15=h91493d7_0
+  - libdeflate=1.22=h2466b09_0
+  - libexpat=2.6.4=he0c23c2_0
+  - libgdal-core=3.10.0=ha193a43_6
+  - libheif=1.18.2=gpl_hc631cee_100
+  - libiconv=1.18=h135ad9c_1
+  - libjpeg-turbo=3.0.3=0
+  - libkml=1.3.0=h538826c_1021
+  - liblzma=5.6.4=h2466b09_0
+  - libpng=1.6.47=had7236b_0
+  - libprotobuf=3.21.12=4
+  - librttopo=1.1.0=hd4c2148_17
+  - libsodium=1.0.18=5
+  - libspatialite=5.1.0=h939089a_12
+  - libsqlite=3.49.1=h67fdade_1
+  - libssh2=1.11.1=he619c9f_0
+  - libthrift=0.20.0=0
+  - libtiff=4.7.0=hdefb170_2
+  - libutf8proc=2.8.0=0
+  - libwebp-base=1.5.0=h3b0e114_0
+  - libxml2=2.13.6=he286e8c_0
+  - libxslt=1.1.39=h3df6e99_0
+  - libzlib=1.3.1=h2466b09_2
+  - locket=1.0.0=py311haa95532_0
+  - lxml=5.3.1=py311hf779c20_0
+  - lz4=4.3.2=py311h2bbff1b_0
+  - lz4-c=1.9.4=1
+  - lzo=2.10=hcfcfb64_1001
+  - mapclassify=2.8.1=pyhd8ed1ab_1
+  - markupsafe=2.1.3=py311h2bbff1b_0
+  - matplotlib=3.6.3=py311_arcgispro_2
+  - matplotlib-base=3.6.3=py311_arcgispro_2
+  - matplotlib-inline=0.1.6=py311haa95532_0
+  - mccabe=0.7.0=pyhd3eb1b0_0
+  - minizip=4.0.7=h9fa1bad_3
+  - mistune=2.0.4=py311haa95532_0
+  - mkl=2022.2.1=arcgispro_19755
+  - mkl-service=2.4.1=py311_arcgispro_0
+  - mkl_fft=1.3.10=py311_arcgispro_0
+  - mkl_random=1.2.7=py311_arcgispro_0
+  - mpmath=1.3.0=py311haa95532_0
+  - msgpack-python=1.0.3=py311h59b6b97_0
+  - msrest=0.6.21=py_0
+  - mypy_extensions=1.0.0=py311haa95532_0
+  - nbclassic=1.1.0=py_1
+  - nbclient=0.8.0=py_0
+  - nbconvert=7.16.4=py_0
+  - nbformat=5.10.4=py_0
+  - nest-asyncio=1.6.0=py311haa95532_0
+  - netcdf4=1.6.4=py311_arcgispro_4
+  - networkx=3.3=py311haa95532_0
+  - nlohmann_json=3.11.2=0
+  - nose=1.3.7=pyhd3eb1b0_1008
+  - notebook=7.2.2=py_1
+  - notebook-shim=0.2.4=py_0
+  - numexpr=2.8.4=py311_2
+  - numpy=1.24.3=py311_1
+  - numpy-base=1.24.3=py311_1
+  - oauthlib=3.2.2=py_0
+  - olefile=0.46=pyhd3eb1b0_0
+  - openpyxl=3.1.2=py311h2bbff1b_0
+  - openssl=3.4.1=ha4e3fda_0
+  - orc=2.0.0=0
+  - overrides=7.4.0=py311haa95532_0
+  - packaging=24.2=py311haa95532_0
+  - pandas=2.0.2=py311_0
+  - pandocfilters=1.5.0=pyhd3eb1b0_0
+  - parso=0.8.4=py311haa95532_0
+  - partd=1.4.2=py311haa95532_0
+  - pathspec=0.9.0=py_0
+  - patsy=1.0.1=py311haa95532_0
+  - pcre2=10.44=h3d7b363_2
+  - pefile=2022.5.30=pyhd8ed1ab_0
+  - pickleshare=0.7.5=pyhd3eb1b0_1003
+  - pillow=10.4.0=py311_3
+  - pip=23.3.2=py311_0
+  - platformdirs=3.10.0=py311haa95532_0
+  - pluggy=1.5.0=py311haa95532_0
+  - pro_notebook_integration=3.4=py311_11
+  - proj=9.5.1=h4f671f6_0
+  - prometheus_client=0.20.0=py_0
+  - prompt-toolkit=3.0.47=py_0
+  - prompt_toolkit=3.0.47=0
+  - protobuf=4.21.12=py311_5
+  - psutil=5.9.0=py311h2bbff1b_0
+  - psygnal=0.11.0=py_0
+  - pure_eval=0.2.2=pyhd3eb1b0_0
+  - puremagic=1.15=py_0
+  - pyarrow=16.1.0=py311_2
+  - pybind11=2.10.4=2
+  - pybind11_json=0.2.13=2
+  - pycodestyle=2.12.1=py311haa95532_0
+  - pycparser=2.21=pyhd3eb1b0_0
+  - pydantic=2.4.2=py_1
+  - pydantic-core=2.10.1=py311_1
+  - pyflakes=3.2.0=py311haa95532_0
+  - pygments=2.18.0=py_0
+  - pyjwt=2.4.0=py_1
+  - pylerc=4.0=py_0
+  - pyodbc=5.0.1=py311hd77b12b_0
+  - pyogrio=0.10.0=py311haedb144_1
+  - pyparsing=3.2.0=py311haa95532_0
+  - pypdf=4.3.1=py_1
+  - pyproj=3.7.1=py311h90dcb63_0
+  - pyshp=2.3.1=py311haa95532_0
+  - pysocks=1.7.1=py311haa95532_0
+  - pyspnego=0.11.1=py311_0
+  - pytest=7.4.3=py311_0
+  - python=3.11.10=0
+  - python-dateutil=2.9.0post0=py311haa95532_2
+  - python-fastjsonschema=2.20.0=py311haa95532_0
+  - python-gssapi=1.8.3=py311_1
+  - python-json-logger=3.2.1=py311haa95532_0
+  - python_abi=3.11=2_cp311
+  - pytz=2022.6=py311_0
+  - pywin32-ctypes=0.2.0=py311_1
+  - pywin32-security=306=py311_2
+  - pywinpty=2.0.10=py311h5da7b33_0
+  - pyyaml=6.0.1=py311h2bbff1b_0
+  - pyzmq=25.1.2=py311_0
+  - rasterio=1.4.3=py311hf418590_0
+  - rav1e=0.6.6=h975169c_2
+  - re2=2023.06.02=0
+  - referencing=0.30.2=py311haa95532_0
+  - regex=2023.10.3=py311h2bbff1b_0
+  - requests=2.31.0=py311haa95532_1
+  - requests-gssapi=1.2.3=py_2
+  - requests-kerberos=0.14.0=pyh424387f_4
+  - requests-oauthlib=2.0.0=py311haa95532_0
+  - requests-toolbelt=1.0.0=py_0
+  - rfc3339-validator=0.1.4=py311haa95532_0
+  - rfc3986-validator=0.1.1=py311haa95532_0
+  - rpds-py=0.10.6=py311h062c2fa_0
+  - ruamel.yaml=0.17.21=py311h2bbff1b_0
+  - saspy=4.3.2=py_1
+  - scikit-learn=1.6.1=py311hdcb8d17_0
+  - scipy=1.9.3=py311_4
+  - seaborn=0.13.2=py311haa95532_1
+  - send2trash=1.8.2=py311haa95532_1
+  - setuptools=74.1.2=py311_0
+  - shapely=2.0.7=py311hd54bd37_0
+  - six=1.16.0=py_0
+  - snappy=1.2.1=0
+  - sniffio=1.3.0=py311haa95532_0
+  - snuggs=1.4.7=pyhd8ed1ab_2
+  - sortedcontainers=2.4.0=pyhd3eb1b0_0
+  - soupsieve=2.5=py311haa95532_0
+  - sqlalchemy=2.0.32=py311_0
+  - sqlite=3.46.1=0
+  - sspilib=0.1.0=py311_0
+  - stack_data=0.5.1=py_0
+  - statsmodels=0.14.0=py311hd7041d2_0
+  - svt-av1=3.0.0=he0c23c2_0
+  - swat=1.13.3=py311_1
+  - sympy=1.12=py311_0
+  - tblib=1.7.0=pyhd3eb1b0_0
+  - terminado=0.17.1=py311haa95532_0
+  - testpath=0.5.0=py_0
+  - threadpoolctl=3.5.0=pyhc1e730c_0
+  - tinycss2=1.1.1=py_0
+  - toml=0.10.2=pyhd3eb1b0_0
+  - tomli=2.0.1=py311haa95532_0
+  - toolz=1.0.0=py311haa95532_0
+  - tornado=6.3.3=py311h2bbff1b_0
+  - tqdm=4.67.1=py311h746a85d_0
+  - traitlets=5.14.3=py311haa95532_0
+  - truststore=0.9.1=py_0
+  - typing-extensions=4.12.2=py311haa95532_0
+  - typing_extensions=4.12.2=py311haa95532_0
+  - tzdata=2025a=h04d1e81_0
+  - ucrt=10.0.22621.0=h57928b3_1
+  - ujson=5.4.0=py311hd77b12b_0
+  - unicodedata2=15.1.0=py311h2bbff1b_0
+  - uriparser=0.9.8=h5a68840_0
+  - urllib3=2.3.0=py311haa95532_0
+  - vc=14.2=h21ff451_1
+  - vc14_runtime=14.42.34433=h6356254_24
+  - vs2015_runtime=14.42.34433=hfef2bbc_24
+  - watchfiles=0.21.0=py311h062c2fa_0
+  - wcwidth=0.2.5=pyhd3eb1b0_0
+  - webencodings=0.5.1=py311haa95532_1
+  - websocket-client=1.8.0=py311haa95532_0
+  - wheel=0.45.1=py311haa95532_0
+  - widgetsnbextension=4.0.13=py_0
+  - win_inet_pton=1.1.0=py311_1
+  - winkerberos=0.9.1=py311_0
+  - winpty=0.4.3=4
+  - wrapt=1.14.1=py311h2bbff1b_0
+  - x265=3.5=h2d74725_3
+  - xarray=2023.6.0=py311haa95532_0
+  - xerces-c=3.2.5=he0c23c2_2
+  - xeus=3.0.5=0
+  - xeus-python=0.15.8=py311_2
+  - xeus-python-shell=0.6.3=1
+  - xeus-python-shell-raw=0.6.3=py_1
+  - xeus-zmq=1.0.2=3
+  - xlrd=2.0.1=pyhd3eb1b0_1
+  - xlwt=1.3.0=py311haa95532_0
+  - xtl=0.7.5=0
+  - xyzservices=2025.1.0=pyhd8ed1ab_0
+  - xz=5.4.7=0
+  - yaml=0.2.5=0
+  - zeromq=4.3.5=0
+  - zict=3.0.0=py_0
+  - zipp=3.21.0=py311haa95532_0
+  - zlib=1.3.1=h2466b09_2
+  - zlib-ng=2.1.6=2
+  - zstd=1.5.6=1

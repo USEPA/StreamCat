@@ -14,25 +14,26 @@ Python,  ArcGIS Pro (used to run ZonalStatisticsAsTable and TabulateArea tools w
 There are two options for installing the required dependencies.  As shown below both create
 a conda environment called `streamcat`, although you can use any name you want.
 
-### Option 1: clone the default ArcGIS environment
+### Option 1: Install packages via conda
 
-We recommend using the specific conda package management that comes with ArcGIS Pro. You can use the package manager in ArcGIS Pro or conda package management available via the python command prompt with ArcGIS Pro (Start > ArcGIS > Python command prompt). Using either approach, clone the base ArcGIS Pro environment, then install geopandas and rasterio (and optionally spyder) to the new environment. *NOTE - the following steps have been verified to work using ArcGIS Pro 3.2.1*.  In the python command prompt use the following steps (replacing 'streamcat' with the environment name of your choice): 
+You can use a Python package manager like [miniforge](https://github.com/conda-forge/miniforge) or the conda package management that comes with ArcGIS Pro. You can use the package manager in ArcGIS Pro or conda package management available via the python command prompt with ArcGIS Pro (Start > ArcGIS > Python command prompt). Note that the version of arcpy should match what your ArcPro arcpy version is. At the conda command prompt the steps are:
 
-     1. conda create --clone arcgispro-py3 -p %localappdata%\esri\conda\envs\streamcat --pinned
-     2. activate streamcat
-     3. conda install geopandas rasterio 
-          * optional: conda install spyder
+1. conda create -n streamcat
+2. conda activate streamcat
+3. conda install -c esri arcpy=3.4 -c esri
+4. conda install pyogrio -c conda-forge
+5. conda install geopandas -c conda-forge
+6. conda install rasterio -c conda-forge
+
 
 ### Option 2: Install all requirements in a fresh conda environment
      
-We list these specific Python packages needed in the StreamCat code are listed in the [spec-file.txt](https://github.com/USEPA/StreamCat/blob/master/spec-file.txt) in the StreamCat GitHub repository.  Users can use this .txt file to create an environment with the necessary Python libraries by running the following lines at a conda prompt:
+We list these specific Python packages needed in the StreamCat code are listed in the [streamcat.yml file](https://github.com/USEPA/StreamCat/blob/master/streamcat.yml) in the StreamCat GitHub repository.  Users can use this .yml file to create an environment with the necessary Python libraries by running the following lines at a conda prompt:
 
-1.  Change directory to where you have downloaded the [spec-file.txt](https://github.com/USEPA/StreamCat/blob/master/spec-file.txt) file:
+1.  Change directory to where you have downloaded the [streamcat.yml](https://github.com/USEPA/StreamCat/blob/master/streamcat.yml) file:
      - for instance: cd C:/UserName/StreamCat
-2.  Use the .txt file to create a new environment
-     - conda create --name streamcat --file spec-file.txt
-3.  Use the spec file to install all of its listed packages into this environment
-     - conda install --name streamcat --file spec-file.txt
+2.  Use the .yml file to create a new environment
+     - conda env create -f environment.yml
 
 ## Local directories and files
 
