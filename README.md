@@ -23,10 +23,7 @@ You can use a Python package manager like [miniforge](https://github.com/conda-f
 1. conda create -n streamcat
 2. conda activate streamcat
 3. conda install -c esri arcpy=3.4 -c esri
-4. conda install pyogrio -c conda-forge
-5. conda install geopandas -c conda-forge
-6. conda install rasterio -c conda-forge
-
+3. conda install geopandas -c conda-forge
 
 ### Option 2: Install all requirements in a fresh conda environment
      
