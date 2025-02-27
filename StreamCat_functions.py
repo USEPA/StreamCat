@@ -47,7 +47,7 @@ from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 
 ###
 # Speed up imports
-import pyogrio 
+# import pyogrio 
 from joblib import Parallel, delayed
 
 ##############################################################################
@@ -1294,7 +1294,8 @@ def swapper(coms, upStream):
 ##############################################################################
 def make_zone_cat_comids(nhd, zone, hr):
     path = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}/NHDPlusCatchment/Catchment.dbf"
-    cats = pyogrio.read_dataframe(path, columns=['FEATUREID'], read_geometry=False, use_arrow=True)
+    cats = gpd.read_file(path, columns=['FEATUREID']).drop('geometry')
+    #cats = pyogrio.read_dataframe(path, columns=['FEATUREID'], read_geometry=False, use_arrow=True)
     
     return cats.values.astype(int)
 
@@ -1307,10 +1308,12 @@ def make_all_cat_comids(nhd, inputs):
 
 def processZone(zone, hr, nhd, inter_tbl, all_comids):
     pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-    flow = pyogrio.read_dataframe(f"{pre}/NHDPlusAttributes/PlusFlow.dbf", columns=["TOCOMID", "FROMCOMID"], read_geometry=False, use_arrow=True)
+    #flow = pyogrio.read_dataframe(f"{pre}/NHDPlusAttributes/PlusFlow.dbf", columns=["TOCOMID", "FROMCOMID"], read_geometry=False, use_arrow=True)
+    flow = gpd.read_file(f"{pre}/NHDPlusAttributes/PlusFlow.dbf", columns=["TOCOMID", "FROMCOMID"]).drop('geometry')
     flow.columns = flow.columns.str.upper()
     flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
-    fls = pyogrio.read_dataframe(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf", read_geometry=False, use_arrow=True)
+    #fls = pyogrio.read_dataframe(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf", read_geometry=False, use_arrow=True)
+    fls = gpd.read_file(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf").drop('geometry')
     fls.columns = fls.columns.str.upper()
     coastfl = fls.COMID[fls.FTYPE == "Coastline"]
     flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
@@ -1330,7 +1333,8 @@ def processZone(zone, hr, nhd, inter_tbl, all_comids):
     out_of_vpus = inter_tbl.loc[
         (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
     ].thruCOMIDs.values
-    cats = pyogrio.read_dataframe(f"{pre}/NHDPlusCatchment/Catchment.dbf", read_geometry=False, use_arrow=True)
+    #cats = pyogrio.read_dataframe(f"{pre}/NHDPlusCatchment/Catchment.dbf", read_geometry=False, use_arrow=True)
+    cats = gpd.read_file(f"{pre}/NHDPlusCatchment/Catchment.dbf").drop('geometry')
     cats.columns = cats.columns.str.upper()
     cats = cats.set_index("FEATUREID")
     comids = cats.index.values

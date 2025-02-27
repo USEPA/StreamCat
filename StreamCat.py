@@ -58,6 +58,8 @@ from StreamCat_functions import (
     nhd_dict,
 )
 
+from joblib import Parallel, delayed
+
 # Load table of layers to be run...
 ctl = pd.read_csv(control)
 
@@ -114,7 +116,8 @@ for _, row in ctl.query("run == 1").iterrows():
         end="",
         flush=True,
     )
-    for zone, hydroregion in INPUTS.items():
+    #for zone, hydroregion in INPUTS.items():
+    def process_zone(zone, hydroregion):
         if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
             print(zone, end=", ", flush=True)
             pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
@@ -142,6 +145,9 @@ for _, row in ctl.query("run == 1").iterrows():
                     points, zone, izd, pct_full, mask_dir, apm, summary
                 )
             cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+    zone_results = Parallel(n_jobs=-1)(
+        delayed(process_zone) (zone, hydroregion) for zone, hydroregion in INPUTS.items()
+    )
     print("done!")
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:
