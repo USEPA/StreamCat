@@ -56,10 +56,10 @@ class DatabaseConnection():
         """Create Database connection string"""
         return f"{self.dialect}+{self.driver}://{self.username}:{self.password}@{self.host}:{self.port}/?service_name={self.service}"
         
-    def __del__(self):
-        """Safely close engine on exit"""
-        if self.engine:
-            self.engine.dispose()
+    # def __del__(self):
+    #     """Safely close engine on exit"""
+    #     if self.engine:
+    #         self.engine.dispose()
     
     def connect(self):
         """Connect to database"""
@@ -196,7 +196,7 @@ class DatabaseConnection():
                 conn.rollback()
             return value
     
-    def GetTableAsDf(self, table_name: str) -> pd.DataFrame | str:
+    def GetTableAsDf(self, table_name: str, cols: list[str] = None, chunksize: int = None) -> pd.DataFrame | str:
         """Get database table by name as pandas Dataframe
 
         Args:
@@ -207,7 +207,9 @@ class DatabaseConnection():
             str: If table not found by name return err string
         """
         if self.inspector.has_table(table_name):
-            return pd.read_sql_table(table_name, self.engine)
+            if cols:
+                return pd.read_sql_table(table_name, self.engine, columns=cols, chunksize=chunksize)
+            return pd.read_sql_table(table_name, self.engine, chunksize=chunksize) 
         else:
             return f"No table found named {table_name} in database. Check log file for details."
 
@@ -300,7 +302,11 @@ class DatabaseConnection():
         
         if self.inspector.has_table(table_name):
             table = self.metadata.tables[table_name]
-            query = insert(table).values(values) # .returning(*table.c)
+            if self.execute:
+                query = insert(table).values(values).returning(*table.c)
+            else:
+                query = insert(table).values(values)
+                
             result, executed = self.RunQuery(query)
             if executed:
                 return result.fetchall()
