@@ -21,6 +21,7 @@ import os
 import sys
 import time
 from collections import OrderedDict, defaultdict, deque
+from pathlib import Path
 from typing import Generator
 
 import numpy as np
@@ -43,6 +44,11 @@ os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
 sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
 import arcpy
 from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
+
+###
+# Speed up imports
+import pyogrio 
+from joblib import Parallel, delayed
 
 ##############################################################################
 
@@ -851,6 +857,44 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
     for idx in tbl.columns[:-1]:
         tbl.loc[comid1, idx] = tbl.loc[comid1, idx] - tbl2.loc[comid2, idx]
 
+##############################################################################
+def accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths):
+    # Function used to parallelize accumulation step
+
+    col_values = tbl[column].values.astype("float")
+    all_values = np.split(col_values[indices], accumulated_indexes)
+    if tbl_type == "Ws":
+        # add identity value to each array for full watershed
+        all_values = np.array(
+            [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
+            dtype=object,
+        )
+
+        # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+
+    # if index == 1:
+    area = all_values.copy()
+    if "PctFull" in column:
+        values = [
+            np.ma.average(np.nan_to_num(val), weights=w) # changed from np.ma.average
+            for val, w in zip(all_values, area)
+        ]
+    elif "MIN" in column or "MAX" in column:
+        func = np.max if "MAX" in column else np.min
+        # initial is necessary to eval empty upstream arrays
+        # these values will be overwritten w/ nan later
+
+        # initial = -999 if "MAX" in column else 999999
+
+        initial = -999999 if "MAX" in column else 999999
+
+        values = np.array([func(val, initial=initial) for val in all_values])
+        values[lengths == 0] = col_values[lengths == 0]
+    else:
+        values = np.array([np.nansum(val) for val in all_values])
+    
+    return index, values
+
 
 ##############################################################################
 
@@ -865,7 +909,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
     Arguments
     ---------
-    arr                   : table containing watershed values
+    tbl                   : table containing watershed values
     comids                : numpy array of all zones comids
     lengths               : numpy array with lengths of upstream comids
     upstream              : numpy array of all upstream arrays for each COMID
@@ -873,7 +917,8 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     icol                  : column in arr object to index
     """
     # RuntimeWarning: invalid value encountered in double_scalars
-    np.seterr(all="ignore")
+    # np.seterr(all="ignore")
+    
     coms = tbl[icol].values.astype("int32")  # Read in comids
     indices = swapper(coms, upstream)  # Get indices that will be used to map values
     del upstream  # a and indices are big - clean up to minimize RAM
@@ -882,40 +927,28 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     data = np.zeros((len(comids), len(tbl.columns)))
     data[:, 0] = comids  # Define first column as comids
     accumulated_indexes = np.add.accumulate(lengths)[:-1]
+    # accumulated_indexes = np.ufunc.accumulate(lengths)[:-1]
+    # accumulated_indexes = np.cumsum(lengths)[:-1]
+    accum_results = []
     # Loop and accumulate values
-    for index, column in enumerate(cols, 1):
-        col_values = tbl[column].values.astype("float")
-        all_values = np.split(col_values[indices], accumulated_indexes)
-        if tbl_type == "Ws":
-            # add identity value to each array for full watershed
-            all_values = np.array(
-                [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)],
-                dtype=object,
-            )
+    # for index, column in enumerate(cols, 1):
+    # process_start = time.time()
+    accum_results = Parallel(n_jobs=-1)(
+        delayed(accum_values)(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths) for index, column in enumerate(cols, 1)
+    )
+    # FOR TESTING LOOP VS PARALLEL SPEEDS
+    # for index, column in enumerate(cols, 1):
+    #     accum_results.append(accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths))
+    # process_end = time.time()
+    # print(f"Finished accumulating {len(coms)} COMIDS for {len(cols)} columns in {process_end - process_start} seconds with {os.cpu_count()} parallel processes")
 
-            # all_values = [np.append(val, col_values[idx]) for idx, val in enumerate(all_values)]
+    
+    # Extract indices and values
+    all_indices = [index for index, _ in accum_results]
+    all_values = np.array([value for _, value in accum_results]).T
 
-        if index == 1:
-            area = all_values.copy()
-        if "PctFull" in column:
-            values = [
-                np.ma.average(np.nan_to_num(val), weights=w)
-                for val, w in zip(all_values, area)
-            ]
-        elif "MIN" in column or "MAX" in column:
-            func = np.max if "MAX" in column else np.min
-            # initial is necessary to eval empty upstream arrays
-            # these values will be overwritten w/ nan later
-
-            # initial = -999 if "MAX" in column else 999999
-
-            initial = -999999 if "MAX" in column else 999999
-
-            values = np.array([func(val, initial=initial) for val in all_values])
-            values[lengths == 0] = col_values[lengths == 0]
-        else:
-            values = np.array([np.nansum(val) for val in all_values])
-        data[:, index] = values
+    # Update data using advanced indexing
+    data[:, all_indices] = all_values
     data = data[np.in1d(data[:, 0], coms), :]  # Remove the extra comids
     outDF = pd.DataFrame(data)
     prefix = "UpCat" if tbl_type == "Up" else "Ws"
@@ -965,16 +998,18 @@ def createCatStats(
         arcpy.env.snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
+                landscape_layer = Path(LandscapeLayer).stem  # / vs. \ agnostic
                 outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
                     out_dir,
-                    LandscapeLayer.split("/")[-1].split(".")[0],
+                    landscape_layer,
                     appendMetric,
                     zone,
                 )
             else:
+                landscape_layer = Path(LandscapeLayer).name  # / vs. \ agnostic
                 outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
                     out_dir,
-                    LandscapeLayer.split("/")[-1],
+                    landscape_layer,
                     appendMetric,
                     zone,
                 )
@@ -1257,20 +1292,63 @@ def swapper(coms, upStream):
 
 
 ##############################################################################
+def make_zone_cat_comids(nhd, zone, hr):
+    path = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}/NHDPlusCatchment/Catchment.dbf"
+    cats = pyogrio.read_dataframe(path, columns=['FEATUREID'], read_geometry=False, use_arrow=True)
+    
+    return cats.values.astype(int)
+
 def make_all_cat_comids(nhd, inputs):
-    print("Making allFLOWCOMs numpy file, reading zones...", end="", flush=True)
-    all_comids = np.array([], dtype=np.int32)
-    for zone, hr in inputs.items():
-        print(zone, end=", ", flush=True)
-        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf")
-        all_comids = np.append(all_comids, cats.FEATUREID.values.astype(int))
-    np.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
-    print("...done!")
-    return set(all_comids)  # RETURN A SET!
+    results = Parallel(n_jobs=-1)(
+        delayed(make_zone_cat_comids)(nhd, zone, hr) for zone, hr in inputs.items()
+    )
+    all_comids = np.concatenate(results)
+    return set(all_comids.flatten())
 
+def processZone(zone, hr, nhd, inter_tbl, all_comids):
+    pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
+    flow = pyogrio.read_dataframe(f"{pre}/NHDPlusAttributes/PlusFlow.dbf", columns=["TOCOMID", "FROMCOMID"], read_geometry=False, use_arrow=True)
+    flow.columns = flow.columns.str.upper()
+    flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
+    fls = pyogrio.read_dataframe(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf", read_geometry=False, use_arrow=True)
+    fls.columns = fls.columns.str.upper()
+    coastfl = fls.COMID[fls.FTYPE == "Coastline"]
+    flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
+    flow = flow[~flow.FROMCOMID.isin(inter_tbl.removeCOMs)]
+    out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
+    out = out[np.nonzero(out)]
+    flow = flow[~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))]
+    
+    flow_dict = defaultdict(list)
+    for _, row in flow.iterrows():
+        flow_dict[row.TOCOMID].append(row.FROMCOMID)
+    
+    for interLine in inter_tbl.values:
+        if interLine[6] > 0 and interLine[2] == zone:
+            flow_dict[int(interLine[6])].append(int(interLine[0]))
+    
+    out_of_vpus = inter_tbl.loc[
+        (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
+    ].thruCOMIDs.values
+    cats = pyogrio.read_dataframe(f"{pre}/NHDPlusCatchment/Catchment.dbf", read_geometry=False, use_arrow=True)
+    cats.columns = cats.columns.str.upper()
+    cats = cats.set_index("FEATUREID")
+    comids = cats.index.values
+    comids = np.append(comids, out_of_vpus)
+    
+    ups = [list(all_comids.intersection(bastards(x, flow_dict))) for x in comids]
+    lengths = np.array([len(u) for u in ups])
+    upstream = np.hstack(ups).astype(np.int32)
+    
+    assert len(ups) == len(lengths) == len(comids)
+    np.savez_compressed(
+        f"./accum_npy/accum_{zone}.npz",
+        comids=comids,
+        lengths=lengths,
+        upstream=upstream,
+    )
 
-def makeNumpyVectors(inter_tbl, nhd):
+def makeNumpyVectors(inter_tbl, nhd, user_zones):
     """
     Uses the NHD tables to create arrays of upstream catchments which are used
     in the Accumulation function
@@ -1280,61 +1358,27 @@ def makeNumpyVectors(inter_tbl, nhd):
     inter_tbl   : table of inter-VPU connections
     nhd         : directory where NHD is stored
     """
-    os.mkdir("accum_npy")
-    inputs = nhd_dict(nhd)
+    os.makedirs("accum_npy", exist_ok=True)
+    inputs = nhd_dict(nhd, user_zones=user_zones)
+
     all_comids = make_all_cat_comids(nhd, inputs)
-    print("Making numpy files in zone...", end="", flush=True)
-    for zone, hr in inputs.items():
-        print(zone, end=", ", flush=True)
-        pre = f"{nhd}/NHDPlus{hr}/NHDPlus{zone}"
-        flow = dbf2DF(f"{pre}/NHDPlusAttributes/PlusFlow.dbf")[["TOCOMID", "FROMCOMID"]]
-        flow = flow[(flow.TOCOMID != 0) & (flow.FROMCOMID != 0)]
-        fls = dbf2DF(f"{pre}/NHDSnapshot/Hydrography/NHDFlowline.dbf")
-        coastfl = fls.COMID[fls.FTYPE == "Coastline"]
-        flow = flow[~flow.FROMCOMID.isin(coastfl.values)]
-        # remove these FROMCOMIDs from the 'flow' table, there are three COMIDs
-        # here that won't get filtered out any other way
-        flow = flow[~flow.FROMCOMID.isin(inter_tbl.removeCOMs)]
-        # find values that are coming from other zones and remove the ones that
-        # aren't in the interVPU table
-        out = np.setdiff1d(flow.FROMCOMID.values, fls.COMID.values)
-        out = out[
-            np.nonzero(out)
-        ]  # this should be what combines zones and above^, but we force connections with inter_tbl
-        flow = flow[
-            ~flow.FROMCOMID.isin(np.setdiff1d(out, inter_tbl.thruCOMIDs.values))
-        ]
-        # Table is ready for processing and flow connection dict can be created
-        flow_dict = defaultdict(list)
-        for _, row in flow.iterrows():
-            flow_dict[row.TOCOMID].append(row.FROMCOMID)
-        # add IDs from UpCOMadd column if working in ToZone, forces the flowtable connection though not there
-        for interLine in inter_tbl.values:
-            if interLine[6] > 0 and interLine[2] == zone:
-                flow_dict[int(interLine[6])].append(int(interLine[0]))
-        out_of_vpus = inter_tbl.loc[
-            (inter_tbl.ToZone == zone) & (inter_tbl.DropCOMID == 0)
-        ].thruCOMIDs.values
-        cats = dbf2DF(f"{pre}/NHDPlusCatchment/Catchment.dbf").set_index("FEATUREID")
-        comids = cats.index.values
-        comids = np.append(comids, out_of_vpus)
-        # list of upstream lists, filter comids in all_comids
-        ups = [list(all_comids.intersection(bastards(x, flow_dict))) for x in comids]
-        lengths = np.array([len(u) for u in ups])
-        upstream = np.hstack(ups).astype(np.int32)  # Convert to 1d vector
-        assert len(ups) == len(lengths) == len(comids)
-        np.savez_compressed(
-            f"./accum_npy/accum_{zone}.npz",
-            comids=comids,
-            lengths=lengths,
-            upstream=upstream,
-        )
+    print(f"Making numpy files for zones {inputs.keys()}: ")
+
+    # Parallel Processing w/ joblib
+    print("Begining parallel execution:")
+    start_time = time.time()
+    Parallel(n_jobs=-1)(
+        delayed(processZone)(zone, hr, nhd, inter_tbl, all_comids) for zone, hr in inputs.items()
+    )
+    end_time = time.time()
+    print(f"Time elapsed to process all zones: {end_time - start_time} seconds")
+        
 
 
 ##############################################################################
 
 
-def nhd_dict(nhd, unit="VPU"):
+def nhd_dict(nhd, unit="VPU", user_zones=None):
     """
     __author__ =  "Rick Debbout <debbout.rick@epa.gov>"
     Creates an OrderdDict for looping through regions of the NHD to carry
@@ -1351,7 +1395,12 @@ def nhd_dict(nhd, unit="VPU"):
     """
 
     inputs = OrderedDict()
+    if user_zones:  # Use user specified zones
+        inputs |= user_zones
+        np.save("./accum_npy/vpu_inputs.npy", inputs)
+        return inputs
     bounds = dbf2DF(f"{nhd}/NHDPlusGlobalData/BoundaryUnit.dbf")
+    # Drop Hawaii and Cayman Islands.
     remove = bounds.loc[bounds.DRAINAGEID.isin(["HI", "CI"])].index
     bounds = bounds.drop(remove, axis=0)
     if unit == "VPU":
@@ -1403,7 +1452,9 @@ def findUpstreamNpy(zone, com, numpy_dir):
 
 
 def dbf2DF(f, upper=True):
-    data = gpd.read_file(f).drop("geometry", axis=1)
+    data = gpd.read_file(f)
+    if "geometry" in data:
+        data.drop("geometry", axis=1, inplace=True)
     if upper is True:
         data.columns = data.columns.str.upper()
     return data

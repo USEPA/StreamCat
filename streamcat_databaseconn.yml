@@ -1,56 +1,65 @@
-name: streamcat
+name: databaseconn
 channels:
-  - conda-forge
   - esri
   - defaults
 dependencies:
+  - affine=2.3.0=pyhd3eb1b0_0
+  - aiohttp=3.9.5=py311h2bbff1b_0
+  - aiosignal=1.2.0=pyhd3eb1b0_0
+  - alabaster=0.7.16=py311haa95532_0
   - annotated-types=0.6.0=py_2
   - anyio=3.5.0=py311haa95532_0
   - anywidget=0.9.13=py_1
   - appdirs=1.4.4=pyhd3eb1b0_0
-  - arcgis=2.4.0.1=py311_103
+  - arcgis=2.4.0=py311_6596
   - arcgis-mapping=4.30.0=py_305
   - arcgispro=3.4=0
   - arcpy=3.4=py311_arcgispro_55347
   - arcpy-base=3.4=py311_55347
   - argon2-cffi=21.3.0=pyhd3eb1b0_0
   - argon2-cffi-bindings=21.2.0=py311h2bbff1b_0
+  - arrow=1.0.1=4
   - arrow-cpp=16.1.0=4
+  - astroid=3.3.8=py311haa95532_0
   - asttokens=2.0.5=pyhd3eb1b0_0
   - async-lru=2.0.4=py_0
-  - attrs=24.3.0=py311haa95532_0
+  - asyncssh=2.17.0=py_0
+  - atomicwrites=1.4.0=py_0
+  - attrs=23.1.0=py311haa95532_0
+  - autopep8=2.0.4=pyhd3eb1b0_0
   - aws-crt-cpp=0.27.4=0
   - aws-sdk-cpp-base=1.11.386=1
   - azure-core=1.12.0=py_0
   - azure-storage-blob=12.8.0=py_0
   - babel=2.11.0=py311_1
+  - bcrypt=3.2.0=py311h2bbff1b_1
   - beautifulsoup4=4.12.3=py311haa95532_0
+  - binaryornot=0.4.4=pyhd3eb1b0_1
   - black=23.10.1=py311_2
   - blas=1.0=mkl
-  - bleach=6.2.0=py311haa95532_0
-  - blinker=1.9.0=py311haa95532_0
+  - bleach=4.1.0=pyhd3eb1b0_0
+  - blinker=1.6.2=py311haa95532_0
   - bottleneck=1.3.7=py311hd7041d2_0
-  - branca=0.8.1=pyhd8ed1ab_0
   - brotli=1.1.0=1
   - brotli-bin=1.1.0=1
   - brotli-python=1.0.9=py311hd77b12b_8
   - c-ares=1.19.1=0
-  - ca-certificates=2025.1.31=h56e8100_0
-  - cachetools=5.5.1=py311haa95532_0
-  - certifi=2025.1.31=pyhd8ed1ab_0
+  - cachetools=5.3.3=py311haa95532_0
+  - certifi=2025.1.31=py311haa95532_0
   - cffi=1.16.0=py311h2bbff1b_1
   - cftime=1.6.3=py311_0
   - chardet=4.0.0=py311haa95532_1003
   - charset-normalizer=3.3.2=pyhd3eb1b0_0
   - click=8.1.7=py311haa95532_0
-  - click-plugins=1.1.1=pyhd8ed1ab_1
-  - cligj=0.7.2=pyhd8ed1ab_2
+  - click-plugins=1.1.1=pyhd3eb1b0_0
+  - cligj=0.7.2=pyhd3eb1b0_0
   - cloudpickle=3.0.0=py311haa95532_0
   - colorama=0.4.6=py311haa95532_0
   - comm=0.2.2=py_0
   - contourpy=1.2.0=py311h59b6b97_0
+  - cookiecutter=2.6.0=py311haa95532_0
   - cppzmq=4.9.0=0
-  - cryptography=44.0.1=py311hfd75b31_0
+  - cryptography=43.0.1=py311_0
   - cycler=0.11.0=pyhd3eb1b0_0
   - cytoolz=0.12.2=py311h2bbff1b_0
   - dask=2023.3.2=py_0
@@ -58,50 +67,57 @@ dependencies:
   - debugpy=1.6.7=py311hd77b12b_0
   - decorator=5.1.1=pyhd3eb1b0_0
   - defusedxml=0.7.1=pyhd3eb1b0_0
+  - deprecated=1.2.13=py311haa95532_0
+  - diff-match-patch=20200713=pyhd3eb1b0_0
+  - dill=0.3.8=py311haa95532_0
   - distributed=2023.3.2=py_0
+  - docstring-to-markdown=0.11=py311haa95532_0
+  - docutils=0.18.1=py311haa95532_3
   - dpcpp-cpp-rt=2022.2.1=arcgispro_19741
   - entrypoints=0.4=py311haa95532_0
   - et_xmlfile=1.1.0=py311haa95532_0
   - exceptiongroup=1.0.0rc9=pyhd8ed1ab_0
   - executing=0.8.3=pyhd3eb1b0_0
-  - fiona=1.9.6=py311_3
-  - flake8=7.1.1=py311haa95532_0
-  - folium=0.19.4=pyhd8ed1ab_0
+  - flake8=7.0.0=py311haa95532_0
   - fonttools=4.51.0=py311h2bbff1b_0
   - freetype=2.13.2=1
-  - fsspec=2024.12.0=py311haa95532_0
+  - frozenlist=1.4.0=py311h2bbff1b_0
+  - fsspec=2024.6.1=py311haa95532_0
   - future=0.18.3=py311_0
+  - fzf=0.55.0=h7d69c46_0
   - gdal=3.9.2=arcgispro_py311_17844
   - geomet=1.0.0=py_0
-  - geopandas=1.0.1=py_0
-  - geopandas-base=1.0.1=py_0
-  - geos=3.13.0=h5a68840_0
   - greenlet=3.0.1=py311hd77b12b_0
   - h11=0.14.0=py311haa95532_0
   - h5py=3.10.0=arcgispro_py311_0
   - httpcore=1.0.2=py311haa95532_0
   - httpx=0.27.0=py311haa95532_0
   - icc_rt=2022.2.1=arcgispro_19741
+  - icu=73.1=h6c2663c_0
   - idna=3.7=py311haa95532_0
-  - importlib-metadata=8.5.0=py311haa95532_0
-  - importlib_metadata=8.5.0=hd3eb1b0_0
+  - imagesize=1.4.1=py311haa95532_0
+  - importlib-metadata=7.0.1=py311haa95532_0
+  - importlib_metadata=7.0.1=hd3eb1b0_0
   - importlib_resources=6.4.0=py311haa95532_0
+  - inflection=0.5.1=py311haa95532_0
   - iniconfig=1.1.1=pyhd3eb1b0_0
   - intel-cmplr-lib-rt=2022.2.1=arcgispro_19741
   - intel-fortran-rt=2022.2.1=arcgispro_19741
   - intel-openmp=2022.2.1=arcgispro_19741
+  - intervaltree=3.1.0=pyhd3eb1b0_0
   - ipykernel=6.29.5=pyh5f5efe1_0
   - ipython=8.18.1=pyh3a91677_1
   - ipython_genutils=0.2.0=pyhd3eb1b0_1
   - ipywidgets=8.1.5=py_0
   - isodate=0.6.0=py_0
+  - isort=5.13.2=py311haa95532_1
   - jdcal=1.4.1=pyhd3eb1b0_0
   - jedi=0.18.2=py_1
-  - jinja2=3.1.5=py311haa95532_0
-  - joblib=1.4.2=pyhd8ed1ab_1
+  - jellyfish=1.1.3=py311h8ecf97c_0
+  - jinja2=3.1.4=py311haa95532_0
   - jpeg=9e=0
   - json5=0.9.25=py_0
-  - jsonschema=4.23.0=py311haa95532_0
+  - jsonschema=4.19.2=py311haa95532_0
   - jsonschema-specifications=2023.7.1=py311haa95532_0
   - jupyter-lsp=2.2.0=py_0
   - jupyter_client=8.6.0=py_0
@@ -110,44 +126,43 @@ dependencies:
   - jupyter_events=0.10.0=py_0
   - jupyter_server=2.14.2=py_0
   - jupyter_server_terminals=0.4.4=py311haa95532_1
-  - jupyterlab=4.2.5=py_0
+  - jupyterlab=4.2.4=py_0
   - jupyterlab_pygments=0.3.0=py_1
   - jupyterlab_server=2.27.3=py_0
   - jupyterlab_widgets=3.0.13=py_0
   - keyring=24.3.0=py311_1
   - kiwisolver=1.4.4=py311hd77b12b_0
   - krb5=1.21.3=1
-  - lerc=4.0.0=h63175ca_0
   - libabseil=20230125.3=0
   - libbrotlicommon=1.1.0=1
   - libbrotlidec=1.1.0=1
   - libbrotlienc=1.1.0=1
-  - libcurl=8.12.1=h88aaa65_0
-  - libdeflate=1.22=h2466b09_0
-  - libjpeg-turbo=3.0.3=0
-  - liblzma=5.6.4=h2466b09_0
-  - libpng=1.6.47=had7236b_0
+  - libclang=14.0.6=default_hb5a9fac_3
+  - libclang13=14.0.6=default_h8e68704_2
+  - libcurl=8.9.1=0
+  - libdeflate=1.20=1
+  - libnghttp2=1.62.1=0
+  - libpng=1.6.43=1
+  - libpq=12.17=h906ac69_1
   - libprotobuf=3.21.12=4
   - libsodium=1.0.18=5
   - libspatialindex=1.9.3=h6c2663c_0
-  - libsqlite=3.49.1=h67fdade_1
-  - libssh2=1.11.1=he619c9f_0
   - libthrift=0.20.0=0
-  - libtiff=4.7.0=hdefb170_2
+  - libtiff=4.6.0=4
   - libutf8proc=2.8.0=0
   - libxml2=2.12.9=arcgispro_0
   - libxslt=1.1.42=0
-  - libzlib=1.3.1=h2466b09_2
   - locket=1.0.0=py311haa95532_0
   - lxml=5.3.0=py311_0
   - lz4=4.3.2=py311h2bbff1b_0
   - lz4-c=1.9.4=1
-  - mapclassify=2.8.1=pyhd8ed1ab_1
+  - markdown-it-py=2.2.0=py311haa95532_1
   - markupsafe=2.1.3=py311h2bbff1b_0
   - matplotlib=3.6.3=py311_arcgispro_2
   - matplotlib-base=3.6.3=py311_arcgispro_2
   - matplotlib-inline=0.1.6=py311haa95532_0
   - mccabe=0.7.0=pyhd3eb1b0_0
+  - mdurl=0.1.0=py311haa95532_0
   - mistune=2.0.4=py311haa95532_0
   - mkl=2022.2.1=arcgispro_19755
   - mkl-service=2.4.1=py311_arcgispro_0
@@ -156,7 +171,7 @@ dependencies:
   - mpmath=1.3.0=py311haa95532_0
   - msgpack-python=1.0.3=py311h59b6b97_0
   - msrest=0.6.21=py_0
-  - munch=2.5.0=pyhd3eb1b0_0
+  - multidict=6.0.4=py311h2bbff1b_0
   - mypy_extensions=1.0.0=py311haa95532_0
   - nbclassic=1.1.0=py_1
   - nbclient=0.8.0=py_0
@@ -167,71 +182,99 @@ dependencies:
   - networkx=3.3=py311haa95532_0
   - nlohmann_json=3.11.2=0
   - nose=1.3.7=pyhd3eb1b0_1008
-  - notebook=7.2.2=py_1
+  - notebook=7.2.1=py_1
   - notebook-shim=0.2.4=py_0
   - numexpr=2.8.4=py311_2
   - numpy=1.24.3=py311_1
   - numpy-base=1.24.3=py311_1
+  - numpydoc=1.7.0=py311haa95532_0
   - oauthlib=3.2.2=py_0
   - olefile=0.46=pyhd3eb1b0_0
   - openpyxl=3.1.2=py311h2bbff1b_0
-  - openssl=3.4.1=ha4e3fda_0
+  - openssl=3.0.15=1
   - orc=2.0.0=0
   - overrides=7.4.0=py311haa95532_0
-  - packaging=24.2=py311haa95532_0
+  - packaging=24.1=py311haa95532_0
   - pandas=2.0.2=py311_0
   - pandocfilters=1.5.0=pyhd3eb1b0_0
-  - parso=0.8.4=py311haa95532_0
-  - partd=1.4.2=py311haa95532_0
+  - paramiko=3.5.0=py311haa95532_0
+  - parso=0.8.3=pyhd3eb1b0_0
+  - partd=1.4.1=py311haa95532_0
   - pathspec=0.9.0=py_0
-  - patsy=1.0.1=py311haa95532_0
+  - patsy=0.5.6=py311haa95532_0
   - pefile=2022.5.30=pyhd8ed1ab_0
+  - pexpect=4.8.0=pyhd3eb1b0_3
   - pickleshare=0.7.5=pyhd3eb1b0_1003
   - pillow=10.4.0=py311_3
   - pip=23.3.2=py311_0
   - platformdirs=3.10.0=py311haa95532_0
-  - pluggy=1.5.0=py311haa95532_0
-  - pro_notebook_integration=3.4=py311_11
-  - proj=9.5.1=h4f671f6_0
+  - pluggy=1.0.0=py311haa95532_1
+  - ply=3.11=py311haa95532_0
+  - pro_notebook_integration=3.4=py311_10
+  - proj4=9.4.1=0
   - prometheus_client=0.20.0=py_0
   - prompt-toolkit=3.0.47=py_0
   - prompt_toolkit=3.0.47=0
   - protobuf=4.21.12=py311_5
   - psutil=5.9.0=py311h2bbff1b_0
   - psygnal=0.11.0=py_0
+  - ptyprocess=0.7.0=pyhd3eb1b0_2
   - pure_eval=0.2.2=pyhd3eb1b0_0
   - puremagic=1.15=py_0
   - pyarrow=16.1.0=py311_2
   - pybind11=2.10.4=2
   - pybind11_json=0.2.13=2
-  - pycodestyle=2.12.1=py311haa95532_0
+  - pycodestyle=2.11.1=py311haa95532_0
   - pycparser=2.21=pyhd3eb1b0_0
   - pydantic=2.4.2=py_1
   - pydantic-core=2.10.1=py311_1
+  - pydocstyle=6.3.0=py311haa95532_0
   - pyflakes=3.2.0=py311haa95532_0
+  - pygithub=2.4.0=py311haa95532_0
   - pygments=2.18.0=py_0
   - pyjwt=2.4.0=py_1
   - pylerc=4.0=py_0
+  - pylint=3.3.3=py311haa95532_0
+  - pylint-venv=3.0.3=py311haa95532_0
+  - pyls-spyder=0.4.0=pyhd3eb1b0_0
+  - pynacl=1.5.0=py311h8cc25b3_0
   - pyodbc=5.0.1=py311hd77b12b_0
-  - pyparsing=3.2.0=py311haa95532_0
+  - pyopenssl=24.2.1=py311haa95532_0
+  - pyparsing=3.1.2=py311haa95532_0
   - pypdf=4.3.1=py_1
-  - pyproj=3.7.1=py311h90dcb63_0
+  - pyproj=3.6.1=py311_4
+  - pyqt=5.15.10=py311hd77b12b_0
+  - pyqt5-sip=12.13.0=py311h2bbff1b_0
+  - pyqtwebengine=5.15.10=py311hd77b12b_0
   - pyshp=2.3.1=py311haa95532_0
   - pysocks=1.7.1=py311haa95532_0
   - pyspnego=0.11.1=py311_0
   - pytest=7.4.3=py311_0
   - python=3.11.10=0
   - python-dateutil=2.9.0post0=py311haa95532_2
-  - python-fastjsonschema=2.20.0=py311haa95532_0
+  - python-fastjsonschema=2.16.2=py311haa95532_0
   - python-gssapi=1.8.3=py311_1
-  - python-json-logger=3.2.1=py311haa95532_0
-  - python_abi=3.11=2_cp311
+  - python-json-logger=2.0.7=py311haa95532_0
+  - python-lsp-black=2.0.0=py_3
+  - python-lsp-jsonrpc=1.1.2=pyhd3eb1b0_0
+  - python-lsp-server=1.12.0=py311_1
+  - python-slugify=5.0.2=pyhd3eb1b0_0
+  - pytoolconfig=1.2.6=py311haa95532_0
   - pytz=2022.6=py311_0
+  - pyuca=1.2=py311haa95532_1
   - pywin32-ctypes=0.2.0=py311_1
   - pywin32-security=306=py311_2
   - pywinpty=2.0.10=py311h5da7b33_0
   - pyyaml=6.0.1=py311h2bbff1b_0
   - pyzmq=25.1.2=py311_0
+  - qdarkstyle=3.2.3=pyhd3eb1b0_0
+  - qstylizer=0.2.2=py311haa95532_0
+  - qt-main=5.15.2=h19c9488_11
+  - qt-webengine=5.15.9=h5bd16bc_7
+  - qtawesome=1.3.1=py311haa95532_0
+  - qtconsole=5.6.1=py311haa95532_0
+  - qtpy=2.4.1=py311haa95532_0
+  - rasterio=1.3.10=py311_0
   - re2=2023.06.02=0
   - referencing=0.30.2=py311haa95532_0
   - regex=2023.10.3=py311h2bbff1b_0
@@ -242,55 +285,73 @@ dependencies:
   - requests-toolbelt=1.0.0=py_0
   - rfc3339-validator=0.1.4=py311haa95532_0
   - rfc3986-validator=0.1.1=py311haa95532_0
+  - rich=13.3.5=py_0
+  - rope=1.12.0=py311haa95532_0
   - rpds-py=0.10.6=py311h062c2fa_0
   - rtree=1.0.1=py311h2eaa2aa_0
   - ruamel.yaml=0.17.21=py311h2bbff1b_0
   - saspy=4.3.2=py_1
-  - scikit-learn=1.6.1=py311hdcb8d17_0
   - scipy=1.9.3=py311_4
-  - seaborn=0.13.2=py311haa95532_1
-  - send2trash=1.8.2=py311haa95532_1
+  - seaborn=0.13.2=py311haa95532_0
+  - send2trash=1.8.2=py311haa95532_0
   - setuptools=74.1.2=py311_0
-  - shapely=2.0.7=py311hd54bd37_0
+  - sip=6.7.12=py311hd77b12b_0
   - six=1.16.0=py_0
   - snappy=1.2.1=0
   - sniffio=1.3.0=py311haa95532_0
+  - snowballstemmer=2.2.0=pyhd3eb1b0_0
+  - snuggs=1.4.7=pyhd3eb1b0_0
   - sortedcontainers=2.4.0=pyhd3eb1b0_0
   - soupsieve=2.5=py311haa95532_0
+  - sphinx=7.3.7=py311h827c3e9_0
+  - sphinxcontrib-applehelp=1.0.2=pyhd3eb1b0_0
+  - sphinxcontrib-devhelp=1.0.2=pyhd3eb1b0_0
+  - sphinxcontrib-htmlhelp=2.0.0=pyhd3eb1b0_0
+  - sphinxcontrib-jsmath=1.0.1=pyhd3eb1b0_0
+  - sphinxcontrib-qthelp=1.0.3=pyhd3eb1b0_0
+  - sphinxcontrib-serializinghtml=1.1.10=py311haa95532_0
+  - spyder=6.0.1=py311_1
+  - spyder-kernels=3.0.0=py311_0
   - sqlalchemy=2.0.32=py311_0
   - sqlite=3.46.1=0
   - sspilib=0.1.0=py311_0
   - stack_data=0.5.1=py_0
   - statsmodels=0.14.0=py311hd7041d2_0
+  - superqt=0.6.7=py311h746a85d_0
   - swat=1.13.3=py311_1
   - sympy=1.12=py311_0
+  - tabulate=0.9.0=py311haa95532_0
   - tblib=1.7.0=pyhd3eb1b0_0
   - terminado=0.17.1=py311haa95532_0
   - testpath=0.5.0=py_0
-  - threadpoolctl=3.5.0=pyhc1e730c_0
+  - text-unidecode=1.3=pyhd3eb1b0_0
+  - textdistance=4.6.3=py311h746a85d_0
+  - three-merge=0.1.1=pyhd3eb1b0_0
   - tinycss2=1.1.1=py_0
   - toml=0.10.2=pyhd3eb1b0_0
   - tomli=2.0.1=py311haa95532_0
-  - toolz=1.0.0=py311haa95532_0
+  - tomlkit=0.13.2=py311haa95532_0
+  - toolz=0.12.0=py311haa95532_0
   - tornado=6.3.3=py311h2bbff1b_0
-  - tqdm=4.67.1=py311h746a85d_0
+  - tqdm=4.66.5=py311h746a85d_0
   - traitlets=5.14.3=py311haa95532_0
   - truststore=0.9.1=py_0
-  - typing-extensions=4.12.2=py311haa95532_0
-  - typing_extensions=4.12.2=py311haa95532_0
-  - tzdata=2025a=h04d1e81_0
-  - ucrt=10.0.22621.0=h57928b3_1
+  - typing-extensions=4.11.0=py311haa95532_0
+  - typing_extensions=4.11.0=py311haa95532_0
+  - tzdata=2024a=h04d1e81_0
   - ujson=5.4.0=py311hd77b12b_0
   - unicodedata2=15.1.0=py311h2bbff1b_0
-  - urllib3=2.3.0=py311haa95532_0
+  - unidecode=1.3.8=py311haa95532_0
+  - urllib3=2.2.2=py311haa95532_0
   - vc=14.2=h21ff451_1
-  - vc14_runtime=14.42.34433=h6356254_24
-  - vs2015_runtime=14.42.34433=hfef2bbc_24
+  - vs2015_runtime=14.27.29016=h5e58377_2
+  - watchdog=4.0.1=py311haa95532_0
   - watchfiles=0.21.0=py311h062c2fa_0
   - wcwidth=0.2.5=pyhd3eb1b0_0
   - webencodings=0.5.1=py311haa95532_1
   - websocket-client=1.8.0=py311haa95532_0
-  - wheel=0.45.1=py311haa95532_0
+  - whatthepatch=1.0.2=py311haa95532_0
+  - wheel=0.44.0=py311haa95532_0
   - widgetsnbextension=4.0.13=py_0
   - win_inet_pton=1.1.0=py311_1
   - winkerberos=0.9.1=py311_0
@@ -305,12 +366,16 @@ dependencies:
   - xlrd=2.0.1=pyhd3eb1b0_1
   - xlwt=1.3.0=py311haa95532_0
   - xtl=0.7.5=0
-  - xyzservices=2025.1.0=pyhd8ed1ab_0
+  - xz=5.4.7=0
   - yaml=0.2.5=0
+  - yapf=0.40.2=py311haa95532_0
+  - yarl=1.11.0=py311_0
   - zeromq=4.3.5=0
   - zict=3.0.0=py_0
-  - zipp=3.21.0=py311haa95532_0
-  - zlib=1.3.1=h2466b09_2
+  - zipp=3.17.0=py311haa95532_0
+  - zlib=1.3.1=1
   - zlib-ng=2.1.6=2
   - zstd=1.5.6=1
-prefix: C:\Users\mweber\AppData\Local\Local\miniforge3\envs\esri-test
+  - pip:
+      - oracledb==2.5.1
+prefix: C:\Users\SMARKLEY\AppData\Local\ESRI\conda\envs\databaseconn
