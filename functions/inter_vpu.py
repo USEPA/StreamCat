@@ -6,6 +6,15 @@ import os
 class InterVPU:
     @staticmethod
     def adjust_coms(tbl, comid1, comid2, tbl2=None):
+        """Adjust values for COMIDs where values from one need to be subtracted from another. 
+            Depending on the type of accumulation, subtracts values for each column in the table other than COMID and PctFull
+
+        Args:
+            tbl (pd.DataFrame): throughVPU table from InterVPU function
+            comid1 (int): COMID which will be adjusted
+            comid2 (int): COMID whose values will be subtracted from comid1
+            tbl2 (pd.DataFrame, optional): toVPU table from InterVPU function in the case where a COMID comes from a different zone. Defaults to None.
+        """
         if tbl2 is None:
             tbl2 = tbl.copy()
         for idx in tbl.columns[:-1]:
@@ -13,17 +22,13 @@ class InterVPU:
     
     @staticmethod
     def appendConnectors(cat, Connector, zone, interVPUtbl):
-        """
-        __author__ =  "Marc Weber <weber.marc@epa.gov>"
-                    "Ryan Hill <hill.ryan@epa.gov>"
-        Appends the connector file of inter VPU COMIDS to the cat table before going into accumulation process
+        """Appends the connector file of inter VPU COMIDS to the cat table before going into accumulation process
 
-        Arguments
-        ---------
-        cat                   : Results table of catchment summarization
-        Connector             : string to file holding the table of inter VPU COMIDs
-        zone                  : string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
-        interVPUtbl           : table of interVPU adjustments
+        Args:
+            cat (pd.DataFrame): Results table of catchment summarization
+            Connector (str): string to file holding the table of inter VPU COMIDs
+            zone (str): string of an NHDPlusV2 VPU zone, i.e. 10L, 16, 17
+            interVPUtbl (pd.DataFrame): table of interVPU adjustments
         """
         con = pd.read_csv(Connector)
         for comidx in con.COMID.values.astype(int):
@@ -48,7 +53,16 @@ class InterVPU:
         return cat.reset_index(drop=True)
 
     @staticmethod
-    def inter_vpu(tbl, cols, accum_type, zone, connector, inter_vpu_tbl):
+    def inter_vpu(tbl, cols, zone, connector, inter_vpu_tbl):
+        """Loads watershed values for given COMIDs to be appended to catResults table for accumulation.
+
+        Args:
+            tbl (pd.DataFrame): Watershed results table
+            cols (list[str]): List of dataframe columns for Cat Results table needed to overwrite onto Connector table
+            zone (str): an NHDPlusV2 VPU number, i.e. 10, 16, 17
+            connector (str: Location of the connector file
+            inter_vpu_tbl (pd.DataFrame): table of interVPU exchanges
+        """
         through_vp_us = (
             tbl[tbl.COMID.isin(inter_vpu_tbl.thruCOMIDs.values)].set_index("COMID").copy()
         )

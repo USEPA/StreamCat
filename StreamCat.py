@@ -26,7 +26,6 @@
      * `$ python StreamCat.py -c /abs/path/alt.csv`
 """
 import os
-
 import click
 import geopandas as gpd
 import numpy as np
@@ -61,9 +60,9 @@ from functions import Accumulation, RasterOperations, SpatialOperations, ZonalOp
 # )
 
     
-def process_metric(args, row):
+def process_metric(args, row, inter_vpu, INPUTS):
     
-
+    already_processed = []
     for _, row in ctl.query("run == 1").iterrows():
 
         apm = "" if row.AppendMetric == "none" else row.AppendMetric
@@ -95,14 +94,12 @@ def process_metric(args, row):
                 points = SpatialOperations.mask_points(points, mask_dir, INPUTS)
         # File string to store InterVPUs needed for adjustments
         Connector = f"{args.OUT_DIR}/{row.FullTableName}_connectors.csv"
-        print(
-            f"Acquiring `{row.FullTableName}` catchment statistics...",
-            end="",
-            flush=True,
+        click.echo(
+            f"Acquiring `{row.FullTableName}` catchment statistics..."
         )
         for zone, hydroregion in INPUTS.items():
             if not os.path.exists(f"{args.OUT_DIR}/{row.FullTableName}_{zone}.csv"):
-                print(zone, end=", ", flush=True)
+                click.echo(zone)
                 pre = f"{args.NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
                 if not row.accum_type == "Point":
                     izd = (
@@ -128,17 +125,17 @@ def process_metric(args, row):
                         points, zone, izd, pct_full, mask_dir, apm, summary
                     )
                 cat.to_csv(f"{args.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
-        print("done!")
-        print("Accumulating...", end="", flush=True)
+        click.echo("done!")
+        click.echo("Accumulating...")
         for zone in INPUTS:
             fn = f"{args.OUT_DIR}/{row.FullTableName}_{zone}.csv"
             cat = pd.read_csv(fn)
             processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().bool()
             if processed:
-                print("skipping!")
+                click.echo("skipping!")
                 already_processed.append(row.FullTableName)
                 break
-            print(zone, end=", ", flush=True)
+            click.echo(zone)
 
             if zone in inter_vpu.ToZone.values:
                 cat = InterVPU.appendConnectors(cat, Connector, zone, inter_vpu)
@@ -169,12 +166,13 @@ def process_metric(args, row):
                     Connector,
                     inter_vpu.copy(),
                 )
+            # TODO final = pd.concat([up.set_index('COMID'), ws.set_index('COMID'), cat.set_index('COMID')] axis=1)
             upFinal = pd.merge(up, ws, on="COMID")
             final = pd.merge(cat, upFinal, on="COMID")
             final.to_csv(f"{args.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
-        print(end="") if processed else print("done!")
+        click.echo(end="processed!") if processed else click.echo("done!")
         if already_processed:
-            print(
+            click.echo(
                 "\n!!!Processing Problem!!!\n\n"
                 f"{', '.join(already_processed)} already run!\n"
                 "Be sure to delete the associated files in your `OUTDIR` to rerun:"
@@ -202,6 +200,6 @@ if __name__ == '__main__':
 
     INPUTS = np.load(args.ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 
-    already_processed = []
+    
     for i, row in ctl.query("run == 1").iterrows():
-        process_metric(args, row)
+        process_metric(args, row, inter_vpu, INPUTS)

@@ -7,31 +7,31 @@ from collections import OrderedDict, defaultdict, deque
 from utils import dbf2df
 
 class NHDProcessing:
-    def __init__(self, nhd_dir):
+    def __init__(self, nhd_dir, accum_dir):
         self.nhd = nhd_dir
+        self.accum_dir = accum_dir
     
-    @staticmethod
-    def nhd_dict(nhd, unit="VPU", user_zones=None):
+    
+    def nhd_dict(self, unit="VPU", user_zones=None):
         inputs = OrderedDict()
         if user_zones:
             inputs |= user_zones
-            np.save("./accum_npy/vpu_inputs.npy", inputs)
+            np.save(f"{self.accum_dir}vpu_inputs.npy", inputs)
             return inputs
-        bounds = pd.read_csv(f"{nhd}/NHDPlusGlobalData/BoundaryUnit.csv")
+        bounds = pd.read_csv(f"{self.nhd}/NHDPlusGlobalData/BoundaryUnit.csv")
         remove = bounds.loc[bounds.DRAINAGEID.isin(["HI", "CI"])].index
         bounds = bounds.drop(remove, axis=0)
         if unit == "VPU":
             vpu_bounds = bounds.loc[bounds.UNITTYPE == "VPU"].sort_values("HYDROSEQ", ascending=False)
             for _, row in vpu_bounds.iterrows():
                 inputs[row.UNITID] = row.DRAINAGEID
-            np.save("./accum_npy/vpu_inputs.npy", inputs)
-            return inputs
+            np.save(f"{self.accum_dir}vpu_inputs.npy", inputs)
+        return inputs
 
-    @staticmethod
-    def make_all_cat_comids(nhd, inputs):
+    def make_all_cat_comids(self, inputs):
         all_comids = np.array([], dtype=np.int32)
         for zone, hr in inputs.items():
-            cats = pd.read_csv(f"{nhd}/NHDPlus{hr}/NHDPlus{zone}/NHDPlusCatchment/Catchment.csv")
+            cats = pd.read_csv(f"{self.nhd}/NHDPlus{hr}/NHDPlus{zone}/NHDPlusCatchment/Catchment.csv", usecols=['FEATUREID'])
             all_comids = np.append(all_comids, cats.FEATUREID.values.astype(int))
         np.savez_compressed("./accum_npy/allCatCOMs.npz", all_comids=all_comids)
         return set(all_comids)
@@ -97,7 +97,8 @@ class NHDProcessing:
         inter_tbl   : table of inter-VPU connections
         nhd         : directory where NHD is stored
         """
-        os.mkdir("accum_npy")
+        #os.mkdir("accum_npy")
+
         inputs = self.nhd_dict(self.nhd, user_zones=user_zones)
         all_comids = self.make_all_cat_comids(self.nhd, inputs)
         print("Making numpy files in zone...", end="", flush=True)
@@ -141,7 +142,7 @@ class NHDProcessing:
             upstream = np.hstack(ups).astype(np.int32)  # Convert to 1d vector
             assert len(ups) == len(lengths) == len(comids)
             np.savez_compressed(
-                f"./accum_npy/accum_{zone}.npz",
+                f"{self.accum_dir}accum_{zone}.npz",
                 comids=comids,
                 lengths=lengths,
                 upstream=upstream,
