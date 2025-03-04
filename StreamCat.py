@@ -44,6 +44,7 @@ from stream_cat_config import (
     OUT_DIR,
     PCT_FULL_FILE,
     PCT_FULL_FILE_RP100,
+    USER_ZONES,
 )
 from StreamCat_functions import (
     Accumulation,
@@ -56,6 +57,8 @@ from StreamCat_functions import (
     mask_points,
     nhd_dict,
 )
+
+from joblib import Parallel, delayed
 
 # Load table of layers to be run...
 ctl = pd.read_csv(control)
@@ -71,7 +74,7 @@ if not os.path.exists(OUT_DIR + "/DBF_stash"):
 
 if not os.path.exists(ACCUM_DIR):
     # TODO: work out children OR bastards only
-    makeNumpyVectors(inter_vpu, NHD_DIR)
+    makeNumpyVectors(inter_vpu, NHD_DIR, USER_ZONES)
 
 INPUTS = np.load(ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 
@@ -90,7 +93,7 @@ for _, row in ctl.query("run == 1").iterrows():
         mask_dir = ""
     layer = (
         row.LandscapeLayer
-        if os.sep in row.LandscapeLayer
+        if "/" in row.LandscapeLayer or "\\" in row.LandscapeLayer
         else (f"{LYR_DIR}/{row.LandscapeLayer}")
     )  # use abspath
     if isinstance(row.summaryfield, str):
@@ -113,7 +116,8 @@ for _, row in ctl.query("run == 1").iterrows():
         end="",
         flush=True,
     )
-    for zone, hydroregion in INPUTS.items():
+    #for zone, hydroregion in INPUTS.items():
+    def process_zone(zone, hydroregion):
         if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
             print(zone, end=", ", flush=True)
             pre = f"{NHD_DIR}/NHDPlus{hydroregion}/NHDPlus{zone}"
@@ -141,6 +145,9 @@ for _, row in ctl.query("run == 1").iterrows():
                     points, zone, izd, pct_full, mask_dir, apm, summary
                 )
             cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+    zone_results = Parallel(n_jobs=-1)(
+        delayed(process_zone) (zone, hydroregion) for zone, hydroregion in INPUTS.items()
+    )
     print("done!")
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:
