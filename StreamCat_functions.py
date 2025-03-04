@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 #from gdalconst import *
-from osgeo import gdal, ogr, osr
+# from osgeo import gdal, ogr, osr
 from rasterio import transform
 
 if rasterio.__version__[0] == "0":
@@ -40,10 +40,16 @@ import fiona
 import geopandas as gpd
 from geopandas.tools import sjoin
 
-os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
-sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
-import arcpy
-from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
+# os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
+# sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
+# import arcpy
+# from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
+
+import xarray as xr
+import rioxarray
+from xrspatial.zonal import stats, crosstab
+import pyogrio
+import pprint
 
 ###
 # Speed up imports
@@ -170,7 +176,19 @@ def bastards(token, tree):
 
 ##############################################################################
 
-
+def getRasterInfo_xarray(file):
+    raster = rioxarray.open_rasterio(file).sel(band=1).drop_vars('band')
+    
+    NDV = raster.rio.nodata
+    xsize = raster.x.size
+    ysize = raster.y.size
+    GeoT = raster.rio.transform()
+    Proj_projcs = raster.rio.crs
+    Proj_geogcs = raster.rio.get_gcps()
+    DataType = raster.dtype # .name
+    bounds = raster.rio.bounds()
+    stats = raster.attrs
+    return raster, NDV, stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType, bounds
 def getRasterInfo(FileName):
     """
     __author__ =   "Marc Weber <weber.marc@epa.gov>"
@@ -771,7 +789,7 @@ def rat_to_dict(inraster, old_val, new_val):
     # data type automatically
     s = [
         pd.Series(rat.ReadAsArray(i), name=rat.GetNameOfCol(i))
-        for i in xrange(rat.GetColumnCount())
+        for i in range(rat.GetColumnCount())
     ]
     # Convert the RAT to a pandas dataframe
     df = pd.concat(s, axis=1)
@@ -964,6 +982,48 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
 ##############################################################################
 
+def xarrayZonalStatsPrep(izd_path, landscape_layer_path):
+    """Create Xarray DataArrays from inZoneData and LandscapeLayer files
+
+    Args:
+        izd_path (str): path to inZoneData dbf
+        landscape_layer_path (str): path to landscape layer raster
+
+    Returns:
+        izd_array (xr.DataArray): DataArray of zone data
+        ll_array (xr.DataArray): Windowed read of landscape layer raster as DataArray
+    """
+
+    # Load first band of in zone data to an xarray DataArray
+    izd_array = rioxarray.open_rasterio(izd_path).sel(band=1).drop_vars('band')
+
+    # Get transform and bounds from in zone data to create window
+    transform = izd_array.rio.transform()
+    bounds = izd_array.rio.bounds()
+    window = rasterio.windows.from_bounds(*bounds, transform)
+
+    # Read window of Landscape Layer (band 1) to rasterio array (numpy ndarray)
+    # Notes:
+    # Used rasterio because windowed reading with rioxarray was not working.
+    # Also attempted to use rioxarray and rio.clip & mask however this took 5-6 minutes for the NE region so was a huge slowdown.
+    # rasterio window read then DataArray conversion is simplest and fastest and does not require us loading a new GeoDataFrame for a shapely box.
+    #with rasterio.open(landscape_layer_path) as src:
+        # Open LandscapeLayer raster, window read band 1
+        #ll_rio_array = src.read(1, window=window)
+    # Convert numpy array to xarray DataArray with x and y as the dimensions to match izd_array
+    #ll_array = xr.DataArray(ll_rio_array, dims=['y', 'x'])
+    
+    # Rioxarray window selection is much faster than rasterio
+    ll_array = rioxarray.open_rasterio(landscape_layer_path).sel(band=1).drop_vars('band')
+    ll_array = ll_array.rio.isel_window(window)
+    
+
+    # Return the DataArrays to use in xrspatial.zonal.stats, and xrspatial.zonal.crosstab
+    return izd_array, ll_array
+
+
+##############################################################################
+
 
 def createCatStats(
     accum_type,
@@ -994,36 +1054,51 @@ def createCatStats(
     """
 
     try:
-        arcpy.env.cellSize = "30"
-        arcpy.env.snapRaster = inZoneData
+        # arcpy.env.cellSize = "30"
+        # arcpy.env.snapRaster = inZoneData
+        # cellSize = 30
+        # snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
-                landscape_layer = Path(LandscapeLayer).stem  # / vs. \ agnostic
-                outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
+                outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.csv" % (
+
                     out_dir,
                     landscape_layer,
                     appendMetric,
                     zone,
                 )
             else:
-                landscape_layer = Path(LandscapeLayer).name  # / vs. \ agnostic
-                outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
+                outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.csv" % (
+
                     out_dir,
                     landscape_layer,
                     appendMetric,
                     zone,
                 )
-            if not os.path.exists(outTable):
+            if not os.path.exists(outTable_path):
                 if accum_type == "Categorical":
-                    TabulateArea(
-                        inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
-                    )
+                    # TabulateArea(
+                    #     inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
+                    # )
+                    izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
+
+                    outTable = crosstab(izd_array, ll_array)
                 if accum_type == "Continuous":
-                    ZonalStatisticsAsTable(
-                        inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
-                    )
+
+                    izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
+                    
+                    outTable = stats(izd_array, ll_array)
+                    outTable.round(2, inplace=True)
+
             try:
-                table = dbf2DF(outTable)
+                if isinstance(outTable, pd.DataFrame):
+                    # Memory cleanup
+                    del izd_array 
+                    del ll_array
+                    
+                    outTable.to_csv(outTable_path)
+                # else:
+                #     table = dbf2DF(outTable)
             except fiona.errors.DriverError as e:
                 # arc occassionally doesn't release the file and fails here
                 print(e, "\n\n!EXCEPTION CAUGHT! TRYING AGAIN!")
@@ -1038,9 +1113,11 @@ def createCatStats(
                 print("working on " + elev)
                 outTable = out_dir + "/DBF_stash/zonalstats_elev%s.dbf" % (subdirs[-3:])
                 if not os.path.exists(outTable):
-                    ZonalStatisticsAsTable(
-                        inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
-                    )
+                    # ZonalStatisticsAsTable(
+                    #     inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
+                    # )
+                    izd_array, elev_array = xarrayZonalStatsPrep(inZoneData, elev)
+                    outTable = stats(izd_array, elev_array)
             for count, rpu in enumerate(rpuList):
                 if count == 0:
                     table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
@@ -1054,29 +1131,32 @@ def createCatStats(
             if len(rpuList) > 1:
                 table.reset_index(drop=True, inplace=True)
                 table = table.loc[table.groupby("VALUE").AREA.idxmax()]
-    except LicenseError:
-        print("Spatial Analyst license is unavailable")
-    except arcpy.ExecuteError:
-        print("Failing at the ExecuteError!")
-        print(arcpy.GetMessages(2))
 
+    except xr.MergeError: #RuntimeError:
+        print("Runtime error")
+    # except LicenseError:
+    #     print("Spatial Analyst license is unavailable")
+    # except arcpy.ExecuteError:
+    #     print("Failing at the ExecuteError!")
+    #     print(arcpy.GetMessages(2))
+    table = outTable[1:].drop('Unnamed: 0', axis=1)
     if mask_dir:
         nhdtbl = dbf2DF(
             f"{NHD_dir}/NHDPlus{hydroregion}/NHDPlus{zone}"
             "/NHDPlusCatchment/Catchment.dbf"
         ).loc[:, ["FEATUREID", "AREASQKM", "GRIDCODE"]]
-        tbl = dbf2DF(outTable)
+        #tbl = dbf2DF(outTable)
         if accum_type == "Categorical":
-            tbl = chkColumnLength(tbl, LandscapeLayer)
+            table = chkColumnLength(table, LandscapeLayer)
         # We need to use the raster attribute table here for PctFull & Area
         # TODO: this needs to be considered when making masks!!!
         tbl2 = dbf2DF(f"{mask_dir}/{zone}.tif.vat.dbf")
         tbl2 = (
-            pd.merge(tbl2, nhdtbl, how="right", left_on="VALUE", right_on="GRIDCODE")
+            pd.merge(tbl2, nhdtbl, how="right", left_on="zone", right_on="GRIDCODE") #TODO change "VALUE" to new xarray name 
             .fillna(0)
-            .drop("VALUE", axis=1)
+            .drop("zone", axis=1)
         )
-        result = pd.merge(tbl2, tbl, left_on="GRIDCODE", right_on="VALUE", how="left")
+        result = pd.merge(tbl2, table, left_on="GRIDCODE", right_on="zone", how="left") #TODO change "VALUE" to new xarray name 
         if accum_type == "Continuous":
             result["PctFull%s" % appendMetric] = (result.COUNT_y / result.COUNT_x) * 100
             result["AreaSqKm%s" % appendMetric] = (result.COUNT_x * 900) * 1e-6
@@ -1101,19 +1181,19 @@ def createCatStats(
                 "PctFull%s" % appendMetric,
             ]
         if accum_type == "Categorical":
-            result["TotCount"] = result[tbl.columns.tolist()[1:]].sum(axis=1)
+            result["TotCount"] = result[table.columns.tolist()[1:]].sum(axis=1)
             result["PctFull%s" % appendMetric] = (
                 result.TotCount / (result.COUNT * 900)
             ) * 100
             result["AreaSqKm%s" % appendMetric] = (result.COUNT * 900) * 1e-6
             result = result[
                 ["FEATUREID", "AreaSqKm%s" % appendMetric]
-                + tbl.columns.tolist()[1:]
+                + table.columns.tolist()[1:]
                 + ["PctFull%s" % appendMetric]
             ]
             result.columns = (
                 ["COMID", "AreaSqKm%s" % appendMetric]
-                + [lbl + appendMetric for lbl in tbl.columns.tolist()[1:]]
+                + [lbl + appendMetric for lbl in table.columns.tolist()[1:]]
                 + ["PctFull%s" % appendMetric]
             )
     else:
@@ -1122,11 +1202,13 @@ def createCatStats(
             if by_RPU == 1:
                 table = table[["VALUE", "AREA", "COUNT", "SUM", "MIN", "MAX"]]
             else:
-                table = table[["VALUE", "AREA", "COUNT", "SUM"]]
-            table = table.rename(columns={"COUNT": "Count", "SUM": "Sum"})
+                table = table[["zone", "mean", "count", "sum", "min", "max"]] # for xrspatial.zonal.stats
+            table = table.rename(columns={"count": "Count", "sum": "Sum"})
+
         if accum_type == "Categorical":
             table = chkColumnLength(table, LandscapeLayer)
-            table["AREA"] = table[table.columns.tolist()[1:]].sum(axis=1)
+            table["AREA"] = table[table.columns.tolist()[1:]].sum(axis=1) # .compute()
+
         nhdTable = dbf2DF(inZoneData[:-3] + "Catchment.dbf").loc[
             :, ["FEATUREID", "AREASQKM", "GRIDCODE"]
         ]
@@ -1134,8 +1216,9 @@ def createCatStats(
             columns={"FEATUREID": "COMID", "AREASQKM": "AreaSqKm"}
         )
         result = pd.merge(
-            nhdTable, table, how="left", left_on="GRIDCODE", right_on="VALUE"
+            nhdTable, table, how="left", left_on="GRIDCODE", right_on="zone"
         )
+
         if LandscapeLayer.split("/")[-1].split(".")[0] == "rdstcrs":
             slptbl = dbf2DF(
                 "%s/NHDPlus%s/NHDPlus%s/NHDPlusAttributes/elevslope.dbf"
@@ -1146,13 +1229,22 @@ def createCatStats(
             result.SLOPE = result.SLOPE.fillna(0)
             result["SlpWtd"] = result["Sum"] * result["SLOPE"]
             result = result.drop(["SLOPE"], axis=1)
-        result["PctFull"] = (
-            ((result.AREA * 1e-6) / result.AreaSqKm.astype("float")) * 100
-        ).fillna(0)
-        result = result.drop(["GRIDCODE", "VALUE", "AREA"], axis=1)
+        
+        #TODO
+        # Find new way to calculate PctFull values
+        # result["PctFull"] = (
+        #     ((result.AREA * 1e-6) / result.AreaSqKm.astype("float")) * 100
+        # ).fillna(0)
+        # print(result.columns)
+        # result = result.drop(["GRIDCODE", "VALUE", "AREA"], axis=1) # These were renamed in the nhdTable section GRIDCODE = COMID, AREA DNE WITH XARRAY-SPATIAL
     cols = result.columns[1:]
     result.columns = np.append("COMID", "Cat" + cols.values)
+    result.fillna(0, inplace=True)
+    # result.compute() ? if necessary
+    # Could also convert to dask here with .from_pandas with n partitions then return and concat to main dataframe in 
     return result  # ALL NAs need to be filled w/ zero here for Accumulation!!
+
+###############################################################################
 
 
 def get_rat_vals(raster):
@@ -1456,9 +1548,7 @@ def findUpstreamNpy(zone, com, numpy_dir):
 
 
 def dbf2DF(f, upper=True):
-    data = gpd.read_file(f)
-    if "geometry" in data:
-        data.drop("geometry", axis=1, inplace=True)
+    data = pyogrio.read_dataframe(f, read_geometry=False, use_arrow=True) # gpd.read_file(f).drop("geometry", axis=1)
     if upper is True:
         data.columns = data.columns.str.upper()
     return data
