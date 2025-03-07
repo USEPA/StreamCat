@@ -39,6 +39,7 @@ if rasterio.__version__[0] == "1":
 import fiona
 import geopandas as gpd
 from geopandas.tools import sjoin
+import dask_geopandas
 
 # os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
 # sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
@@ -49,7 +50,6 @@ import xarray as xr
 import rioxarray
 from xrspatial.zonal import stats, crosstab
 import pyogrio
-import pprint
 
 ###
 # Speed up imports
@@ -661,7 +661,7 @@ def mask_points(points, mask_dir, INPUTS, nodata_vals=[0, -2147483648.0]):
     return points.iloc[xx.loc[xx == 1].index]
 
 
-def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summary):
+def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summary, use_dask=False):
     """
     Filter points to those that only lie within the mask.
 
@@ -692,8 +692,13 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
         table
 
     """
-
-    polys = gpd.GeoDataFrame.from_file(catchments)
+    
+    #polys = gpd.GeoDataFrame.from_file(catchments)
+    # TODO see if we can use dask in this function instead.
+    if use_dask:
+        polys = dask_geopandas.read_file(catchments, npartitions=16)
+    else:
+        polys = pyogrio.read_dataframe(catchments, read_geometry=True, use_arrow=True)
     polys.to_crs(points.crs, inplace=True)
     if mask_dir:
         rat = dbf2DF(f"{mask_dir}/{vpu}.tif.vat.dbf")
@@ -715,8 +720,12 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
     )
     # Remove duplicate points for 'Count'
     points2 = points.drop_duplicates("latlon_tuple")
+    
     try:
-        point_poly_join = sjoin(points2, polys, how="left", op="within")
+        if use_dask:
+            point_poly_join = dask_geopandas.sjoin(points2, polys, how="left", op="within").compute()
+        else:
+            point_poly_join = sjoin(points2, polys, how="left", op="within")
         fld = "GRIDCODE"
     except:
         polys["link"] = np.nan
@@ -732,7 +741,10 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
     final = final[["FEATUREID", "AreaSqKM", "COUNT"]].fillna(0)
     cols = ["COMID", f"CatAreaSqKm{appendMetric}", f"CatCount{appendMetric}"]
     if not summary == None:  # Summarize fields including duplicates
-        point_poly_dups = sjoin(points, polys, how="left", op="within")
+        if use_dask:
+            point_poly_dups = dask_geopandas.sjoin(points, polys, how="left", op="within").compute()
+        else:
+            point_poly_dups = sjoin(points, polys, how="left", op="within")
         grouped2 = point_poly_dups.groupby("FEATUREID")
         for x in summary:  # Sum the field in summary field list for each catchment
             point_poly_stats = grouped2[x].sum()
@@ -982,7 +994,7 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
 ##############################################################################
 
-def xarrayZonalStatsPrep(izd_path, landscape_layer_path):
+def xarrayZonalStatsPrep(izd_path, landscape_layer_path, use_dask=False):
     """Create Xarray DataArrays from inZoneData and LandscapeLayer files
 
     Args:
@@ -995,8 +1007,10 @@ def xarrayZonalStatsPrep(izd_path, landscape_layer_path):
     """
 
     # Load first band of in zone data to an xarray DataArray
+    if use_dask:
+        izd_array = rioxarray.open_rasterio(izd_path, chunks=True).sel(band=1).drop_vars('band')
     izd_array = rioxarray.open_rasterio(izd_path).sel(band=1).drop_vars('band')
-
+    
     # Get transform and bounds from in zone data to create window
     transform = izd_array.rio.transform()
     bounds = izd_array.rio.bounds()
@@ -1015,10 +1029,27 @@ def xarrayZonalStatsPrep(izd_path, landscape_layer_path):
     
     # Rioxarray window selection is much faster than rasterio
     ll_array = rioxarray.open_rasterio(landscape_layer_path).sel(band=1).drop_vars('band')
-    ll_array = ll_array.rio.isel_window(window)
+    ll_array = ll_array.rio.isel_window(window, pad=True)
     
+    # TODO add check to make sure they are the same size
+    if izd_array.shape != ll_array.shape:
+        # Determine the target shape (you can choose either one, but here we'll use izd_array's shape)
+        target_shape = izd_array.shape
+
+        # Resample or pad the ll_array to match the target shape
+        if ll_array.shape[0] < target_shape[0]:
+            ll_array = ll_array.pad(y=(0, target_shape[0] - ll_array.shape[0]), mode='constant', constant_values=np.nan)
+        elif ll_array.shape[0] > target_shape[0]:
+            ll_array = ll_array.isel(y=slice(0, target_shape[0]))
+
+        if ll_array.shape[1] < target_shape[1]:
+            ll_array = ll_array.pad(x=(0, target_shape[1] - ll_array.shape[1]), mode='constant', constant_values=np.nan)
+        elif ll_array.shape[1] > target_shape[1]:
+            ll_array = ll_array.isel(x=slice(0, target_shape[1]))
 
     # Return the DataArrays to use in xrspatial.zonal.stats, and xrspatial.zonal.crosstab
+    if use_dask:
+        ll_array = ll_array.chunk(izd_array.chunksizes)
     return izd_array, ll_array
 
 
@@ -1036,6 +1067,7 @@ def createCatStats(
     NHD_dir,
     hydroregion,
     appendMetric,
+    use_dask=False
 ):
 
     """
@@ -1060,16 +1092,16 @@ def createCatStats(
         # snapRaster = inZoneData
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
-                outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.csv" % (
-
+                landscape_layer = Path(LandscapeLayer).stem # / vs . \ agnostic
+                outTable_path = "%s/DBF_stash/zonalstats_%s%s_%s.csv" % (
                     out_dir,
                     landscape_layer,
                     appendMetric,
                     zone,
                 )
             else:
-                outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.csv" % (
-
+                landscape_layer = Path(LandscapeLayer).stem # / vs . \ agnostic
+                outTable_path = "%s/DBF_stash/zonalstats_%s%s_%s.csv" % (
                     out_dir,
                     landscape_layer,
                     appendMetric,
@@ -1080,15 +1112,22 @@ def createCatStats(
                     # TabulateArea(
                     #     inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
                     # )
-                    izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
+                    izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer, use_dask)
 
                     outTable = crosstab(izd_array, ll_array)
                 if accum_type == "Continuous":
 
-                    izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
+                    izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer, use_dask)
                     
                     outTable = stats(izd_array, ll_array)
-                    outTable.round(2, inplace=True)
+                    if "Unnamed: 0" in outTable.columns:
+                        outTable = outTable.drop("Unnamed: 0")
+                    outTable = outTable[outTable.zone != -2147483647]
+                    outTable = outTable.round(2)
+                
+                if use_dask:
+                    outTable.compute()
+                # print(outTable.head())
 
             try:
                 if isinstance(outTable, pd.DataFrame):
@@ -1139,7 +1178,7 @@ def createCatStats(
     # except arcpy.ExecuteError:
     #     print("Failing at the ExecuteError!")
     #     print(arcpy.GetMessages(2))
-    table = outTable[1:].drop('Unnamed: 0', axis=1)
+    table = outTable[1:]# .drop('Unnamed: 0', axis=1)
     if mask_dir:
         nhdtbl = dbf2DF(
             f"{NHD_dir}/NHDPlus{hydroregion}/NHDPlus{zone}"
