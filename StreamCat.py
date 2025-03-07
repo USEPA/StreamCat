@@ -89,6 +89,8 @@ INPUTS = np.load(ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 already_processed = []
 
 for _, row in ctl.query("run == 1").iterrows():
+    if row.Year is not None:
+        row.FullTableName = row.FullTableName + row.Year
 #def process_row(row):
     apm = "" if row.AppendMetric == "none" else row.AppendMetric
     if row.use_mask == 1:
