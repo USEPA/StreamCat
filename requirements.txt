@@ -1,0 +1,10 @@
+numpy
+pandas
+geopandas
+xarray
+rioxarray
+xarray-spatial
+joblib
+pyogrio
+dask
+dask-geopandas
