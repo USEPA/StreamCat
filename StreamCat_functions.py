@@ -1052,18 +1052,7 @@ def xarrayZonalStatsPrep(izd_path, landscape_layer_path, use_dask=False):
     # Return the DataArrays to use in xrspatial.zonal.stats, and xrspatial.zonal.crosstab
     if use_dask:
         ll_array = ll_array.chunk(izd_array.chunksizes)
- 
-    # print(izd_array)
-    # print(ll_array)
- 
-    # print(izd_array.shape)
-    # print(ll_array.shape)
- 
-    # print(type(izd_array))
-    # print(type(ll_array))
- 
-    # print(izd_array.chunksizes)
-    # print(ll_array.chunksizes)
+
     return izd_array, ll_array
  
 
@@ -1135,20 +1124,25 @@ def createCatStats(
                     izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer, use_dask)
                     
                     outTable = stats(izd_array, ll_array)
-                    if "Unnamed: 0" in outTable.columns:
-                        outTable = outTable.drop("Unnamed: 0")
-                    outTable = outTable[outTable.zone != -2147483647]
-                    outTable = outTable.round(2)
                 
+                # Call compute before building up too large of a dask graph if using dask
                 if use_dask:
-                    outTable.compute()
-                # print(outTable.head())
+                    outTable = outTable.compute()
+                
+                # Post process pandas dataframe
+                if "Unnamed: 0" in outTable.columns:
+                    outTable = outTable.drop("Unnamed: 0")
+                outTable = outTable[outTable.zone != -2147483647]
+                outTable = outTable.round(2)
 
+                # Memeory cleanup
+                del izd_array 
+                del ll_array
             try:
                 if isinstance(outTable, pd.DataFrame):
                     # Memory cleanup
-                    del izd_array 
-                    del ll_array
+                    # del izd_array 
+                    # del ll_array
                     
                     outTable.to_csv(outTable_path)
                 # else:
@@ -1172,6 +1166,10 @@ def createCatStats(
                     # )
                     izd_array, elev_array = xarrayZonalStatsPrep(inZoneData, elev)
                     outTable = stats(izd_array, elev_array)
+                    if use_dask:
+                        outTable = outTable.compute()
+                        del izd_array
+                        del elev_array
             for count, rpu in enumerate(rpuList):
                 if count == 0:
                     table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
@@ -1186,14 +1184,16 @@ def createCatStats(
                 table.reset_index(drop=True, inplace=True)
                 table = table.loc[table.groupby("VALUE").AREA.idxmax()]
 
-    except xr.MergeError: #RuntimeError:
-        print("Runtime error")
+    except Exception as e: #RuntimeError:
+        print(f"Error in createCatStats(): {e}")
+        raise
     # except LicenseError:
     #     print("Spatial Analyst license is unavailable")
     # except arcpy.ExecuteError:
     #     print("Failing at the ExecuteError!")
     #     print(arcpy.GetMessages(2))
-    table = outTable[1:]# .drop('Unnamed: 0', axis=1)
+    table = outTable # [1:]# .drop('Unnamed: 0', axis=1)
+    del outTable
     if mask_dir:
         nhdtbl = dbf2DF(
             f"{NHD_dir}/NHDPlus{hydroregion}/NHDPlus{zone}"
