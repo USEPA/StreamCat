@@ -504,7 +504,7 @@ class DatabaseConnection():
             return results
 
 
-    def CreateDataset(self, partition: str, df: pd.DataFrame, dsname: str, active: int = 0):
+    def CreateDataset(self, partition: str, df: pd.DataFrame, dsname: str, active: int = 0, dsid: int | None = None):
         """Create new dataset table from pandas dataframe. This will also insert the new metrics into our metric informatio tables, _metrics, _metrics_display_names and _metrics_tg.
 
         Args:
@@ -512,7 +512,7 @@ class DatabaseConnection():
             df (pd.DataFrame): Dataframe to upload to database as table
             dsname (str): New dataset name, defaults to csv name.
             active (int): binary int 1 if dataset will be published and displayed upon creation. 0 if not. Default is 0
-
+            dsid (int | None): What dsid to create the new dataset table at. If None it will by default be the max dsid + 1.
 
         Returns:
             ds_result (tuple): new dataset table name and dataset name inserted into 
@@ -527,7 +527,9 @@ class DatabaseConnection():
         else:
             ValueError("Invalid partition! Needs to be either streamcat or lakecat")
         
-        dsid = self.getMaxDsid(partition) + 1
+        if dsid is None:
+            dsid = self.getMaxDsid(partition) + 1
+        
         table_name = prefix + 'ds_' + str(dsid)
         if self.execute:
             # Change this to sqlalchemy CreateTable function called self.CreateNewTable

@@ -1036,8 +1036,6 @@ def xarrayZonalStatsPrep(izd_path, landscape_layer_path, use_dask=False):
     # Rioxarray window selection is much faster than rasterio
     ll_array = rioxarray.open_rasterio(landscape_layer_path).sel(band=1).drop_vars('band')
     ll_array = ll_array.rio.isel_window(window, pad=True)
-    # print(izd_array.shape)
-    # print(ll_array.shape)
     
     # TODO add check to make sure they are the same size
     if izd_array.shape != ll_array.shape:
