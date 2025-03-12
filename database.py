@@ -72,7 +72,6 @@ class DatabaseConnection():
             logging.basicConfig(filename=f'logs/db_log_{datetime.today().strftime("%m_%d_%Y")}.log', filemode='a')
             logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
             event.listen(self.engine, 'before_execute', log_query)
-            
         return
     
     def disconnect(self):

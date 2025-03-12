@@ -661,7 +661,7 @@ def mask_points(points, mask_dir, INPUTS, nodata_vals=[0, -2147483648.0]):
     return points.iloc[xx.loc[xx == 1].index]
 
 
-def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summary, use_dask=False, dask_client=None):
+def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summary, use_dask=False):
     """
     Filter points to those that only lie within the mask.
 
@@ -723,7 +723,7 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
     
     try:
         if use_dask:
-            point_poly_join = dask_geopandas.sjoin(points2, polys, how="left", op="within") #.compute()
+            point_poly_join = dask_geopandas.sjoin(points2, polys, how="left", op="within").compute()
         else:
             point_poly_join = sjoin(points2, polys, how="left", op="within")
         fld = "GRIDCODE"
@@ -737,8 +737,6 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
     point_poly_count.name = "COUNT"
     # Join Count column on to NHDCatchments table and keep only
     # ['COMID','CatAreaSqKm','CatCount']
-    # TODO 
-    # maybe call compute here on polys / point_poly_join
     final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
     final = final[["FEATUREID", "AreaSqKM", "COUNT"]].fillna(0)
     cols = ["COMID", f"CatAreaSqKm{appendMetric}", f"CatCount{appendMetric}"]
@@ -753,8 +751,6 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
             point_poly_stats.name = x
             final = final.join(point_poly_stats, on="FEATUREID", how="left").fillna(0)
             cols.append("Cat" + x + appendMetric)
-    # TODO 
-    # could also call compute here on polys / point_poly_join / point_poly_dups
     final.columns = cols
     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
     final = pd.merge(final, pct_full, on="COMID", how="left")
@@ -1000,28 +996,28 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
 def xarrayZonalStatsPrep(izd_path, landscape_layer_path, use_dask=False):
     """Create Xarray DataArrays from inZoneData and LandscapeLayer files
-
+ 
     Args:
         izd_path (str): path to inZoneData dbf
         landscape_layer_path (str): path to landscape layer raster
-
+ 
     Returns:
         izd_array (xr.DataArray): DataArray of zone data
         ll_array (xr.DataArray): Windowed read of landscape layer raster as DataArray
     """
-
+ 
     # Load first band of in zone data to an xarray DataArray
     # print(use_dask)
     if use_dask:
         izd_array = rioxarray.open_rasterio(izd_path, chunks="auto").sel(band=1).drop_vars('band')
     else:
         izd_array = rioxarray.open_rasterio(izd_path).sel(band=1).drop_vars('band')
-    
+   
     # Get transform and bounds from in zone data to create window
     transform = izd_array.rio.transform()
     bounds = izd_array.rio.bounds()
     window = rasterio.windows.from_bounds(*bounds, transform)
-
+ 
     # Read window of Landscape Layer (band 1) to rasterio array (numpy ndarray)
     # Notes:
     # Used rasterio because windowed reading with rioxarray was not working.
@@ -1032,7 +1028,7 @@ def xarrayZonalStatsPrep(izd_path, landscape_layer_path, use_dask=False):
         #ll_rio_array = src.read(1, window=window)
     # Convert numpy array to xarray DataArray with x and y as the dimensions to match izd_array
     #ll_array = xr.DataArray(ll_rio_array, dims=['y', 'x'])
-    
+   
     # Rioxarray window selection is much faster than rasterio
     ll_array = rioxarray.open_rasterio(landscape_layer_path).sel(band=1).drop_vars('band')
     ll_array = ll_array.rio.isel_window(window, pad=True)
@@ -1041,34 +1037,35 @@ def xarrayZonalStatsPrep(izd_path, landscape_layer_path, use_dask=False):
     if izd_array.shape != ll_array.shape:
         # Determine the target shape (you can choose either one, but here we'll use izd_array's shape)
         target_shape = izd_array.shape
-
+ 
         # Resample or pad the ll_array to match the target shape
         if ll_array.shape[0] < target_shape[0]:
             ll_array = ll_array.pad(y=(0, target_shape[0] - ll_array.shape[0]), mode='constant', constant_values=np.nan)
         elif ll_array.shape[0] > target_shape[0]:
             ll_array = ll_array.isel(y=slice(0, target_shape[0]))
-
+ 
         if ll_array.shape[1] < target_shape[1]:
             ll_array = ll_array.pad(x=(0, target_shape[1] - ll_array.shape[1]), mode='constant', constant_values=np.nan)
         elif ll_array.shape[1] > target_shape[1]:
             ll_array = ll_array.isel(x=slice(0, target_shape[1]))
-
+ 
     # Return the DataArrays to use in xrspatial.zonal.stats, and xrspatial.zonal.crosstab
     if use_dask:
         ll_array = ll_array.chunk(izd_array.chunksizes)
-
+ 
     # print(izd_array)
     # print(ll_array)
-
+ 
     # print(izd_array.shape)
     # print(ll_array.shape)
-
+ 
     # print(type(izd_array))
     # print(type(ll_array))
-
+ 
     # print(izd_array.chunksizes)
     # print(ll_array.chunksizes)
     return izd_array, ll_array
+ 
 
 
 ##############################################################################
@@ -1108,7 +1105,6 @@ def createCatStats(
         # arcpy.env.snapRaster = inZoneData
         # cellSize = 30
         # snapRaster = inZoneData
-        # print(use_dask)
         if by_RPU == 0:
             if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
                 landscape_layer = Path(LandscapeLayer).stem # / vs . \ agnostic
@@ -1139,19 +1135,13 @@ def createCatStats(
                     izd_array, ll_array = xarrayZonalStatsPrep(inZoneData, LandscapeLayer, use_dask)
                     
                     outTable = stats(izd_array, ll_array)
-                    #print(outTable)
-                    
-                if use_dask:
-                    outTable = outTable.compute()
-                # if use_dask and dask_client is not None:
-                #     outTable = dask_client.compute(outTable) # [0] # outTable.compute()
-                    #print(outTable.head())
-                
-                # Post process dataframe
-                if "Unnamed: 0" in outTable.columns:
+                    if "Unnamed: 0" in outTable.columns:
                         outTable = outTable.drop("Unnamed: 0")
-                outTable = outTable[outTable.zone != -2147483647]
-                outTable = outTable.round(2)
+                    outTable = outTable[outTable.zone != -2147483647]
+                    outTable = outTable.round(2)
+                
+                if use_dask:
+                    outTable.compute()
                 # print(outTable.head())
 
             try:
@@ -1182,11 +1172,6 @@ def createCatStats(
                     # )
                     izd_array, elev_array = xarrayZonalStatsPrep(inZoneData, elev)
                     outTable = stats(izd_array, elev_array)
-
-                    if use_dask:
-                        outTable = outTable.compute()
-                    # if use_dask and dask_client is not None:
-                    #     outTable = dask_client.compute(outTable)# [0]
             for count, rpu in enumerate(rpuList):
                 if count == 0:
                     table = dbf2DF(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")
@@ -1201,17 +1186,14 @@ def createCatStats(
                 table.reset_index(drop=True, inplace=True)
                 table = table.loc[table.groupby("VALUE").AREA.idxmax()]
 
-    except Exception as e: #RuntimeError:
-        print(f"Error in createCatStats: {e}")
-        raise 
+    except xr.MergeError: #RuntimeError:
+        print("Runtime error")
     # except LicenseError:
     #     print("Spatial Analyst license is unavailable")
     # except arcpy.ExecuteError:
     #     print("Failing at the ExecuteError!")
     #     print(arcpy.GetMessages(2))
-    table = outTable # .compute() # [1:]# .drop('Unnamed: 0', axis=1)
-    del outTable
-    # print(f"Table type: {type(table)}, heading: {table.head()}")
+    table = outTable[1:]# .drop('Unnamed: 0', axis=1)
     if mask_dir:
         nhdtbl = dbf2DF(
             f"{NHD_dir}/NHDPlus{hydroregion}/NHDPlus{zone}"
