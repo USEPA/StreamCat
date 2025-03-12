@@ -996,26 +996,28 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
 
 def xarrayZonalStatsPrep(izd_path, landscape_layer_path, use_dask=False):
     """Create Xarray DataArrays from inZoneData and LandscapeLayer files
-
+ 
     Args:
         izd_path (str): path to inZoneData dbf
         landscape_layer_path (str): path to landscape layer raster
-
+ 
     Returns:
         izd_array (xr.DataArray): DataArray of zone data
         ll_array (xr.DataArray): Windowed read of landscape layer raster as DataArray
     """
-
+ 
     # Load first band of in zone data to an xarray DataArray
+    # print(use_dask)
     if use_dask:
-        izd_array = rioxarray.open_rasterio(izd_path, chunks=True).sel(band=1).drop_vars('band')
-    izd_array = rioxarray.open_rasterio(izd_path).sel(band=1).drop_vars('band')
-    
+        izd_array = rioxarray.open_rasterio(izd_path, chunks="auto").sel(band=1).drop_vars('band')
+    else:
+        izd_array = rioxarray.open_rasterio(izd_path).sel(band=1).drop_vars('band')
+   
     # Get transform and bounds from in zone data to create window
     transform = izd_array.rio.transform()
     bounds = izd_array.rio.bounds()
     window = rasterio.windows.from_bounds(*bounds, transform)
-
+ 
     # Read window of Landscape Layer (band 1) to rasterio array (numpy ndarray)
     # Notes:
     # Used rasterio because windowed reading with rioxarray was not working.
@@ -1026,31 +1028,44 @@ def xarrayZonalStatsPrep(izd_path, landscape_layer_path, use_dask=False):
         #ll_rio_array = src.read(1, window=window)
     # Convert numpy array to xarray DataArray with x and y as the dimensions to match izd_array
     #ll_array = xr.DataArray(ll_rio_array, dims=['y', 'x'])
-    
+   
     # Rioxarray window selection is much faster than rasterio
     ll_array = rioxarray.open_rasterio(landscape_layer_path).sel(band=1).drop_vars('band')
     ll_array = ll_array.rio.isel_window(window, pad=True)
-    
+   
     # TODO add check to make sure they are the same size
     if izd_array.shape != ll_array.shape:
         # Determine the target shape (you can choose either one, but here we'll use izd_array's shape)
         target_shape = izd_array.shape
-
+ 
         # Resample or pad the ll_array to match the target shape
         if ll_array.shape[0] < target_shape[0]:
             ll_array = ll_array.pad(y=(0, target_shape[0] - ll_array.shape[0]), mode='constant', constant_values=np.nan)
         elif ll_array.shape[0] > target_shape[0]:
             ll_array = ll_array.isel(y=slice(0, target_shape[0]))
-
+ 
         if ll_array.shape[1] < target_shape[1]:
             ll_array = ll_array.pad(x=(0, target_shape[1] - ll_array.shape[1]), mode='constant', constant_values=np.nan)
         elif ll_array.shape[1] > target_shape[1]:
             ll_array = ll_array.isel(x=slice(0, target_shape[1]))
-
+ 
     # Return the DataArrays to use in xrspatial.zonal.stats, and xrspatial.zonal.crosstab
     if use_dask:
         ll_array = ll_array.chunk(izd_array.chunksizes)
+ 
+    # print(izd_array)
+    # print(ll_array)
+ 
+    # print(izd_array.shape)
+    # print(ll_array.shape)
+ 
+    # print(type(izd_array))
+    # print(type(ll_array))
+ 
+    # print(izd_array.chunksizes)
+    # print(ll_array.chunksizes)
     return izd_array, ll_array
+ 
 
 
 ##############################################################################
