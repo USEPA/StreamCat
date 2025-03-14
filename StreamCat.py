@@ -89,9 +89,8 @@ INPUTS = np.load(ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 already_processed = []
 
 for _, row in ctl.query("run == 1").iterrows():
-    if row.Year is not None:
-        row.FullTableName = row.FullTableName + row.Year
-#def process_row(row):
+    #if row.Year is not None:
+        #row.FullTableName = row.FullTableName + "_" + str(row.Year)[:-2]
     apm = "" if row.AppendMetric == "none" else row.AppendMetric
     if row.use_mask == 1:
         mask_dir = MASK_DIR_RP100
@@ -212,6 +211,3 @@ for _, row in ctl.query("run == 1").iterrows():
             f"output used in 'Continuous' and 'Categorical' metrics!!!"
         )
 
-#row_results = Parallel(n_jobs=os.cpu_count()/2)(
-#    delayed(process_row)(row) for _, row in ctl.query("run == 1").iterrows()
-#)
