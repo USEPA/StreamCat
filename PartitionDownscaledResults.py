@@ -34,7 +34,7 @@ VPU = COMID_VPU['VPU'].unique()
 # nut = pd.read_csv(nut_dir + 'ClimTerms_2012_10.csv')
 #nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/AmaliaHandler/'
 nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/NutrientInventory/CountyCatResultsData/'
-nut = pd.read_parquet(nut_dir + 'P_Human_WasteCountyCatResults.parquet')
+nut = pd.read_parquet(nut_dir + 'p_crop_remCountyCatResults.parquet')
 
 cat_area = StreamCat_template[['COMID','CatAreaSqKm']]
 cat_area.head()
@@ -47,7 +47,7 @@ nut = pd.merge(nut, cat_area, how='left', left_on=['COMID'], right_on=['COMID'])
 # select columns - this part we can modify to iterate through columns
 nut.columns = nut.columns.str.replace('_Cat','')
 cols = [i for i in nut.columns if i not in ["COMID", "VPU", "CatAreaSqKm"]]
-cols = cols[20:21]
+cols = cols[29:31]
 for col in cols:
     final = nut[['COMID', col, 'CatAreaSqKm', 'VPU']]
     final = final.rename(columns={col: 'CatSum'})
