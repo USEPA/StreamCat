@@ -424,507 +424,569 @@ LST_YrMean,Continuous,LST_YrMean,,none,E:\WorkingData\To_Be_Flow_Accumulated,,Cl
 LST,Continuous,LST,,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,0,,No,No,No,5/6/2024
 SNOW_YrMean,Continuous,SNOW_YrMean,,none,E:\WorkingData\To_Be_Flow_Accumulated,,ClimTerms_2012_10,Mean,1,0,0,0,,No,No,No,5/6/2024
 Clay2,Continuous,Clay2,,none,clay.tif,,Test,Mean,0.01,0,0,0,,No,No,Yes,6/15/2020
-N_Fert_Farm_1987,Continuous,N_Fert_Farm_1987,1987,none,nlcd_1987.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1988,Continuous,N_Fert_Farm_1988,1988,none,nlcd_1988.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1989,Continuous,N_Fert_Farm_1989,1989,none,nlcd_1989.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1990,Continuous,N_Fert_Farm_1990,1990,none,nlcd_1990.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1991,Continuous,N_Fert_Farm_1991,1991,none,nlcd_1991.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1992,Continuous,N_Fert_Farm_1992,1992,none,nlcd_1992.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1993,Continuous,N_Fert_Farm_1993,1993,none,nlcd_1993.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1994,Continuous,N_Fert_Farm_1994,1994,none,nlcd_1994.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1995,Continuous,N_Fert_Farm_1995,1995,none,nlcd_1995.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1996,Continuous,N_Fert_Farm_1996,1996,none,nlcd_1996.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1997,Continuous,N_Fert_Farm_1997,1997,none,nlcd_1997.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1998,Continuous,N_Fert_Farm_1998,1998,none,nlcd_1998.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_1999,Continuous,N_Fert_Farm_1999,1999,none,nlcd_1999.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2000,Continuous,N_Fert_Farm_2000,2000,none,nlcd_2000.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2001,Continuous,N_Fert_Farm_2001,2001,none,nlcd_2001.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2002,Continuous,N_Fert_Farm_2002,2002,none,nlcd_2002.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2003,Continuous,N_Fert_Farm_2003,2003,none,nlcd_2003.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2004,Continuous,N_Fert_Farm_2004,2004,none,nlcd_2004.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2005,Continuous,N_Fert_Farm_2005,2005,none,nlcd_2005.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2006,Continuous,N_Fert_Farm_2006,2006,none,nlcd_2006.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2007,Continuous,N_Fert_Farm_2007,2007,none,nlcd_2007.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2008,Continuous,N_Fert_Farm_2008,2008,none,nlcd_2008.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2009,Continuous,N_Fert_Farm_2009,2009,none,nlcd_2009.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2010,Continuous,N_Fert_Farm_2010,2010,none,nlcd_2010.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2011,Continuous,N_Fert_Farm_2011,2011,none,nlcd_2011.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2012,Continuous,N_Fert_Farm_2012,2012,none,nlcd_2012.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2013,Continuous,N_Fert_Farm_2013,2013,none,nlcd_2013.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2014,Continuous,N_Fert_Farm_2014,2014,none,nlcd_2014.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2015,Continuous,N_Fert_Farm_2015,2015,none,nlcd_2015.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2016,Continuous,N_Fert_Farm_2016,2016,none,nlcd_2016.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_Farm_2017,Continuous,N_Fert_Farm_2017,2017,none,nlcd_2017.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1987,Continuous,P_Fert_Farm_1987,1987,none,nlcd_1987.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1988,Continuous,P_Fert_Farm_1988,1988,none,nlcd_1988.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1989,Continuous,P_Fert_Farm_1989,1989,none,nlcd_1989.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1990,Continuous,P_Fert_Farm_1990,1990,none,nlcd_1990.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1991,Continuous,P_Fert_Farm_1991,1991,none,nlcd_1991.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1992,Continuous,P_Fert_Farm_1992,1992,none,nlcd_1992.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1993,Continuous,P_Fert_Farm_1993,1993,none,nlcd_1993.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1994,Continuous,P_Fert_Farm_1994,1994,none,nlcd_1994.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1995,Continuous,P_Fert_Farm_1995,1995,none,nlcd_1995.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1996,Continuous,P_Fert_Farm_1996,1996,none,nlcd_1996.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1997,Continuous,P_Fert_Farm_1997,1997,none,nlcd_1997.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1998,Continuous,P_Fert_Farm_1998,1998,none,nlcd_1998.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_1999,Continuous,P_Fert_Farm_1999,1999,none,nlcd_1999.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2000,Continuous,P_Fert_Farm_2000,2000,none,nlcd_2000.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2001,Continuous,P_Fert_Farm_2001,2001,none,nlcd_2001.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2002,Continuous,P_Fert_Farm_2002,2002,none,nlcd_2002.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2003,Continuous,P_Fert_Farm_2003,2003,none,nlcd_2003.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2004,Continuous,P_Fert_Farm_2004,2004,none,nlcd_2004.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2005,Continuous,P_Fert_Farm_2005,2005,none,nlcd_2005.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2006,Continuous,P_Fert_Farm_2006,2006,none,nlcd_2006.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2007,Continuous,P_Fert_Farm_2007,2007,none,nlcd_2007.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2008,Continuous,P_Fert_Farm_2008,2008,none,nlcd_2008.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2009,Continuous,P_Fert_Farm_2009,2009,none,nlcd_2009.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2010,Continuous,P_Fert_Farm_2010,2010,none,nlcd_2010.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2011,Continuous,P_Fert_Farm_2011,2011,none,nlcd_2011.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2012,Continuous,P_Fert_Farm_2012,2012,none,nlcd_2012.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2013,Continuous,P_Fert_Farm_2013,2013,none,nlcd_2013.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2014,Continuous,P_Fert_Farm_2014,2014,none,nlcd_2014.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2015,Continuous,P_Fert_Farm_2015,2015,none,nlcd_2015.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2016,Continuous,P_Fert_Farm_2016,2016,none,nlcd_2016.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_Farm_2017,Continuous,P_Fert_Farm_2017,2017,none,nlcd_2017.tif,,Farm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1987,Continuous,N_Fert_NonFarm_1987,1987,none,nlcd_1987.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1988,Continuous,N_Fert_NonFarm_1988,1988,none,nlcd_1988.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1989,Continuous,N_Fert_NonFarm_1989,1989,none,nlcd_1989.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1990,Continuous,N_Fert_NonFarm_1990,1990,none,nlcd_1990.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1991,Continuous,N_Fert_NonFarm_1991,1991,none,nlcd_1991.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1992,Continuous,N_Fert_NonFarm_1992,1992,none,nlcd_1992.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1993,Continuous,N_Fert_NonFarm_1993,1993,none,nlcd_1993.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1994,Continuous,N_Fert_NonFarm_1994,1994,none,nlcd_1994.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1995,Continuous,N_Fert_NonFarm_1995,1995,none,nlcd_1995.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1996,Continuous,N_Fert_NonFarm_1996,1996,none,nlcd_1996.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1997,Continuous,N_Fert_NonFarm_1997,1997,none,nlcd_1997.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1998,Continuous,N_Fert_NonFarm_1998,1998,none,nlcd_1998.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_1999,Continuous,N_Fert_NonFarm_1999,1999,none,nlcd_1999.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2000,Continuous,N_Fert_NonFarm_2000,2000,none,nlcd_2000.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2001,Continuous,N_Fert_NonFarm_2001,2001,none,nlcd_2001.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2002,Continuous,N_Fert_NonFarm_2002,2002,none,nlcd_2002.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2003,Continuous,N_Fert_NonFarm_2003,2003,none,nlcd_2003.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2004,Continuous,N_Fert_NonFarm_2004,2004,none,nlcd_2004.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2005,Continuous,N_Fert_NonFarm_2005,2005,none,nlcd_2005.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2006,Continuous,N_Fert_NonFarm_2006,2006,none,nlcd_2006.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2007,Continuous,N_Fert_NonFarm_2007,2007,none,nlcd_2007.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2008,Continuous,N_Fert_NonFarm_2008,2008,none,nlcd_2008.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2009,Continuous,N_Fert_NonFarm_2009,2009,none,nlcd_2009.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2010,Continuous,N_Fert_NonFarm_2010,2010,none,nlcd_2010.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2011,Continuous,N_Fert_NonFarm_2011,2011,none,nlcd_2011.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2012,Continuous,N_Fert_NonFarm_2012,2012,none,nlcd_2012.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2013,Continuous,N_Fert_NonFarm_2013,2013,none,nlcd_2013.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2014,Continuous,N_Fert_NonFarm_2014,2014,none,nlcd_2014.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2015,Continuous,N_Fert_NonFarm_2015,2015,none,nlcd_2015.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2016,Continuous,N_Fert_NonFarm_2016,2016,none,nlcd_2016.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Fert_NonFarm_2017,Continuous,N_Fert_NonFarm_2017,2017,none,nlcd_2017.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1987,Continuous,P_Fert_NonFarm_1987,1987,none,nlcd_1987.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1988,Continuous,P_Fert_NonFarm_1988,1988,none,nlcd_1988.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1989,Continuous,P_Fert_NonFarm_1989,1989,none,nlcd_1989.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1990,Continuous,P_Fert_NonFarm_1990,1990,none,nlcd_1990.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1991,Continuous,P_Fert_NonFarm_1991,1991,none,nlcd_1991.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1992,Continuous,P_Fert_NonFarm_1992,1992,none,nlcd_1992.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1993,Continuous,P_Fert_NonFarm_1993,1993,none,nlcd_1993.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1994,Continuous,P_Fert_NonFarm_1994,1994,none,nlcd_1994.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1995,Continuous,P_Fert_NonFarm_1995,1995,none,nlcd_1995.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1996,Continuous,P_Fert_NonFarm_1996,1996,none,nlcd_1996.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1997,Continuous,P_Fert_NonFarm_1997,1997,none,nlcd_1997.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1998,Continuous,P_Fert_NonFarm_1998,1998,none,nlcd_1998.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_1999,Continuous,P_Fert_NonFarm_1999,1999,none,nlcd_1999.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2000,Continuous,P_Fert_NonFarm_2000,2000,none,nlcd_2000.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2001,Continuous,P_Fert_NonFarm_2001,2001,none,nlcd_2001.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2002,Continuous,P_Fert_NonFarm_2002,2002,none,nlcd_2002.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2003,Continuous,P_Fert_NonFarm_2003,2003,none,nlcd_2003.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2004,Continuous,P_Fert_NonFarm_2004,2004,none,nlcd_2004.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2005,Continuous,P_Fert_NonFarm_2005,2005,none,nlcd_2005.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2006,Continuous,P_Fert_NonFarm_2006,2006,none,nlcd_2006.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2007,Continuous,P_Fert_NonFarm_2007,2007,none,nlcd_2007.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2008,Continuous,P_Fert_NonFarm_2008,2008,none,nlcd_2008.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2009,Continuous,P_Fert_NonFarm_2009,2009,none,nlcd_2009.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2010,Continuous,P_Fert_NonFarm_2010,2010,none,nlcd_2010.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2011,Continuous,P_Fert_NonFarm_2011,2011,none,nlcd_2011.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2012,Continuous,P_Fert_NonFarm_2012,2012,none,nlcd_2012.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2013,Continuous,P_Fert_NonFarm_2013,2013,none,nlcd_2013.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2014,Continuous,P_Fert_NonFarm_2014,2014,none,nlcd_2014.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2015,Continuous,P_Fert_NonFarm_2015,2015,none,nlcd_2015.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2016,Continuous,P_Fert_NonFarm_2016,2016,none,nlcd_2016.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Fert_NonFarm_2017,Continuous,P_Fert_NonFarm_2017,2017,none,nlcd_2017.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1987,Continuous,N_Manure_1987,1987,none,nlcd_1987.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1988,Continuous,N_Manure_1988,1988,none,nlcd_1988.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1989,Continuous,N_Manure_1989,1989,none,nlcd_1989.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1990,Continuous,N_Manure_1990,1990,none,nlcd_1990.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1991,Continuous,N_Manure_1991,1991,none,nlcd_1991.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1992,Continuous,N_Manure_1992,1992,none,nlcd_1992.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1993,Continuous,N_Manure_1993,1993,none,nlcd_1993.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1994,Continuous,N_Manure_1994,1994,none,nlcd_1994.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1995,Continuous,N_Manure_1995,1995,none,nlcd_1995.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1996,Continuous,N_Manure_1996,1996,none,nlcd_1996.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1997,Continuous,N_Manure_1997,1997,none,nlcd_1997.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1998,Continuous,N_Manure_1998,1998,none,nlcd_1998.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_1999,Continuous,N_Manure_1999,1999,none,nlcd_1999.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2000,Continuous,N_Manure_2000,2000,none,nlcd_2000.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2001,Continuous,N_Manure_2001,2001,none,nlcd_2001.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2002,Continuous,N_Manure_2002,2002,none,nlcd_2002.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2003,Continuous,N_Manure_2003,2003,none,nlcd_2003.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2004,Continuous,N_Manure_2004,2004,none,nlcd_2004.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2005,Continuous,N_Manure_2005,2005,none,nlcd_2005.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2006,Continuous,N_Manure_2006,2006,none,nlcd_2006.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2007,Continuous,N_Manure_2007,2007,none,nlcd_2007.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2008,Continuous,N_Manure_2008,2008,none,nlcd_2008.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2009,Continuous,N_Manure_2009,2009,none,nlcd_2009.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2010,Continuous,N_Manure_2010,2010,none,nlcd_2010.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2011,Continuous,N_Manure_2011,2011,none,nlcd_2011.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2012,Continuous,N_Manure_2012,2012,none,nlcd_2012.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2013,Continuous,N_Manure_2013,2013,none,nlcd_2013.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2014,Continuous,N_Manure_2014,2014,none,nlcd_2014.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2015,Continuous,N_Manure_2015,2015,none,nlcd_2015.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2016,Continuous,N_Manure_2016,2016,none,nlcd_2016.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Manure_2017,Continuous,N_Manure_2017,2017,none,nlcd_2017.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1987,Continuous,P_Manure_1987,1987,none,nlcd_1987.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1988,Continuous,P_Manure_1988,1988,none,nlcd_1988.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1989,Continuous,P_Manure_1989,1989,none,nlcd_1989.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1990,Continuous,P_Manure_1990,1990,none,nlcd_1990.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1991,Continuous,P_Manure_1991,1991,none,nlcd_1991.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1992,Continuous,P_Manure_1992,1992,none,nlcd_1992.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1993,Continuous,P_Manure_1993,1993,none,nlcd_1993.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1994,Continuous,P_Manure_1994,1994,none,nlcd_1994.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1995,Continuous,P_Manure_1995,1995,none,nlcd_1995.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1996,Continuous,P_Manure_1996,1996,none,nlcd_1996.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1997,Continuous,P_Manure_1997,1997,none,nlcd_1997.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1998,Continuous,P_Manure_1998,1998,none,nlcd_1998.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_1999,Continuous,P_Manure_1999,1999,none,nlcd_1999.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2000,Continuous,P_Manure_2000,2000,none,nlcd_2000.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2001,Continuous,P_Manure_2001,2001,none,nlcd_2001.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2002,Continuous,P_Manure_2002,2002,none,nlcd_2002.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2003,Continuous,P_Manure_2003,2003,none,nlcd_2003.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2004,Continuous,P_Manure_2004,2004,none,nlcd_2004.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2005,Continuous,P_Manure_2005,2005,none,nlcd_2005.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2006,Continuous,P_Manure_2006,2006,none,nlcd_2006.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2007,Continuous,P_Manure_2007,2007,none,nlcd_2007.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2008,Continuous,P_Manure_2008,2008,none,nlcd_2008.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2009,Continuous,P_Manure_2009,2009,none,nlcd_2009.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2010,Continuous,P_Manure_2010,2010,none,nlcd_2010.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2011,Continuous,P_Manure_2011,2011,none,nlcd_2011.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2012,Continuous,P_Manure_2012,2012,none,nlcd_2012.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2013,Continuous,P_Manure_2013,2013,none,nlcd_2013.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2014,Continuous,P_Manure_2014,2014,none,nlcd_2014.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2015,Continuous,P_Manure_2015,2015,none,nlcd_2015.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2016,Continuous,P_Manure_2016,2016,none,nlcd_2016.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Manure_2017,Continuous,P_Manure_2017,2017,none,nlcd_2017.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1987,Continuous,N_Lvstk_Waste_Recov_1987,1987,none,nlcd_1987.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1988,Continuous,N_Lvstk_Waste_Recov_1988,1988,none,nlcd_1988.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1989,Continuous,N_Lvstk_Waste_Recov_1989,1989,none,nlcd_1989.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1990,Continuous,N_Lvstk_Waste_Recov_1990,1990,none,nlcd_1990.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1991,Continuous,N_Lvstk_Waste_Recov_1991,1991,none,nlcd_1991.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1992,Continuous,N_Lvstk_Waste_Recov_1992,1992,none,nlcd_1992.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1993,Continuous,N_Lvstk_Waste_Recov_1993,1993,none,nlcd_1993.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1994,Continuous,N_Lvstk_Waste_Recov_1994,1994,none,nlcd_1994.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1995,Continuous,N_Lvstk_Waste_Recov_1995,1995,none,nlcd_1995.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1996,Continuous,N_Lvstk_Waste_Recov_1996,1996,none,nlcd_1996.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1997,Continuous,N_Lvstk_Waste_Recov_1997,1997,none,nlcd_1997.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1998,Continuous,N_Lvstk_Waste_Recov_1998,1998,none,nlcd_1998.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_1999,Continuous,N_Lvstk_Waste_Recov_1999,1999,none,nlcd_1999.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2000,Continuous,N_Lvstk_Waste_Recov_2000,2000,none,nlcd_2000.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2001,Continuous,N_Lvstk_Waste_Recov_2001,2001,none,nlcd_2001.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2002,Continuous,N_Lvstk_Waste_Recov_2002,2002,none,nlcd_2002.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2003,Continuous,N_Lvstk_Waste_Recov_2003,2003,none,nlcd_2003.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2004,Continuous,N_Lvstk_Waste_Recov_2004,2004,none,nlcd_2004.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2005,Continuous,N_Lvstk_Waste_Recov_2005,2005,none,nlcd_2005.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2006,Continuous,N_Lvstk_Waste_Recov_2006,2006,none,nlcd_2006.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2007,Continuous,N_Lvstk_Waste_Recov_2007,2007,none,nlcd_2007.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2008,Continuous,N_Lvstk_Waste_Recov_2008,2008,none,nlcd_2008.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2009,Continuous,N_Lvstk_Waste_Recov_2009,2009,none,nlcd_2009.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2010,Continuous,N_Lvstk_Waste_Recov_2010,2010,none,nlcd_2010.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2011,Continuous,N_Lvstk_Waste_Recov_2011,2011,none,nlcd_2011.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2012,Continuous,N_Lvstk_Waste_Recov_2012,2012,none,nlcd_2012.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2013,Continuous,N_Lvstk_Waste_Recov_2013,2013,none,nlcd_2013.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2014,Continuous,N_Lvstk_Waste_Recov_2014,2014,none,nlcd_2014.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2015,Continuous,N_Lvstk_Waste_Recov_2015,2015,none,nlcd_2015.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2016,Continuous,N_Lvstk_Waste_Recov_2016,2016,none,nlcd_2016.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_Recov_2017,Continuous,N_Lvstk_Waste_Recov_2017,2017,none,nlcd_2017.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1987,Continuous,P_Lvstk_Waste_Recov_1987,1987,none,nlcd_1987.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1988,Continuous,P_Lvstk_Waste_Recov_1988,1988,none,nlcd_1988.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1989,Continuous,P_Lvstk_Waste_Recov_1989,1989,none,nlcd_1989.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1990,Continuous,P_Lvstk_Waste_Recov_1990,1990,none,nlcd_1990.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1991,Continuous,P_Lvstk_Waste_Recov_1991,1991,none,nlcd_1991.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1992,Continuous,P_Lvstk_Waste_Recov_1992,1992,none,nlcd_1992.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1993,Continuous,P_Lvstk_Waste_Recov_1993,1993,none,nlcd_1993.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1994,Continuous,P_Lvstk_Waste_Recov_1994,1994,none,nlcd_1994.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1995,Continuous,P_Lvstk_Waste_Recov_1995,1995,none,nlcd_1995.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1996,Continuous,P_Lvstk_Waste_Recov_1996,1996,none,nlcd_1996.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1997,Continuous,P_Lvstk_Waste_Recov_1997,1997,none,nlcd_1997.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1998,Continuous,P_Lvstk_Waste_Recov_1998,1998,none,nlcd_1998.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_1999,Continuous,P_Lvstk_Waste_Recov_1999,1999,none,nlcd_1999.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2000,Continuous,P_Lvstk_Waste_Recov_2000,2000,none,nlcd_2000.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2001,Continuous,P_Lvstk_Waste_Recov_2001,2001,none,nlcd_2001.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2002,Continuous,P_Lvstk_Waste_Recov_2002,2002,none,nlcd_2002.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2003,Continuous,P_Lvstk_Waste_Recov_2003,2003,none,nlcd_2003.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2004,Continuous,P_Lvstk_Waste_Recov_2004,2004,none,nlcd_2004.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2005,Continuous,P_Lvstk_Waste_Recov_2005,2005,none,nlcd_2005.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2006,Continuous,P_Lvstk_Waste_Recov_2006,2006,none,nlcd_2006.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2007,Continuous,P_Lvstk_Waste_Recov_2007,2007,none,nlcd_2007.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2008,Continuous,P_Lvstk_Waste_Recov_2008,2008,none,nlcd_2008.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2009,Continuous,P_Lvstk_Waste_Recov_2009,2009,none,nlcd_2009.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2010,Continuous,P_Lvstk_Waste_Recov_2010,2010,none,nlcd_2010.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2011,Continuous,P_Lvstk_Waste_Recov_2011,2011,none,nlcd_2011.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2012,Continuous,P_Lvstk_Waste_Recov_2012,2012,none,nlcd_2012.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2013,Continuous,P_Lvstk_Waste_Recov_2013,2013,none,nlcd_2013.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2014,Continuous,P_Lvstk_Waste_Recov_2014,2014,none,nlcd_2014.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2015,Continuous,P_Lvstk_Waste_Recov_2015,2015,none,nlcd_2015.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2016,Continuous,P_Lvstk_Waste_Recov_2016,2016,none,nlcd_2016.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_Recov_2017,Continuous,P_Lvstk_Waste_Recov_2017,2017,none,nlcd_2017.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1987,Continuous,N_Lvstk_Waste_1987,1987,none,nlcd_1987.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1988,Continuous,N_Lvstk_Waste_1988,1988,none,nlcd_1988.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1989,Continuous,N_Lvstk_Waste_1989,1989,none,nlcd_1989.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1990,Continuous,N_Lvstk_Waste_1990,1990,none,nlcd_1990.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1991,Continuous,N_Lvstk_Waste_1991,1991,none,nlcd_1991.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1992,Continuous,N_Lvstk_Waste_1992,1992,none,nlcd_1992.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1993,Continuous,N_Lvstk_Waste_1993,1993,none,nlcd_1993.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1994,Continuous,N_Lvstk_Waste_1994,1994,none,nlcd_1994.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1995,Continuous,N_Lvstk_Waste_1995,1995,none,nlcd_1995.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1996,Continuous,N_Lvstk_Waste_1996,1996,none,nlcd_1996.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1997,Continuous,N_Lvstk_Waste_1997,1997,none,nlcd_1997.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1998,Continuous,N_Lvstk_Waste_1998,1998,none,nlcd_1998.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_1999,Continuous,N_Lvstk_Waste_1999,1999,none,nlcd_1999.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2000,Continuous,N_Lvstk_Waste_2000,2000,none,nlcd_2000.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2001,Continuous,N_Lvstk_Waste_2001,2001,none,nlcd_2001.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2002,Continuous,N_Lvstk_Waste_2002,2002,none,nlcd_2002.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2003,Continuous,N_Lvstk_Waste_2003,2003,none,nlcd_2003.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2004,Continuous,N_Lvstk_Waste_2004,2004,none,nlcd_2004.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2005,Continuous,N_Lvstk_Waste_2005,2005,none,nlcd_2005.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2006,Continuous,N_Lvstk_Waste_2006,2006,none,nlcd_2006.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2007,Continuous,N_Lvstk_Waste_2007,2007,none,nlcd_2007.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2008,Continuous,N_Lvstk_Waste_2008,2008,none,nlcd_2008.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2009,Continuous,N_Lvstk_Waste_2009,2009,none,nlcd_2009.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2010,Continuous,N_Lvstk_Waste_2010,2010,none,nlcd_2010.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2011,Continuous,N_Lvstk_Waste_2011,2011,none,nlcd_2011.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2012,Continuous,N_Lvstk_Waste_2012,2012,none,nlcd_2012.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2013,Continuous,N_Lvstk_Waste_2013,2013,none,nlcd_2013.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2014,Continuous,N_Lvstk_Waste_2014,2014,none,nlcd_2014.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2015,Continuous,N_Lvstk_Waste_2015,2015,none,nlcd_2015.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2016,Continuous,N_Lvstk_Waste_2016,2016,none,nlcd_2016.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Lvstk_Waste_2017,Continuous,N_Lvstk_Waste_2017,2017,none,nlcd_2017.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1987,Continuous,P_Lvstk_Waste_1987,1987,none,nlcd_1987.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1988,Continuous,P_Lvstk_Waste_1988,1988,none,nlcd_1988.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1989,Continuous,P_Lvstk_Waste_1989,1989,none,nlcd_1989.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1990,Continuous,P_Lvstk_Waste_1990,1990,none,nlcd_1990.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1991,Continuous,P_Lvstk_Waste_1991,1991,none,nlcd_1991.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1992,Continuous,P_Lvstk_Waste_1992,1992,none,nlcd_1992.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1993,Continuous,P_Lvstk_Waste_1993,1993,none,nlcd_1993.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1994,Continuous,P_Lvstk_Waste_1994,1994,none,nlcd_1994.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1995,Continuous,P_Lvstk_Waste_1995,1995,none,nlcd_1995.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1996,Continuous,P_Lvstk_Waste_1996,1996,none,nlcd_1996.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1997,Continuous,P_Lvstk_Waste_1997,1997,none,nlcd_1997.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1998,Continuous,P_Lvstk_Waste_1998,1998,none,nlcd_1998.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_1999,Continuous,P_Lvstk_Waste_1999,1999,none,nlcd_1999.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2000,Continuous,P_Lvstk_Waste_2000,2000,none,nlcd_2000.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2001,Continuous,P_Lvstk_Waste_2001,2001,none,nlcd_2001.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2002,Continuous,P_Lvstk_Waste_2002,2002,none,nlcd_2002.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2003,Continuous,P_Lvstk_Waste_2003,2003,none,nlcd_2003.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2004,Continuous,P_Lvstk_Waste_2004,2004,none,nlcd_2004.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2005,Continuous,P_Lvstk_Waste_2005,2005,none,nlcd_2005.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2006,Continuous,P_Lvstk_Waste_2006,2006,none,nlcd_2006.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2007,Continuous,P_Lvstk_Waste_2007,2007,none,nlcd_2007.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2008,Continuous,P_Lvstk_Waste_2008,2008,none,nlcd_2008.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2009,Continuous,P_Lvstk_Waste_2009,2009,none,nlcd_2009.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2010,Continuous,P_Lvstk_Waste_2010,2010,none,nlcd_2010.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2011,Continuous,P_Lvstk_Waste_2011,2011,none,nlcd_2011.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2012,Continuous,P_Lvstk_Waste_2012,2012,none,nlcd_2012.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2013,Continuous,P_Lvstk_Waste_2013,2013,none,nlcd_2013.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2014,Continuous,P_Lvstk_Waste_2014,2014,none,nlcd_2014.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2015,Continuous,P_Lvstk_Waste_2015,2015,none,nlcd_2015.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2016,Continuous,P_Lvstk_Waste_2016,2016,none,nlcd_2016.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Lvstk_Waste_2017,Continuous,P_Lvstk_Waste_2017,2017,none,nlcd_2017.tif,,Livestock Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1987,Continuous,N_Crop_Removal_1987,1987,none,nlcd_1987.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1988,Continuous,N_Crop_Removal_1988,1988,none,nlcd_1988.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1989,Continuous,N_Crop_Removal_1989,1989,none,nlcd_1989.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1990,Continuous,N_Crop_Removal_1990,1990,none,nlcd_1990.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1991,Continuous,N_Crop_Removal_1991,1991,none,nlcd_1991.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1992,Continuous,N_Crop_Removal_1992,1992,none,nlcd_1992.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1993,Continuous,N_Crop_Removal_1993,1993,none,nlcd_1993.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1994,Continuous,N_Crop_Removal_1994,1994,none,nlcd_1994.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1995,Continuous,N_Crop_Removal_1995,1995,none,nlcd_1995.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1996,Continuous,N_Crop_Removal_1996,1996,none,nlcd_1996.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1997,Continuous,N_Crop_Removal_1997,1997,none,nlcd_1997.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1998,Continuous,N_Crop_Removal_1998,1998,none,nlcd_1998.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_1999,Continuous,N_Crop_Removal_1999,1999,none,nlcd_1999.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2000,Continuous,N_Crop_Removal_2000,2000,none,nlcd_2000.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2001,Continuous,N_Crop_Removal_2001,2001,none,nlcd_2001.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2002,Continuous,N_Crop_Removal_2002,2002,none,nlcd_2002.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2003,Continuous,N_Crop_Removal_2003,2003,none,nlcd_2003.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2004,Continuous,N_Crop_Removal_2004,2004,none,nlcd_2004.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2005,Continuous,N_Crop_Removal_2005,2005,none,nlcd_2005.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2006,Continuous,N_Crop_Removal_2006,2006,none,nlcd_2006.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2007,Continuous,N_Crop_Removal_2007,2007,none,nlcd_2007.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2008,Continuous,N_Crop_Removal_2008,2008,none,nlcd_2008.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2009,Continuous,N_Crop_Removal_2009,2009,none,nlcd_2009.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2010,Continuous,N_Crop_Removal_2010,2010,none,nlcd_2010.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2011,Continuous,N_Crop_Removal_2011,2011,none,nlcd_2011.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2012,Continuous,N_Crop_Removal_2012,2012,none,nlcd_2012.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2013,Continuous,N_Crop_Removal_2013,2013,none,nlcd_2013.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2014,Continuous,N_Crop_Removal_2014,2014,none,nlcd_2014.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2015,Continuous,N_Crop_Removal_2015,2015,none,nlcd_2015.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2016,Continuous,N_Crop_Removal_2016,2016,none,nlcd_2016.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Crop_Removal_2017,Continuous,N_Crop_Removal_2017,2017,none,nlcd_2017.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1987,Continuous,P_Crop_Removal_1987,1987,none,nlcd_1987.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1988,Continuous,P_Crop_Removal_1988,1988,none,nlcd_1988.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1989,Continuous,P_Crop_Removal_1989,1989,none,nlcd_1989.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1990,Continuous,P_Crop_Removal_1990,1990,none,nlcd_1990.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1991,Continuous,P_Crop_Removal_1991,1991,none,nlcd_1991.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1992,Continuous,P_Crop_Removal_1992,1992,none,nlcd_1992.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1993,Continuous,P_Crop_Removal_1993,1993,none,nlcd_1993.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1994,Continuous,P_Crop_Removal_1994,1994,none,nlcd_1994.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1995,Continuous,P_Crop_Removal_1995,1995,none,nlcd_1995.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1996,Continuous,P_Crop_Removal_1996,1996,none,nlcd_1996.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1997,Continuous,P_Crop_Removal_1997,1997,none,nlcd_1997.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1998,Continuous,P_Crop_Removal_1998,1998,none,nlcd_1998.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_1999,Continuous,P_Crop_Removal_1999,1999,none,nlcd_1999.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2000,Continuous,P_Crop_Removal_2000,2000,none,nlcd_2000.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2001,Continuous,P_Crop_Removal_2001,2001,none,nlcd_2001.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2002,Continuous,P_Crop_Removal_2002,2002,none,nlcd_2002.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2003,Continuous,P_Crop_Removal_2003,2003,none,nlcd_2003.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2004,Continuous,P_Crop_Removal_2004,2004,none,nlcd_2004.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2005,Continuous,P_Crop_Removal_2005,2005,none,nlcd_2005.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2006,Continuous,P_Crop_Removal_2006,2006,none,nlcd_2006.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2007,Continuous,P_Crop_Removal_2007,2007,none,nlcd_2007.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2008,Continuous,P_Crop_Removal_2008,2008,none,nlcd_2008.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2009,Continuous,P_Crop_Removal_2009,2009,none,nlcd_2009.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2010,Continuous,P_Crop_Removal_2010,2010,none,nlcd_2010.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2011,Continuous,P_Crop_Removal_2011,2011,none,nlcd_2011.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2012,Continuous,P_Crop_Removal_2012,2012,none,nlcd_2012.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2013,Continuous,P_Crop_Removal_2013,2013,none,nlcd_2013.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2014,Continuous,P_Crop_Removal_2014,2014,none,nlcd_2014.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2015,Continuous,P_Crop_Removal_2015,2015,none,nlcd_2015.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2016,Continuous,P_Crop_Removal_2016,2016,none,nlcd_2016.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Crop_Removal_2017,Continuous,P_Crop_Removal_2017,2017,none,nlcd_2017.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1987,Continuous,Crop_N_Fixation_1987,1987,none,nlcd_1987.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1988,Continuous,Crop_N_Fixation_1988,1988,none,nlcd_1988.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1989,Continuous,Crop_N_Fixation_1989,1989,none,nlcd_1989.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1990,Continuous,Crop_N_Fixation_1990,1990,none,nlcd_1990.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1991,Continuous,Crop_N_Fixation_1991,1991,none,nlcd_1991.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1992,Continuous,Crop_N_Fixation_1992,1992,none,nlcd_1992.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1993,Continuous,Crop_N_Fixation_1993,1993,none,nlcd_1993.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1994,Continuous,Crop_N_Fixation_1994,1994,none,nlcd_1994.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1995,Continuous,Crop_N_Fixation_1995,1995,none,nlcd_1995.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1996,Continuous,Crop_N_Fixation_1996,1996,none,nlcd_1996.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1997,Continuous,Crop_N_Fixation_1997,1997,none,nlcd_1997.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1998,Continuous,Crop_N_Fixation_1998,1998,none,nlcd_1998.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_1999,Continuous,Crop_N_Fixation_1999,1999,none,nlcd_1999.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2000,Continuous,Crop_N_Fixation_2000,2000,none,nlcd_2000.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2001,Continuous,Crop_N_Fixation_2001,2001,none,nlcd_2001.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2002,Continuous,Crop_N_Fixation_2002,2002,none,nlcd_2002.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2003,Continuous,Crop_N_Fixation_2003,2003,none,nlcd_2003.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2004,Continuous,Crop_N_Fixation_2004,2004,none,nlcd_2004.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2005,Continuous,Crop_N_Fixation_2005,2005,none,nlcd_2005.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2006,Continuous,Crop_N_Fixation_2006,2006,none,nlcd_2006.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2007,Continuous,Crop_N_Fixation_2007,2007,none,nlcd_2007.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2008,Continuous,Crop_N_Fixation_2008,2008,none,nlcd_2008.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2009,Continuous,Crop_N_Fixation_2009,2009,none,nlcd_2009.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2010,Continuous,Crop_N_Fixation_2010,2010,none,nlcd_2010.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2011,Continuous,Crop_N_Fixation_2011,2011,none,nlcd_2011.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2012,Continuous,Crop_N_Fixation_2012,2012,none,nlcd_2012.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2013,Continuous,Crop_N_Fixation_2013,2013,none,nlcd_2013.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2014,Continuous,Crop_N_Fixation_2014,2014,none,nlcd_2014.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2015,Continuous,Crop_N_Fixation_2015,2015,none,nlcd_2015.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2016,Continuous,Crop_N_Fixation_2016,2016,none,nlcd_2016.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-Crop_N_Fixation_2017,Continuous,Crop_N_Fixation_2017,2017,none,nlcd_2017.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1987,Continuous,N_Human_Waste_1987,1987,none,nlcd_1987.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1988,Continuous,N_Human_Waste_1988,1988,none,nlcd_1988.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1989,Continuous,N_Human_Waste_1989,1989,none,nlcd_1989.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1990,Continuous,N_Human_Waste_1990,1990,none,nlcd_1990.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1991,Continuous,N_Human_Waste_1991,1991,none,nlcd_1991.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1992,Continuous,N_Human_Waste_1992,1992,none,nlcd_1992.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1993,Continuous,N_Human_Waste_1993,1993,none,nlcd_1993.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1994,Continuous,N_Human_Waste_1994,1994,none,nlcd_1994.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1995,Continuous,N_Human_Waste_1995,1995,none,nlcd_1995.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1996,Continuous,N_Human_Waste_1996,1996,none,nlcd_1996.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1997,Continuous,N_Human_Waste_1997,1997,none,nlcd_1997.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1998,Continuous,N_Human_Waste_1998,1998,none,nlcd_1998.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_1999,Continuous,N_Human_Waste_1999,1999,none,nlcd_1999.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2000,Continuous,N_Human_Waste_2000,2000,none,nlcd_2000.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2001,Continuous,N_Human_Waste_2001,2001,none,nlcd_2001.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2002,Continuous,N_Human_Waste_2002,2002,none,nlcd_2002.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2003,Continuous,N_Human_Waste_2003,2003,none,nlcd_2003.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2004,Continuous,N_Human_Waste_2004,2004,none,nlcd_2004.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2005,Continuous,N_Human_Waste_2005,2005,none,nlcd_2005.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2006,Continuous,N_Human_Waste_2006,2006,none,nlcd_2006.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2007,Continuous,N_Human_Waste_2007,2007,none,nlcd_2007.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2008,Continuous,N_Human_Waste_2008,2008,none,nlcd_2008.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2009,Continuous,N_Human_Waste_2009,2009,none,nlcd_2009.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2010,Continuous,N_Human_Waste_2010,2010,none,nlcd_2010.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2011,Continuous,N_Human_Waste_2011,2011,none,nlcd_2011.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2012,Continuous,N_Human_Waste_2012,2012,none,nlcd_2012.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2013,Continuous,N_Human_Waste_2013,2013,none,nlcd_2013.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2014,Continuous,N_Human_Waste_2014,2014,none,nlcd_2014.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2015,Continuous,N_Human_Waste_2015,2015,none,nlcd_2015.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2016,Continuous,N_Human_Waste_2016,2016,none,nlcd_2016.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-N_Human_Waste_2017,Continuous,N_Human_Waste_2017,2017,none,nlcd_2017.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1987,Continuous,P_Human_Waste_1987,1987,none,nlcd_1987.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1988,Continuous,P_Human_Waste_1988,1988,none,nlcd_1988.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1989,Continuous,P_Human_Waste_1989,1989,none,nlcd_1989.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1990,Continuous,P_Human_Waste_1990,1990,none,nlcd_1990.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1991,Continuous,P_Human_Waste_1991,1991,none,nlcd_1991.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1992,Continuous,P_Human_Waste_1992,1992,none,nlcd_1992.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1993,Continuous,P_Human_Waste_1993,1993,none,nlcd_1993.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1994,Continuous,P_Human_Waste_1994,1994,none,nlcd_1994.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1995,Continuous,P_Human_Waste_1995,1995,none,nlcd_1995.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1996,Continuous,P_Human_Waste_1996,1996,none,nlcd_1996.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1997,Continuous,P_Human_Waste_1997,1997,none,nlcd_1997.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1998,Continuous,P_Human_Waste_1998,1998,none,nlcd_1998.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_1999,Continuous,P_Human_Waste_1999,1999,none,nlcd_1999.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2000,Continuous,P_Human_Waste_2000,2000,none,nlcd_2000.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2001,Continuous,P_Human_Waste_2001,2001,none,nlcd_2001.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2002,Continuous,P_Human_Waste_2002,2002,none,nlcd_2002.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2003,Continuous,P_Human_Waste_2003,2003,none,nlcd_2003.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2004,Continuous,P_Human_Waste_2004,2004,none,nlcd_2004.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2005,Continuous,P_Human_Waste_2005,2005,none,nlcd_2005.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2006,Continuous,P_Human_Waste_2006,2006,none,nlcd_2006.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2007,Continuous,P_Human_Waste_2007,2007,none,nlcd_2007.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2008,Continuous,P_Human_Waste_2008,2008,none,nlcd_2008.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2009,Continuous,P_Human_Waste_2009,2009,none,nlcd_2009.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2010,Continuous,P_Human_Waste_2010,2010,none,nlcd_2010.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2011,Continuous,P_Human_Waste_2011,2011,none,nlcd_2011.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2012,Continuous,P_Human_Waste_2012,2012,none,nlcd_2012.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2013,Continuous,P_Human_Waste_2013,2013,none,nlcd_2013.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2014,Continuous,P_Human_Waste_2014,2014,none,nlcd_2014.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2015,Continuous,P_Human_Waste_2015,2015,none,nlcd_2015.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2016,Continuous,P_Human_Waste_2016,2016,none,nlcd_2016.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-P_Human_Waste_2017,Continuous,P_Human_Waste_2017,2017,none,nlcd_2017.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1985,none,Annual_NLCD_LndCov_1985_CU_C1V0.tif,,NLCD1985,Percent,1,0,0,1,,No,No,,8/11/2021
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1986,none,Annual_NLCD_LndCov_1986_CU_CV.tif,,NLCD1986,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1987,none,Annual_NLCD_LndCov_1987_CU_CV.tif,,NLCD1987,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1988,none,Annual_NLCD_LndCov_1988_CU_CV.tif,,NLCD1988,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1989,none,Annual_NLCD_LndCov_1989_CU_CV.tif,,NLCD1989,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1990,none,Annual_NLCD_LndCov_1990_CU_CV.tif,,NLCD1990,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1991,none,Annual_NLCD_LndCov_1991_CU_CV.tif,,NLCD1991,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1992,none,Annual_NLCD_LndCov_1992_CU_CV.tif,,NLCD1992,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1993,none,Annual_NLCD_LndCov_1993_CU_CV.tif,,NLCD1993,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1994,none,Annual_NLCD_LndCov_1994_CU_CV.tif,,NLCD1994,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1995,none,Annual_NLCD_LndCov_1995_CU_CV.tif,,NLCD1995,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1996,none,Annual_NLCD_LndCov_1996_CU_CV.tif,,NLCD1996,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1997,none,Annual_NLCD_LndCov_1997_CU_CV.tif,,NLCD1997,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1998,none,Annual_NLCD_LndCov_1998_CU_CV.tif,,NLCD1998,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1999,none,Annual_NLCD_LndCov_1999_CU_CV.tif,,NLCD1999,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2000,none,Annual_NLCD_LndCov_2000_CU_CV.tif,,NLCD2000,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2001,none,Annual_NLCD_LndCov_2001_CU_CV.tif,,NLCD2001,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2002,none,Annual_NLCD_LndCov_2002_CU_CV.tif,,NLCD2002,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2003,none,Annual_NLCD_LndCov_2003_CU_CV.tif,,NLCD2003,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2004,none,Annual_NLCD_LndCov_2004_CU_CV.tif,,NLCD2004,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2005,none,Annual_NLCD_LndCov_2005_CU_CV.tif,,NLCD2005,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2006,none,Annual_NLCD_LndCov_2006_CU_CV.tif,,NLCD2006,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2007,none,Annual_NLCD_LndCov_2007_CU_CV.tif,,NLCD2007,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2008,none,Annual_NLCD_LndCov_2008_CU_CV.tif,,NLCD2008,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2009,none,Annual_NLCD_LndCov_2009_CU_CV.tif,,NLCD2009,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2010,none,Annual_NLCD_LndCov_2010_CU_CV.tif,,NLCD2010,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2011,none,Annual_NLCD_LndCov_2011_CU_CV.tif,,NLCD2011,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2012,none,Annual_NLCD_LndCov_2012_CU_CV.tif,,NLCD2012,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2013,none,Annual_NLCD_LndCov_2013_CU_CV.tif,,NLCD2013,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2014,none,Annual_NLCD_LndCov_2014_CU_CV.tif,,NLCD2014,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2015,none,Annual_NLCD_LndCov_2015_CU_CV.tif,,NLCD2015,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2016,none,Annual_NLCD_LndCov_2016_CU_CV.tif,,NLCD2016,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2017,none,Annual_NLCD_LndCov_2017_CU_CV.tif,,NLCD2017,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2018,none,Annual_NLCD_LndCov_2018_CU_CV.tif,,NLCD2018,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2019,none,Annual_NLCD_LndCov_2019_CU_CV.tif,,NLCD2019,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2020,none,Annual_NLCD_LndCov_2020_CU_CV.tif,,NLCD2020,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2021,none,Annual_NLCD_LndCov_2021_CU_CV.tif,,NLCD2021,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2022,none,Annual_NLCD_LndCov_2022_CU_CV.tif,,NLCD2022,Percent,1,0,0,1,,No,No,,
-NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2023,none,Annual_NLCD_LndCov_2023_CU_CV.tif,,NLCD2023,Percent,1,0,0,1,,No,No,,
+n_farm_fert_1987,Continuous,n_farm_fert_1987,1987,none,nlcd_1987.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1988,Continuous,n_farm_fert_1988,1988,none,nlcd_1988.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1989,Continuous,n_farm_fert_1989,1989,none,nlcd_1989.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1990,Continuous,n_farm_fert_1990,1990,none,nlcd_1990.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1991,Continuous,n_farm_fert_1991,1991,none,nlcd_1991.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1992,Continuous,n_farm_fert_1992,1992,none,nlcd_1992.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1993,Continuous,n_farm_fert_1993,1993,none,nlcd_1993.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1994,Continuous,n_farm_fert_1994,1994,none,nlcd_1994.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1995,Continuous,n_farm_fert_1995,1995,none,nlcd_1995.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1996,Continuous,n_farm_fert_1996,1996,none,nlcd_1996.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1997,Continuous,n_farm_fert_1997,1997,none,nlcd_1997.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1998,Continuous,n_farm_fert_1998,1998,none,nlcd_1998.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_1999,Continuous,n_farm_fert_1999,1999,none,nlcd_1999.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2000,Continuous,n_farm_fert_2000,2000,none,nlcd_2000.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2001,Continuous,n_farm_fert_2001,2001,none,nlcd_2001.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2002,Continuous,n_farm_fert_2002,2002,none,nlcd_2002.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2003,Continuous,n_farm_fert_2003,2003,none,nlcd_2003.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2004,Continuous,n_farm_fert_2004,2004,none,nlcd_2004.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2005,Continuous,n_farm_fert_2005,2005,none,nlcd_2005.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2006,Continuous,n_farm_fert_2006,2006,none,nlcd_2006.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2007,Continuous,n_farm_fert_2007,2007,none,nlcd_2007.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2008,Continuous,n_farm_fert_2008,2008,none,nlcd_2008.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2009,Continuous,n_farm_fert_2009,2009,none,nlcd_2009.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2010,Continuous,n_farm_fert_2010,2010,none,nlcd_2010.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2011,Continuous,n_farm_fert_2011,2011,none,nlcd_2011.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2012,Continuous,n_farm_fert_2012,2012,none,nlcd_2012.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2013,Continuous,n_farm_fert_2013,2013,none,nlcd_2013.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2014,Continuous,n_farm_fert_2014,2014,none,nlcd_2014.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2015,Continuous,n_farm_fert_2015,2015,none,nlcd_2015.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2016,Continuous,n_farm_fert_2016,2016,none,nlcd_2016.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_farm_fert_2017,Continuous,n_farm_fert_2017,2017,none,nlcd_2017.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1987,Continuous,p_farm_fert_1987,1987,none,nlcd_1987.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1988,Continuous,p_farm_fert_1988,1988,none,nlcd_1988.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1989,Continuous,p_farm_fert_1989,1989,none,nlcd_1989.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1990,Continuous,p_farm_fert_1990,1990,none,nlcd_1990.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1991,Continuous,p_farm_fert_1991,1991,none,nlcd_1991.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1992,Continuous,p_farm_fert_1992,1992,none,nlcd_1992.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1993,Continuous,p_farm_fert_1993,1993,none,nlcd_1993.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1994,Continuous,p_farm_fert_1994,1994,none,nlcd_1994.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1995,Continuous,p_farm_fert_1995,1995,none,nlcd_1995.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1996,Continuous,p_farm_fert_1996,1996,none,nlcd_1996.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1997,Continuous,p_farm_fert_1997,1997,none,nlcd_1997.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1998,Continuous,p_farm_fert_1998,1998,none,nlcd_1998.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_1999,Continuous,p_farm_fert_1999,1999,none,nlcd_1999.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2000,Continuous,p_farm_fert_2000,2000,none,nlcd_2000.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2001,Continuous,p_farm_fert_2001,2001,none,nlcd_2001.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2002,Continuous,p_farm_fert_2002,2002,none,nlcd_2002.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2003,Continuous,p_farm_fert_2003,2003,none,nlcd_2003.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2004,Continuous,p_farm_fert_2004,2004,none,nlcd_2004.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2005,Continuous,p_farm_fert_2005,2005,none,nlcd_2005.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2006,Continuous,p_farm_fert_2006,2006,none,nlcd_2006.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2007,Continuous,p_farm_fert_2007,2007,none,nlcd_2007.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2008,Continuous,p_farm_fert_2008,2008,none,nlcd_2008.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2009,Continuous,p_farm_fert_2009,2009,none,nlcd_2009.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2010,Continuous,p_farm_fert_2010,2010,none,nlcd_2010.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2011,Continuous,p_farm_fert_2011,2011,none,nlcd_2011.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2012,Continuous,p_farm_fert_2012,2012,none,nlcd_2012.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2013,Continuous,p_farm_fert_2013,2013,none,nlcd_2013.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2014,Continuous,p_farm_fert_2014,2014,none,nlcd_2014.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2015,Continuous,p_farm_fert_2015,2015,none,nlcd_2015.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2016,Continuous,p_farm_fert_2016,2016,none,nlcd_2016.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+p_farm_fert_2017,Continuous,p_farm_fert_2017,2017,none,nlcd_2017.tif,,Farm Fertilizer,Mean,1,0,0,1,,No,No,,9/6/2024
+n_nonfarm_fert_1987,Continuous,n_nonfarm_fert_1987,1987,none,nlcd_1987.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1988,Continuous,n_nonfarm_fert_1988,1988,none,nlcd_1988.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1989,Continuous,n_nonfarm_fert_1989,1989,none,nlcd_1989.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1990,Continuous,n_nonfarm_fert_1990,1990,none,nlcd_1990.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1991,Continuous,n_nonfarm_fert_1991,1991,none,nlcd_1991.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1992,Continuous,n_nonfarm_fert_1992,1992,none,nlcd_1992.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1993,Continuous,n_nonfarm_fert_1993,1993,none,nlcd_1993.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1994,Continuous,n_nonfarm_fert_1994,1994,none,nlcd_1994.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1995,Continuous,n_nonfarm_fert_1995,1995,none,nlcd_1995.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1996,Continuous,n_nonfarm_fert_1996,1996,none,nlcd_1996.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1997,Continuous,n_nonfarm_fert_1997,1997,none,nlcd_1997.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1998,Continuous,n_nonfarm_fert_1998,1998,none,nlcd_1998.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_1999,Continuous,n_nonfarm_fert_1999,1999,none,nlcd_1999.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2000,Continuous,n_nonfarm_fert_2000,2000,none,nlcd_2000.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2001,Continuous,n_nonfarm_fert_2001,2001,none,nlcd_2001.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2002,Continuous,n_nonfarm_fert_2002,2002,none,nlcd_2002.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2003,Continuous,n_nonfarm_fert_2003,2003,none,nlcd_2003.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2004,Continuous,n_nonfarm_fert_2004,2004,none,nlcd_2004.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2005,Continuous,n_nonfarm_fert_2005,2005,none,nlcd_2005.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2006,Continuous,n_nonfarm_fert_2006,2006,none,nlcd_2006.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2007,Continuous,n_nonfarm_fert_2007,2007,none,nlcd_2007.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2008,Continuous,n_nonfarm_fert_2008,2008,none,nlcd_2008.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2009,Continuous,n_nonfarm_fert_2009,2009,none,nlcd_2009.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2010,Continuous,n_nonfarm_fert_2010,2010,none,nlcd_2010.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2011,Continuous,n_nonfarm_fert_2011,2011,none,nlcd_2011.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2012,Continuous,n_nonfarm_fert_2012,2012,none,nlcd_2012.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2013,Continuous,n_nonfarm_fert_2013,2013,none,nlcd_2013.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2014,Continuous,n_nonfarm_fert_2014,2014,none,nlcd_2014.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2015,Continuous,n_nonfarm_fert_2015,2015,none,nlcd_2015.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2016,Continuous,n_nonfarm_fert_2016,2016,none,nlcd_2016.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_nonfarm_fert_2017,Continuous,n_nonfarm_fert_2017,2017,none,nlcd_2017.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1987,Continuous,p_nonfarm_fert_1987,1987,none,nlcd_1987.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1988,Continuous,p_nonfarm_fert_1988,1988,none,nlcd_1988.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1989,Continuous,p_nonfarm_fert_1989,1989,none,nlcd_1989.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1990,Continuous,p_nonfarm_fert_1990,1990,none,nlcd_1990.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1991,Continuous,p_nonfarm_fert_1991,1991,none,nlcd_1991.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1992,Continuous,p_nonfarm_fert_1992,1992,none,nlcd_1992.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1993,Continuous,p_nonfarm_fert_1993,1993,none,nlcd_1993.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1994,Continuous,p_nonfarm_fert_1994,1994,none,nlcd_1994.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1995,Continuous,p_nonfarm_fert_1995,1995,none,nlcd_1995.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1996,Continuous,p_nonfarm_fert_1996,1996,none,nlcd_1996.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1997,Continuous,p_nonfarm_fert_1997,1997,none,nlcd_1997.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1998,Continuous,p_nonfarm_fert_1998,1998,none,nlcd_1998.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_1999,Continuous,p_nonfarm_fert_1999,1999,none,nlcd_1999.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2000,Continuous,p_nonfarm_fert_2000,2000,none,nlcd_2000.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2001,Continuous,p_nonfarm_fert_2001,2001,none,nlcd_2001.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2002,Continuous,p_nonfarm_fert_2002,2002,none,nlcd_2002.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2003,Continuous,p_nonfarm_fert_2003,2003,none,nlcd_2003.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2004,Continuous,p_nonfarm_fert_2004,2004,none,nlcd_2004.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2005,Continuous,p_nonfarm_fert_2005,2005,none,nlcd_2005.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2006,Continuous,p_nonfarm_fert_2006,2006,none,nlcd_2006.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2007,Continuous,p_nonfarm_fert_2007,2007,none,nlcd_2007.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2008,Continuous,p_nonfarm_fert_2008,2008,none,nlcd_2008.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2009,Continuous,p_nonfarm_fert_2009,2009,none,nlcd_2009.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2010,Continuous,p_nonfarm_fert_2010,2010,none,nlcd_2010.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2011,Continuous,p_nonfarm_fert_2011,2011,none,nlcd_2011.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2012,Continuous,p_nonfarm_fert_2012,2012,none,nlcd_2012.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2013,Continuous,p_nonfarm_fert_2013,2013,none,nlcd_2013.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2014,Continuous,p_nonfarm_fert_2014,2014,none,nlcd_2014.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2015,Continuous,p_nonfarm_fert_2015,2015,none,nlcd_2015.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2016,Continuous,p_nonfarm_fert_2016,2016,none,nlcd_2016.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+p_nonfarm_fert_2017,Continuous,p_nonfarm_fert_2017,2017,none,nlcd_2017.tif,,NonFarm Fertilizer,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1987,Continuous,n_manure_1987,1987,none,nlcd_1987.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1988,Continuous,n_manure_1988,1988,none,nlcd_1988.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1989,Continuous,n_manure_1989,1989,none,nlcd_1989.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1990,Continuous,n_manure_1990,1990,none,nlcd_1990.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1991,Continuous,n_manure_1991,1991,none,nlcd_1991.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1992,Continuous,n_manure_1992,1992,none,nlcd_1992.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1993,Continuous,n_manure_1993,1993,none,nlcd_1993.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1994,Continuous,n_manure_1994,1994,none,nlcd_1994.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1995,Continuous,n_manure_1995,1995,none,nlcd_1995.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1996,Continuous,n_manure_1996,1996,none,nlcd_1996.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1997,Continuous,n_manure_1997,1997,none,nlcd_1997.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1998,Continuous,n_manure_1998,1998,none,nlcd_1998.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_1999,Continuous,n_manure_1999,1999,none,nlcd_1999.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2000,Continuous,n_manure_2000,2000,none,nlcd_2000.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2001,Continuous,n_manure_2001,2001,none,nlcd_2001.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2002,Continuous,n_manure_2002,2002,none,nlcd_2002.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2003,Continuous,n_manure_2003,2003,none,nlcd_2003.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2004,Continuous,n_manure_2004,2004,none,nlcd_2004.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2005,Continuous,n_manure_2005,2005,none,nlcd_2005.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2006,Continuous,n_manure_2006,2006,none,nlcd_2006.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2007,Continuous,n_manure_2007,2007,none,nlcd_2007.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2008,Continuous,n_manure_2008,2008,none,nlcd_2008.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2009,Continuous,n_manure_2009,2009,none,nlcd_2009.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2010,Continuous,n_manure_2010,2010,none,nlcd_2010.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2011,Continuous,n_manure_2011,2011,none,nlcd_2011.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2012,Continuous,n_manure_2012,2012,none,nlcd_2012.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2013,Continuous,n_manure_2013,2013,none,nlcd_2013.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2014,Continuous,n_manure_2014,2014,none,nlcd_2014.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2015,Continuous,n_manure_2015,2015,none,nlcd_2015.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2016,Continuous,n_manure_2016,2016,none,nlcd_2016.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_manure_2017,Continuous,n_manure_2017,2017,none,nlcd_2017.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1987,Continuous,p_manure_1987,1987,none,nlcd_1987.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1988,Continuous,p_manure_1988,1988,none,nlcd_1988.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1989,Continuous,p_manure_1989,1989,none,nlcd_1989.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1990,Continuous,p_manure_1990,1990,none,nlcd_1990.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1991,Continuous,p_manure_1991,1991,none,nlcd_1991.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1992,Continuous,p_manure_1992,1992,none,nlcd_1992.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1993,Continuous,p_manure_1993,1993,none,nlcd_1993.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1994,Continuous,p_manure_1994,1994,none,nlcd_1994.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1995,Continuous,p_manure_1995,1995,none,nlcd_1995.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1996,Continuous,p_manure_1996,1996,none,nlcd_1996.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1997,Continuous,p_manure_1997,1997,none,nlcd_1997.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1998,Continuous,p_manure_1998,1998,none,nlcd_1998.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_1999,Continuous,p_manure_1999,1999,none,nlcd_1999.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2000,Continuous,p_manure_2000,2000,none,nlcd_2000.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2001,Continuous,p_manure_2001,2001,none,nlcd_2001.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2002,Continuous,p_manure_2002,2002,none,nlcd_2002.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2003,Continuous,p_manure_2003,2003,none,nlcd_2003.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2004,Continuous,p_manure_2004,2004,none,nlcd_2004.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2005,Continuous,p_manure_2005,2005,none,nlcd_2005.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2006,Continuous,p_manure_2006,2006,none,nlcd_2006.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2007,Continuous,p_manure_2007,2007,none,nlcd_2007.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2008,Continuous,p_manure_2008,2008,none,nlcd_2008.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2009,Continuous,p_manure_2009,2009,none,nlcd_2009.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2010,Continuous,p_manure_2010,2010,none,nlcd_2010.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2011,Continuous,p_manure_2011,2011,none,nlcd_2011.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2012,Continuous,p_manure_2012,2012,none,nlcd_2012.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2013,Continuous,p_manure_2013,2013,none,nlcd_2013.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2014,Continuous,p_manure_2014,2014,none,nlcd_2014.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2015,Continuous,p_manure_2015,2015,none,nlcd_2015.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2016,Continuous,p_manure_2016,2016,none,nlcd_2016.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+p_manure_2017,Continuous,p_manure_2017,2017,none,nlcd_2017.tif,,Manure,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1987,Continuous,n_livestock_rec_1987,1987,none,nlcd_1987.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1988,Continuous,n_livestock_rec_1988,1988,none,nlcd_1988.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1989,Continuous,n_livestock_rec_1989,1989,none,nlcd_1989.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1990,Continuous,n_livestock_rec_1990,1990,none,nlcd_1990.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1991,Continuous,n_livestock_rec_1991,1991,none,nlcd_1991.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1992,Continuous,n_livestock_rec_1992,1992,none,nlcd_1992.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1993,Continuous,n_livestock_rec_1993,1993,none,nlcd_1993.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1994,Continuous,n_livestock_rec_1994,1994,none,nlcd_1994.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1995,Continuous,n_livestock_rec_1995,1995,none,nlcd_1995.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1996,Continuous,n_livestock_rec_1996,1996,none,nlcd_1996.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1997,Continuous,n_livestock_rec_1997,1997,none,nlcd_1997.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1998,Continuous,n_livestock_rec_1998,1998,none,nlcd_1998.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_1999,Continuous,n_livestock_rec_1999,1999,none,nlcd_1999.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2000,Continuous,n_livestock_rec_2000,2000,none,nlcd_2000.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2001,Continuous,n_livestock_rec_2001,2001,none,nlcd_2001.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2002,Continuous,n_livestock_rec_2002,2002,none,nlcd_2002.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2003,Continuous,n_livestock_rec_2003,2003,none,nlcd_2003.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2004,Continuous,n_livestock_rec_2004,2004,none,nlcd_2004.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2005,Continuous,n_livestock_rec_2005,2005,none,nlcd_2005.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2006,Continuous,n_livestock_rec_2006,2006,none,nlcd_2006.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2007,Continuous,n_livestock_rec_2007,2007,none,nlcd_2007.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2008,Continuous,n_livestock_rec_2008,2008,none,nlcd_2008.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2009,Continuous,n_livestock_rec_2009,2009,none,nlcd_2009.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2010,Continuous,n_livestock_rec_2010,2010,none,nlcd_2010.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2011,Continuous,n_livestock_rec_2011,2011,none,nlcd_2011.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2012,Continuous,n_livestock_rec_2012,2012,none,nlcd_2012.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2013,Continuous,n_livestock_rec_2013,2013,none,nlcd_2013.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2014,Continuous,n_livestock_rec_2014,2014,none,nlcd_2014.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2015,Continuous,n_livestock_rec_2015,2015,none,nlcd_2015.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2016,Continuous,n_livestock_rec_2016,2016,none,nlcd_2016.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_rec_2017,Continuous,n_livestock_rec_2017,2017,none,nlcd_2017.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1987,Continuous,p_livestock_rec_1987,1987,none,nlcd_1987.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1988,Continuous,p_livestock_rec_1988,1988,none,nlcd_1988.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1989,Continuous,p_livestock_rec_1989,1989,none,nlcd_1989.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1990,Continuous,p_livestock_rec_1990,1990,none,nlcd_1990.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1991,Continuous,p_livestock_rec_1991,1991,none,nlcd_1991.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1992,Continuous,p_livestock_rec_1992,1992,none,nlcd_1992.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1993,Continuous,p_livestock_rec_1993,1993,none,nlcd_1993.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1994,Continuous,p_livestock_rec_1994,1994,none,nlcd_1994.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1995,Continuous,p_livestock_rec_1995,1995,none,nlcd_1995.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1996,Continuous,p_livestock_rec_1996,1996,none,nlcd_1996.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1997,Continuous,p_livestock_rec_1997,1997,none,nlcd_1997.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1998,Continuous,p_livestock_rec_1998,1998,none,nlcd_1998.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_1999,Continuous,p_livestock_rec_1999,1999,none,nlcd_1999.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2000,Continuous,p_livestock_rec_2000,2000,none,nlcd_2000.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2001,Continuous,p_livestock_rec_2001,2001,none,nlcd_2001.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2002,Continuous,p_livestock_rec_2002,2002,none,nlcd_2002.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2003,Continuous,p_livestock_rec_2003,2003,none,nlcd_2003.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2004,Continuous,p_livestock_rec_2004,2004,none,nlcd_2004.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2005,Continuous,p_livestock_rec_2005,2005,none,nlcd_2005.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2006,Continuous,p_livestock_rec_2006,2006,none,nlcd_2006.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2007,Continuous,p_livestock_rec_2007,2007,none,nlcd_2007.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2008,Continuous,p_livestock_rec_2008,2008,none,nlcd_2008.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2009,Continuous,p_livestock_rec_2009,2009,none,nlcd_2009.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2010,Continuous,p_livestock_rec_2010,2010,none,nlcd_2010.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2011,Continuous,p_livestock_rec_2011,2011,none,nlcd_2011.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2012,Continuous,p_livestock_rec_2012,2012,none,nlcd_2012.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2013,Continuous,p_livestock_rec_2013,2013,none,nlcd_2013.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2014,Continuous,p_livestock_rec_2014,2014,none,nlcd_2014.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2015,Continuous,p_livestock_rec_2015,2015,none,nlcd_2015.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2016,Continuous,p_livestock_rec_2016,2016,none,nlcd_2016.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_rec_2017,Continuous,p_livestock_rec_2017,2017,none,nlcd_2017.tif,,Livestock Waste Recovered,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1987,none,nlcd_1987.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1988,none,nlcd_1988.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1989,none,nlcd_1989.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1990,none,nlcd_1990.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1991,none,nlcd_1991.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1992,none,nlcd_1992.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1993,none,nlcd_1993.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1994,none,nlcd_1994.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1995,none,nlcd_1995.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1996,none,nlcd_1996.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1997,none,nlcd_1997.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1998,none,nlcd_1998.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,1999,none,nlcd_1999.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2000,none,nlcd_2000.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2001,none,nlcd_2001.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2002,none,nlcd_2002.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2003,none,nlcd_2003.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2004,none,nlcd_2004.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2005,none,nlcd_2005.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2006,none,nlcd_2006.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2007,none,nlcd_2007.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2008,none,nlcd_2008.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2009,none,nlcd_2009.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2010,none,nlcd_2010.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2011,none,nlcd_2011.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2012,none,nlcd_2012.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2013,none,nlcd_2013.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2014,none,nlcd_2014.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2015,none,nlcd_2015.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2016,none,nlcd_2016.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_livestock_prod,Continuous,n_livestock_prod,2017,none,nlcd_2017.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1987,none,nlcd_1987.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1988,none,nlcd_1988.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1989,none,nlcd_1989.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1990,none,nlcd_1990.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1991,none,nlcd_1991.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1992,none,nlcd_1992.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1993,none,nlcd_1993.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1994,none,nlcd_1994.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1995,none,nlcd_1995.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1996,none,nlcd_1996.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1997,none,nlcd_1997.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1998,none,nlcd_1998.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,1999,none,nlcd_1999.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2000,none,nlcd_2000.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2001,none,nlcd_2001.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2002,none,nlcd_2002.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2003,none,nlcd_2003.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2004,none,nlcd_2004.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2005,none,nlcd_2005.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2006,none,nlcd_2006.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2007,none,nlcd_2007.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2008,none,nlcd_2008.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2009,none,nlcd_2009.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2010,none,nlcd_2010.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2011,none,nlcd_2011.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2012,none,nlcd_2012.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2013,none,nlcd_2013.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2014,none,nlcd_2014.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2015,none,nlcd_2015.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2016,none,nlcd_2016.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+p_livestock_prod,Continuous,p_livestock_prod,2017,none,nlcd_2017.tif,,Livestock Waste Produced,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1987,Continuous,n_crop_rem_1987,1987,none,nlcd_1987.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1988,Continuous,n_crop_rem_1988,1988,none,nlcd_1988.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1989,Continuous,n_crop_rem_1989,1989,none,nlcd_1989.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1990,Continuous,n_crop_rem_1990,1990,none,nlcd_1990.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1991,Continuous,n_crop_rem_1991,1991,none,nlcd_1991.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1992,Continuous,n_crop_rem_1992,1992,none,nlcd_1992.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1993,Continuous,n_crop_rem_1993,1993,none,nlcd_1993.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1994,Continuous,n_crop_rem_1994,1994,none,nlcd_1994.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1995,Continuous,n_crop_rem_1995,1995,none,nlcd_1995.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1996,Continuous,n_crop_rem_1996,1996,none,nlcd_1996.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1997,Continuous,n_crop_rem_1997,1997,none,nlcd_1997.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1998,Continuous,n_crop_rem_1998,1998,none,nlcd_1998.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_1999,Continuous,n_crop_rem_1999,1999,none,nlcd_1999.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2000,Continuous,n_crop_rem_2000,2000,none,nlcd_2000.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2001,Continuous,n_crop_rem_2001,2001,none,nlcd_2001.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2002,Continuous,n_crop_rem_2002,2002,none,nlcd_2002.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2003,Continuous,n_crop_rem_2003,2003,none,nlcd_2003.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2004,Continuous,n_crop_rem_2004,2004,none,nlcd_2004.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2005,Continuous,n_crop_rem_2005,2005,none,nlcd_2005.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2006,Continuous,n_crop_rem_2006,2006,none,nlcd_2006.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2007,Continuous,n_crop_rem_2007,2007,none,nlcd_2007.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2008,Continuous,n_crop_rem_2008,2008,none,nlcd_2008.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2009,Continuous,n_crop_rem_2009,2009,none,nlcd_2009.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2010,Continuous,n_crop_rem_2010,2010,none,nlcd_2010.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2011,Continuous,n_crop_rem_2011,2011,none,nlcd_2011.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2012,Continuous,n_crop_rem_2012,2012,none,nlcd_2012.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2013,Continuous,n_crop_rem_2013,2013,none,nlcd_2013.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2014,Continuous,n_crop_rem_2014,2014,none,nlcd_2014.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2015,Continuous,n_crop_rem_2015,2015,none,nlcd_2015.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2016,Continuous,n_crop_rem_2016,2016,none,nlcd_2016.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_rem_2017,Continuous,n_crop_rem_2017,2017,none,nlcd_2017.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1987,Continuous,p_crop_rem_1987,1987,none,nlcd_1987.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1988,Continuous,p_crop_rem_1988,1988,none,nlcd_1988.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1989,Continuous,p_crop_rem_1989,1989,none,nlcd_1989.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1990,Continuous,p_crop_rem_1990,1990,none,nlcd_1990.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1991,Continuous,p_crop_rem_1991,1991,none,nlcd_1991.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1992,Continuous,p_crop_rem_1992,1992,none,nlcd_1992.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1993,Continuous,p_crop_rem_1993,1993,none,nlcd_1993.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1994,Continuous,p_crop_rem_1994,1994,none,nlcd_1994.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1995,Continuous,p_crop_rem_1995,1995,none,nlcd_1995.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1996,Continuous,p_crop_rem_1996,1996,none,nlcd_1996.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1997,Continuous,p_crop_rem_1997,1997,none,nlcd_1997.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1998,Continuous,p_crop_rem_1998,1998,none,nlcd_1998.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_1999,Continuous,p_crop_rem_1999,1999,none,nlcd_1999.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2000,Continuous,p_crop_rem_2000,2000,none,nlcd_2000.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2001,Continuous,p_crop_rem_2001,2001,none,nlcd_2001.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2002,Continuous,p_crop_rem_2002,2002,none,nlcd_2002.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2003,Continuous,p_crop_rem_2003,2003,none,nlcd_2003.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2004,Continuous,p_crop_rem_2004,2004,none,nlcd_2004.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2005,Continuous,p_crop_rem_2005,2005,none,nlcd_2005.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2006,Continuous,p_crop_rem_2006,2006,none,nlcd_2006.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2007,Continuous,p_crop_rem_2007,2007,none,nlcd_2007.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2008,Continuous,p_crop_rem_2008,2008,none,nlcd_2008.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2009,Continuous,p_crop_rem_2009,2009,none,nlcd_2009.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2010,Continuous,p_crop_rem_2010,2010,none,nlcd_2010.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2011,Continuous,p_crop_rem_2011,2011,none,nlcd_2011.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2012,Continuous,p_crop_rem_2012,2012,none,nlcd_2012.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2013,Continuous,p_crop_rem_2013,2013,none,nlcd_2013.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2014,Continuous,p_crop_rem_2014,2014,none,nlcd_2014.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2015,Continuous,p_crop_rem_2015,2015,none,nlcd_2015.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2016,Continuous,p_crop_rem_2016,2016,none,nlcd_2016.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+p_crop_rem_2017,Continuous,p_crop_rem,2017,none,nlcd_2017.tif,,Crop Removal,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1987,Continuous,n_crop_fix_1987,1987,none,nlcd_1987.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1988,Continuous,n_crop_fix_1988,1988,none,nlcd_1988.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1989,Continuous,n_crop_fix_1989,1989,none,nlcd_1989.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1990,Continuous,n_crop_fix_1990,1990,none,nlcd_1990.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1991,Continuous,n_crop_fix_1991,1991,none,nlcd_1991.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1992,Continuous,n_crop_fix_1992,1992,none,nlcd_1992.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1993,Continuous,n_crop_fix_1993,1993,none,nlcd_1993.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1994,Continuous,n_crop_fix_1994,1994,none,nlcd_1994.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1995,Continuous,n_crop_fix_1995,1995,none,nlcd_1995.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1996,Continuous,n_crop_fix_1996,1996,none,nlcd_1996.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1997,Continuous,n_crop_fix_1997,1997,none,nlcd_1997.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1998,Continuous,n_crop_fix_1998,1998,none,nlcd_1998.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_1999,Continuous,n_crop_fix_1999,1999,none,nlcd_1999.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2000,Continuous,n_crop_fix_2000,2000,none,nlcd_2000.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2001,Continuous,n_crop_fix_2001,2001,none,nlcd_2001.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2002,Continuous,n_crop_fix_2002,2002,none,nlcd_2002.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2003,Continuous,n_crop_fix_2003,2003,none,nlcd_2003.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2004,Continuous,n_crop_fix_2004,2004,none,nlcd_2004.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2005,Continuous,n_crop_fix_2005,2005,none,nlcd_2005.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2006,Continuous,n_crop_fix_2006,2006,none,nlcd_2006.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2007,Continuous,n_crop_fix_2007,2007,none,nlcd_2007.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2008,Continuous,n_crop_fix_2008,2008,none,nlcd_2008.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2009,Continuous,n_crop_fix_2009,2009,none,nlcd_2009.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2010,Continuous,n_crop_fix_2010,2010,none,nlcd_2010.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2011,Continuous,n_crop_fix_2011,2011,none,nlcd_2011.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2012,Continuous,n_crop_fix_2012,2012,none,nlcd_2012.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2013,Continuous,n_crop_fix_2013,2013,none,nlcd_2013.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2014,Continuous,n_crop_fix_2014,2014,none,nlcd_2014.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2015,Continuous,n_crop_fix_2015,2015,none,nlcd_2015.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2016,Continuous,n_crop_fix_2016,2016,none,nlcd_2016.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_crop_fix_2017,Continuous,n_crop_fix_2017,2017,none,nlcd_2017.tif,,Crop NFixation,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1987,Continuous,n_human_waste_1987,1987,none,nlcd_1987.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1988,Continuous,n_human_waste_1988,1988,none,nlcd_1988.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1989,Continuous,n_human_waste_1989,1989,none,nlcd_1989.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1990,Continuous,n_human_waste_1990,1990,none,nlcd_1990.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1991,Continuous,n_human_waste_1991,1991,none,nlcd_1991.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1992,Continuous,n_human_waste_1992,1992,none,nlcd_1992.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1993,Continuous,n_human_waste_1993,1993,none,nlcd_1993.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1994,Continuous,n_human_waste_1994,1994,none,nlcd_1994.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1995,Continuous,n_human_waste_1995,1995,none,nlcd_1995.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1996,Continuous,n_human_waste_1996,1996,none,nlcd_1996.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1997,Continuous,n_human_waste_1997,1997,none,nlcd_1997.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1998,Continuous,n_human_waste_1998,1998,none,nlcd_1998.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_1999,Continuous,n_human_waste_1999,1999,none,nlcd_1999.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2000,Continuous,n_human_waste_2000,2000,none,nlcd_2000.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2001,Continuous,n_human_waste_2001,2001,none,nlcd_2001.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2002,Continuous,n_human_waste_2002,2002,none,nlcd_2002.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2003,Continuous,n_human_waste_2003,2003,none,nlcd_2003.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2004,Continuous,n_human_waste_2004,2004,none,nlcd_2004.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2005,Continuous,n_human_waste_2005,2005,none,nlcd_2005.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2006,Continuous,n_human_waste_2006,2006,none,nlcd_2006.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2007,Continuous,n_human_waste_2007,2007,none,nlcd_2007.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2008,Continuous,n_human_waste_2008,2008,none,nlcd_2008.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2009,Continuous,n_human_waste_2009,2009,none,nlcd_2009.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2010,Continuous,n_human_waste_2010,2010,none,nlcd_2010.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2011,Continuous,n_human_waste_2011,2011,none,nlcd_2011.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2012,Continuous,n_human_waste_2012,2012,none,nlcd_2012.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2013,Continuous,n_human_waste_2013,2013,none,nlcd_2013.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2014,Continuous,n_human_waste_2014,2014,none,nlcd_2014.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2015,Continuous,n_human_waste_2015,2015,none,nlcd_2015.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2016,Continuous,n_human_waste_2016,2016,none,nlcd_2016.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+n_human_waste_2017,Continuous,n_human_waste_2017,2017,none,nlcd_2017.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1987,Continuous,p_human_waste_1987,1987,none,nlcd_1987.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1988,Continuous,p_human_waste_1988,1988,none,nlcd_1988.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1989,Continuous,p_human_waste_1989,1989,none,nlcd_1989.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1990,Continuous,p_human_waste_1990,1990,none,nlcd_1990.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1991,Continuous,p_human_waste_1991,1991,none,nlcd_1991.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1992,Continuous,p_human_waste_1992,1992,none,nlcd_1992.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1993,Continuous,p_human_waste_1993,1993,none,nlcd_1993.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1994,Continuous,p_human_waste_1994,1994,none,nlcd_1994.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1995,Continuous,p_human_waste_1995,1995,none,nlcd_1995.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1996,Continuous,p_human_waste_1996,1996,none,nlcd_1996.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1997,Continuous,p_human_waste_1997,1997,none,nlcd_1997.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1998,Continuous,p_human_waste_1998,1998,none,nlcd_1998.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_1999,Continuous,p_human_waste_1999,1999,none,nlcd_1999.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2000,Continuous,p_human_waste_2000,2000,none,nlcd_2000.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2001,Continuous,p_human_waste_2001,2001,none,nlcd_2001.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2002,Continuous,p_human_waste_2002,2002,none,nlcd_2002.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2003,Continuous,p_human_waste_2003,2003,none,nlcd_2003.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2004,Continuous,p_human_waste_2004,2004,none,nlcd_2004.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2005,Continuous,p_human_waste_2005,2005,none,nlcd_2005.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2006,Continuous,p_human_waste_2006,2006,none,nlcd_2006.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2007,Continuous,p_human_waste_2007,2007,none,nlcd_2007.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2008,Continuous,p_human_waste_2008,2008,none,nlcd_2008.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2009,Continuous,p_human_waste_2009,2009,none,nlcd_2009.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2010,Continuous,p_human_waste_2010,2010,none,nlcd_2010.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2011,Continuous,p_human_waste_2011,2011,none,nlcd_2011.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2012,Continuous,p_human_waste_2012,2012,none,nlcd_2012.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2013,Continuous,p_human_waste_2013,2013,none,nlcd_2013.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2014,Continuous,p_human_waste_2014,2014,none,nlcd_2014.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2015,Continuous,p_human_waste_2015,2015,none,nlcd_2015.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2016,Continuous,p_human_waste_2016,2016,none,nlcd_2016.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+p_human_waste_2017,Continuous,p_human_waste_2017,2017,none,nlcd_2017.tif,,Human Waste,Mean,1,0,0,0,,No,No,,9/6/2024
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1985,none,Annual_NLCD_LndCov_1985_CU_C1V0.tif,,NLCD1985,Percent,1,0,0,0,,No,No,,8/11/2021
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1986,none,Annual_NLCD_LndCov_1986_CU_CV.tif,,NLCD1986,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1987,none,Annual_NLCD_LndCov_1987_CU_CV.tif,,NLCD1987,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1988,none,Annual_NLCD_LndCov_1988_CU_CV.tif,,NLCD1988,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1989,none,Annual_NLCD_LndCov_1989_CU_CV.tif,,NLCD1989,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1990,none,Annual_NLCD_LndCov_1990_CU_CV.tif,,NLCD1990,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1991,none,Annual_NLCD_LndCov_1991_CU_CV.tif,,NLCD1991,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1992,none,Annual_NLCD_LndCov_1992_CU_CV.tif,,NLCD1992,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1993,none,Annual_NLCD_LndCov_1993_CU_CV.tif,,NLCD1993,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1994,none,Annual_NLCD_LndCov_1994_CU_CV.tif,,NLCD1994,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1995,none,Annual_NLCD_LndCov_1995_CU_CV.tif,,NLCD1995,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1996,none,Annual_NLCD_LndCov_1996_CU_CV.tif,,NLCD1996,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1997,none,Annual_NLCD_LndCov_1997_CU_CV.tif,,NLCD1997,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1998,none,Annual_NLCD_LndCov_1998_CU_CV.tif,,NLCD1998,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,1999,none,Annual_NLCD_LndCov_1999_CU_CV.tif,,NLCD1999,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2000,none,Annual_NLCD_LndCov_2000_CU_CV.tif,,NLCD2000,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2001,none,Annual_NLCD_LndCov_2001_CU_CV.tif,,NLCD2001,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2002,none,Annual_NLCD_LndCov_2002_CU_CV.tif,,NLCD2002,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2003,none,Annual_NLCD_LndCov_2003_CU_CV.tif,,NLCD2003,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2004,none,Annual_NLCD_LndCov_2004_CU_CV.tif,,NLCD2004,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2005,none,Annual_NLCD_LndCov_2005_CU_CV.tif,,NLCD2005,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2006,none,Annual_NLCD_LndCov_2006_CU_CV.tif,,NLCD2006,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2007,none,Annual_NLCD_LndCov_2007_CU_CV.tif,,NLCD2007,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2008,none,Annual_NLCD_LndCov_2008_CU_CV.tif,,NLCD2008,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2009,none,Annual_NLCD_LndCov_2009_CU_CV.tif,,NLCD2009,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2010,none,Annual_NLCD_LndCov_2010_CU_CV.tif,,NLCD2010,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2011,none,Annual_NLCD_LndCov_2011_CU_CV.tif,,NLCD2011,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2012,none,Annual_NLCD_LndCov_2012_CU_CV.tif,,NLCD2012,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2013,none,Annual_NLCD_LndCov_2013_CU_CV.tif,,NLCD2013,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2014,none,Annual_NLCD_LndCov_2014_CU_CV.tif,,NLCD2014,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2015,none,Annual_NLCD_LndCov_2015_CU_CV.tif,,NLCD2015,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2016,none,Annual_NLCD_LndCov_2016_CU_CV.tif,,NLCD2016,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2017,none,Annual_NLCD_LndCov_2017_CU_CV.tif,,NLCD2017,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2018,none,Annual_NLCD_LndCov_2018_CU_CV.tif,,NLCD2018,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2019,none,Annual_NLCD_LndCov_2019_CU_CV.tif,,NLCD2019,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2020,none,Annual_NLCD_LndCov_2020_CU_CV.tif,,NLCD2020,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2021,none,Annual_NLCD_LndCov_2021_CU_CV.tif,,NLCD2021,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2022,none,Annual_NLCD_LndCov_2022_CU_CV.tif,,NLCD2022,Percent,1,0,0,0,,No,No,,
+NLCD,Categorical,lookup/AnnualNLCD_lookup.csv,2023,none,Annual_NLCD_LndCov_2023_CU_CV.tif,,NLCD2023,Percent,1,0,0,0,,No,No,,
+n_ag_surplus_1987,Continuous,n_ag_surplus_1987,1987,none,nlcd_1987.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1988,Continuous,n_ag_surplus_1988,1988,none,nlcd_1988.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1989,Continuous,n_ag_surplus_1989,1989,none,nlcd_1989.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1990,Continuous,n_ag_surplus_1990,1990,none,nlcd_1990.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1991,Continuous,n_ag_surplus_1991,1991,none,nlcd_1991.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1992,Continuous,n_ag_surplus_1992,1992,none,nlcd_1992.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1993,Continuous,n_ag_surplus_1993,1993,none,nlcd_1993.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1994,Continuous,n_ag_surplus_1994,1994,none,nlcd_1994.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1995,Continuous,n_ag_surplus_1995,1995,none,nlcd_1995.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1996,Continuous,n_ag_surplus_1996,1996,none,nlcd_1996.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1997,Continuous,n_ag_surplus_1997,1997,none,nlcd_1997.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1998,Continuous,n_ag_surplus_1998,1998,none,nlcd_1998.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_1999,Continuous,n_ag_surplus_1999,1999,none,nlcd_1999.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2000,Continuous,n_ag_surplus_2000,2000,none,nlcd_2000.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2001,Continuous,n_ag_surplus_2001,2001,none,nlcd_2001.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2002,Continuous,n_ag_surplus_2002,2002,none,nlcd_2002.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2003,Continuous,n_ag_surplus_2003,2003,none,nlcd_2003.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2004,Continuous,n_ag_surplus_2004,2004,none,nlcd_2004.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2005,Continuous,n_ag_surplus_2005,2005,none,nlcd_2005.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2006,Continuous,n_ag_surplus_2006,2006,none,nlcd_2006.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2007,Continuous,n_ag_surplus_2007,2007,none,nlcd_2007.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2008,Continuous,n_ag_surplus_2008,2008,none,nlcd_2008.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2009,Continuous,n_ag_surplus_2009,2009,none,nlcd_2009.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2010,Continuous,n_ag_surplus_2010,2010,none,nlcd_2010.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2011,Continuous,n_ag_surplus_2011,2011,none,nlcd_2011.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2012,Continuous,n_ag_surplus_2012,2012,none,nlcd_2012.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2013,Continuous,n_ag_surplus_2013,2013,none,nlcd_2013.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2014,Continuous,n_ag_surplus_2014,2014,none,nlcd_2014.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2015,Continuous,n_ag_surplus_2015,2015,none,nlcd_2015.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2016,Continuous,n_ag_surplus_2016,2016,none,nlcd_2016.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+n_ag_surplus_2017,Continuous,n_ag_surplus_2017,2017,none,nlcd_2017.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1987,Continuous,p_ag_surplus_1987,1987,none,nlcd_1987.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1988,Continuous,p_ag_surplus_1988,1988,none,nlcd_1988.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1989,Continuous,p_ag_surplus_1989,1989,none,nlcd_1989.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1990,Continuous,p_ag_surplus_1990,1990,none,nlcd_1990.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1991,Continuous,p_ag_surplus_1991,1991,none,nlcd_1991.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1992,Continuous,p_ag_surplus_1992,1992,none,nlcd_1992.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1993,Continuous,p_ag_surplus_1993,1993,none,nlcd_1993.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1994,Continuous,p_ag_surplus_1994,1994,none,nlcd_1994.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1995,Continuous,p_ag_surplus_1995,1995,none,nlcd_1995.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1996,Continuous,p_ag_surplus_1996,1996,none,nlcd_1996.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1997,Continuous,p_ag_surplus_1997,1997,none,nlcd_1997.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1998,Continuous,p_ag_surplus_1998,1998,none,nlcd_1998.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_1999,Continuous,p_ag_surplus_1999,1999,none,nlcd_1999.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2000,Continuous,p_ag_surplus_2000,2000,none,nlcd_2000.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2001,Continuous,p_ag_surplus_2001,2001,none,nlcd_2001.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2002,Continuous,p_ag_surplus_2002,2002,none,nlcd_2002.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2003,Continuous,p_ag_surplus_2003,2003,none,nlcd_2003.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2004,Continuous,p_ag_surplus_2004,2004,none,nlcd_2004.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2005,Continuous,p_ag_surplus_2005,2005,none,nlcd_2005.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2006,Continuous,p_ag_surplus_2006,2006,none,nlcd_2006.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2007,Continuous,p_ag_surplus_2007,2007,none,nlcd_2007.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2008,Continuous,p_ag_surplus_2008,2008,none,nlcd_2008.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2009,Continuous,p_ag_surplus_2009,2009,none,nlcd_2009.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2010,Continuous,p_ag_surplus_2010,2010,none,nlcd_2010.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2011,Continuous,p_ag_surplus_2011,2011,none,nlcd_2011.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2012,Continuous,p_ag_surplus_2012,2012,none,nlcd_2012.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2013,Continuous,p_ag_surplus_2013,2013,none,nlcd_2013.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2014,Continuous,p_ag_surplus_2014,2014,none,nlcd_2014.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2015,Continuous,p_ag_surplus_2015,2015,none,nlcd_2015.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2016,Continuous,p_ag_surplus_2016,2016,none,nlcd_2016.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
+p_ag_surplus_2017,Continuous,p_ag_surplus_2017,2017,none,nlcd_2017.tif,,Agricultural Surplus,Mean,1,0,0,0,,No,No,,9/6/2024
