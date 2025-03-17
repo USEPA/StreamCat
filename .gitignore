@@ -14,3 +14,6 @@ StreamCat.Rproj
 /__pycache__
 /logs/
 /config_tables/
+create_sc_ds_130.sql
+db_updates_02_21_2025.sql
+db_updates_02_24_2025.sql
