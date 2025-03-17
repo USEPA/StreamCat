@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 #from gdalconst import *
-from osgeo import gdal, ogr, osr
+# from osgeo import gdal, ogr, osr
 from rasterio import transform
 
 if rasterio.__version__[0] == "0":
