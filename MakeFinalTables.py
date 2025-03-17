@@ -58,6 +58,12 @@ print(ctl.query("run == 1").MetricName.head())
 inputs = np.load(ACCUM_DIR + "/vpu_inputs.npy", allow_pickle=True).item()
 
 runners = ctl.query("run == 1").groupby("Final_Table_Name")
+#for _, row in runners.iterrows():
+    #if row.Year is not None:
+        #row.FullTableName = row.FullTableName + "_" + str(row.Year)[:-2]
+        #row.MetricName = row.MetricName + "_" + str(row.Year)[:-2] 
+#runners = runners.groupby("Final_Table_Name")
+        
 tables = runners["FullTableName"].unique().to_dict()
 # check that all accumulated files are present
 missing = []
