@@ -9,6 +9,7 @@ from arcpy.sa import *
 arcpy.CheckOutExtension("spatial")
 arcpy.env.overwriteOutput = True
 from raster_function import catcsv2raster2
+from ..functions.raster_operations import RasterOperations
 import pandas as pd
 import numpy as np
 import glob
@@ -31,11 +32,12 @@ frame = pd.concat(li, axis=0, ignore_index=True)
 wi_names = ['Phos_Ag_BalanceWs', 'Phos_Crop_UptakeWs',  'Phos_FertWs',   'Phos_ManureWs']
 
 for i in wi_names:
-    print i
+    print(i)
     Value = i
     outName = i
     outRas = out_dir + 'CI_' + outName + '_300m.tif'
-    catcsv2raster2(frame, Value, inTemplate, outRas, dtype='Float')
+    # catcsv2raster2(frame, Value, inTemplate, outRas, dtype='Float')
+    RasterOperations.catcsv2raster2(frame, Value, inTemplate, outRas, dtype='Float')
 
 
 

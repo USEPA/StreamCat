@@ -181,7 +181,7 @@ def process_metric(args, row, inter_vpu, INPUTS):
             )
 
 if __name__ == '__main__':
-    args = ConfigArgs()
+    #args = ConfigArgs()
 
     ctl = pd.read_csv(args.control_table)
     # Load table of inter vpu connections
