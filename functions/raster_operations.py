@@ -78,8 +78,8 @@ class RasterOperations:
                     resampling=Resampling[resamp_type],
                 )
 
-
-    def catcsv2raster(self, inCSV, Value, inTemplate, outRaster, dtype='Int', idName='COMID'):
+    @staticmethod
+    def catcsv2raster(inCSV, Value, inTemplate, outRaster, dtype='Int', idName='COMID'):
         '''
         __author__ = "Ryan Hill <hill.ryan@epa.gov>"
                     "Marc Weber <weber.marc@epa.gov>"
@@ -139,8 +139,8 @@ class RasterOperations:
         del newRas, a, b, c, bsort, apos, indices, z, inRas, rstArray
         gc.collect()
 
-
-    def catcsv2raster2(self, lookup, Value, inTemplate, outRaster, dtype='Int', idName='COMID'):
+    @staticmethod
+    def catcsv2raster2(lookup, Value, inTemplate, outRaster, dtype='Int', idName='COMID'):
         '''
         __author__ = "Ryan Hill <hill.ryan@epa.gov>"
                     "Marc Weber <weber.marc@epa.gov>"

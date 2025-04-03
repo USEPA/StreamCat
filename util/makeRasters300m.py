@@ -8,7 +8,7 @@ import sys, arcpy
 from arcpy.sa import *
 arcpy.CheckOutExtension("spatial")
 arcpy.env.overwriteOutput = True
-from raster_function import catcsv2raster2
+# from raster_function import catcsv2raster2
 from ..functions.raster_operations import RasterOperations
 import pandas as pd
 import numpy as np
