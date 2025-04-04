@@ -60,7 +60,7 @@ from functions import Accumulation, RasterOperations, SpatialOperations, ZonalOp
 # )
 
     
-def process_metric(args, row, inter_vpu, INPUTS):
+def process_metric(args, row, inter_vpu, INPUTS, use_arcpy, num_workers):
     
     already_processed = []
     for _, row in ctl.query("run == 1").iterrows():

@@ -9,11 +9,21 @@ import gdal
 import time 
 import fiona
 from utils import dbf2df
+import rioxarray
+import rasterio
+from xrspatial.zonal import stats, crosstab
 
 class LicenseError(Exception):
     pass
 
 class ZonalOperations:
+    def __init__(self, use_arcpy=False, num_workers=None):
+        self.use_arcpy = use_arcpy
+        self.num_workers = num_workers
+        self.use_dask = False
+
+        if use_arcpy and num_workers:
+            self.use_dask = True
     @staticmethod
     def get_rat_vals(raster):
         """
@@ -94,6 +104,67 @@ class ZonalOperations:
                 table.insert(idx + 1, col, 0)  # add 1 to shift for VALUE
         return table
     
+    def xarrayZonalStatsPrep(self, izd_path, landscape_layer_path):
+        """Create Xarray DataArrays from inZoneData and LandscapeLayer files
+    
+        Args:
+            izd_path (str): path to inZoneData dbf
+            landscape_layer_path (str): path to landscape layer raster
+    
+        Returns:
+            izd_array (xr.DataArray): DataArray of zone data
+            ll_array (xr.DataArray): Windowed read of landscape layer raster as DataArray
+        """
+    
+        # Load first band of in zone data to an xarray DataArray
+        # print(use_dask)
+        if self.use_dask:
+            izd_array = rioxarray.open_rasterio(izd_path, chunks="auto").sel(band=1).drop_vars('band')
+        else:
+            izd_array = rioxarray.open_rasterio(izd_path).sel(band=1).drop_vars('band')
+    
+        # Get transform and bounds from in zone data to create window
+        transform = izd_array.rio.transform()
+        bounds = izd_array.rio.bounds()
+        window = rasterio.windows.from_bounds(*bounds, transform)
+    
+        # Read window of Landscape Layer (band 1) to rasterio array (numpy ndarray)
+        # Notes:
+        # Used rasterio because windowed reading with rioxarray was not working.
+        # Also attempted to use rioxarray and rio.clip & mask however this took 5-6 minutes for the NE region so was a huge slowdown.
+        # rasterio window read then DataArray conversion is simplest and fastest and does not require us loading a new GeoDataFrame for a shapely box.
+        #with rasterio.open(landscape_layer_path) as src:
+            # Open LandscapeLayer raster, window read band 1
+            #ll_rio_array = src.read(1, window=window)
+        # Convert numpy array to xarray DataArray with x and y as the dimensions to match izd_array
+        #ll_array = xr.DataArray(ll_rio_array, dims=['y', 'x'])
+    
+        # Rioxarray window selection is much faster than rasterio
+        ll_array = rioxarray.open_rasterio(landscape_layer_path).sel(band=1).drop_vars('band')
+        ll_array = ll_array.rio.isel_window(window, pad=True)
+        
+        # TODO add check to make sure they are the same size
+        if izd_array.shape != ll_array.shape:
+            # Determine the target shape (you can choose either one, but here we'll use izd_array's shape)
+            target_shape = izd_array.shape
+    
+            # Resample or pad the ll_array to match the target shape
+            if ll_array.shape[0] < target_shape[0]:
+                ll_array = ll_array.pad(y=(0, target_shape[0] - ll_array.shape[0]), mode='constant', constant_values=np.nan)
+            elif ll_array.shape[0] > target_shape[0]:
+                ll_array = ll_array.isel(y=slice(0, target_shape[0]))
+    
+            if ll_array.shape[1] < target_shape[1]:
+                ll_array = ll_array.pad(x=(0, target_shape[1] - ll_array.shape[1]), mode='constant', constant_values=np.nan)
+            elif ll_array.shape[1] > target_shape[1]:
+                ll_array = ll_array.isel(x=slice(0, target_shape[1]))
+    
+        # Return the DataArrays to use in xrspatial.zonal.stats, and xrspatial.zonal.crosstab
+        if self.use_dask:
+            ll_array = ll_array.chunk(izd_array.chunksizes)
+
+        return izd_array, ll_array
+    
     def createCatStats(
         self,
         accum_type,
@@ -124,36 +195,69 @@ class ZonalOperations:
         """
 
         try:
-            arcpy.env.cellSize = "30"
-            arcpy.env.snapRaster = inZoneData
+            if self.use_arcpy:
+                arcpy.env.cellSize = "30"
+                arcpy.env.snapRaster = inZoneData
+                ext = 'dbf'
+            else:
+                ext = 'csv'
             if by_RPU == 0:
                 if LandscapeLayer.count(".tif") or LandscapeLayer.count(".img"):
                     landscape_layer = Path(LandscapeLayer).stem  # / vs. \ agnostic
-                    outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
+                    
+                    outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.%s" % (
                         out_dir,
                         landscape_layer,
                         appendMetric,
                         zone,
+                        ext
                     )
                 else:
                     landscape_layer = Path(LandscapeLayer).name  # / vs. \ agnostic
-                    outTable = "%s/DBF_stash/zonalstats_%s%s%s.dbf" % (
+                    outTable_path = "%s/DBF_stash/zonalstats_%s%s%s.%s" % (
                         out_dir,
                         landscape_layer,
                         appendMetric,
                         zone,
+                        ext
                     )
-                if not os.path.exists(outTable):
+                if not os.path.exists(outTable_path):
                     if accum_type == "Categorical":
-                        TabulateArea(
-                            inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
-                        )
+                        if self.use_arcpy:
+                            TabulateArea(
+                                inZoneData, "VALUE", LandscapeLayer, "Value", outTable, "30"
+                            )
+                        else:
+                            izd_array, ll_array = self.xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
+                            outTable = crosstab(izd_array, ll_array)
+
                     if accum_type == "Continuous":
-                        ZonalStatisticsAsTable(
-                            inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
-                        )
+                        if self.use_arcpy:
+                            ZonalStatisticsAsTable(
+                                inZoneData, "VALUE", LandscapeLayer, outTable, "DATA", "ALL"
+                            )
+                        else:
+                            izd_array, ll_array = self.xarrayZonalStatsPrep(inZoneData, LandscapeLayer)
+                            outTable = stats(izd_array, ll_array)
+                    
+                    # Call compute before building up too large of a dask graph if using dask
+                    if self.use_dask:
+                        outTable = outTable.compute()
+                    
+                    # Post process pandas dataframe
+                    if "Unnamed: 0" in outTable.columns:
+                        outTable = outTable.drop("Unnamed: 0", axis=1)
+                    outTable = outTable[outTable.zone != -2147483647]
+                    outTable = outTable.round(2)
+
+                    # Memeory cleanup
+                    del izd_array 
+                    del ll_array
                 try:
-                    table = dbf2df(outTable)
+                    if self.use_arcpy:
+                        table = dbf2df(outTable)
+                    else:
+                        outTable.to_csv(outTable_path)
                 except fiona.errors.DriverError as e:
                     # arc occassionally doesn't release the file and fails here
                     print(e, "\n\n!EXCEPTION CAUGHT! TRYING AGAIN!")
@@ -168,9 +272,17 @@ class ZonalOperations:
                     print("working on " + elev)
                     outTable = out_dir + "/DBF_stash/zonalstats_elev%s.dbf" % (subdirs[-3:])
                     if not os.path.exists(outTable):
-                        ZonalStatisticsAsTable(
-                            inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
-                        )
+                        if self.use_arcpy:
+                            ZonalStatisticsAsTable(
+                                inZoneData, "VALUE", elev, outTable, "DATA", "ALL"
+                            )
+                        else:
+                            izd_array, elev_array = self.xarrayZonalStatsPrep(inZoneData, elev)
+                            outTable = stats(izd_array, elev_array)
+                            if self.use_dask:
+                                outTable = outTable.compute()
+                                del izd_array
+                                del elev_array
                 for count, rpu in enumerate(rpuList):
                     if count == 0:
                         table = dbf2df(f"{out_dir}/DBF_stash/zonalstats_elev{rpu}.dbf")

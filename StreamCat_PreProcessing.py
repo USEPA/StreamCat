@@ -25,10 +25,12 @@ os.environ['GDAL_DATA'] = 'C:/Users/Rdebbout/AppData/Local/Continuum/Anaconda/pk
 #ControlTable  = pd.read_csv('L:/Priv/CORFiles/Geospatial_Library/Data/Project/SSWR1.1B/ControlTables/RasterControlTable_MW.csv')
 #sys.path.append(ControlTable.DirectoryLocations[3])  #'F:/Watershed Integrity Spatial Prediction/Scripts'
 sys.path.append('F:/Watershed Integrity Spatial Prediction/Scripts')
-from StreamCat_functions import Reclass, rasterMath, getRasterInfo, dbf2DF, rat_to_dict
+#from StreamCat_functions import Reclass, rasterMath, getRasterInfo, dbf2DF, rat_to_dict
 import geopandas as gpd
 from subprocess import call
 import arcpy
+
+from functions.raster_operations import RasterOperations
 
 #############################
 # Parameters
@@ -47,11 +49,13 @@ FinalDir = ControlTable.DirectoryLocations[2]
 MaskRas = ControlTable.DirectoryLocations[3]
 #####################################################################################################################
 
+ControlTable = ControlTable.drop([0, 1], axis=1)
+
 out_coor_system = "PROJCS['NAD_1983_Contiguous_USA_Albers',\
                     GEOGCS['GCS_North_American_1983',\
-                        DATUM['D_North_American_1983',\
-                            SPHEROID['GRS_1980',6378137.0,298.257222101]],\
-                        PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],\
+                    DATUM['D_North_American_1983',\
+                    SPHEROID['GRS_1980',6378137.0,298.257222101]],\
+                    PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],\
                     PROJECTION['Albers'],\
                     PARAMETER['false_easting',0.0],\
                     PARAMETER['false_northing',0.0],\
@@ -63,21 +67,21 @@ out_coor_system = "PROJCS['NAD_1983_Contiguous_USA_Albers',\
 
 for line in ControlTable.values: # loop through each landscape_var in control table
     if line[-1] == 1:   # check 'run' field from the table, if 1 run, if not, skip
-        print 'running ' + str(line[2])
-        InFile = line[2]
-        OutFile = line[3]
-        FileType = line[4]
-        DataCategory = line[5]
-        ModifyBy = line[6]
-        RastType = line[7]
-        ReclassTable = line[8]
-        RasterAttTable = line[9]
-        ShapeFieldCalc = line[10]
-        Convert = line[11]
-        ConvertFields = line[12]
-        ConvertRes = int(line[13])
-        UseArcpy = line[14]
-        UseStatesMask = line[15]
+        print('running ' + str(line[2]))
+        InFile = line[2] # InputFileName
+        OutFile = line[3] # OutputFileName
+        FileType = line[4] # File Type
+        DataCategory = line[5] # Data Type (continuous, point, polygon, categorical, etc.)
+        ModifyBy = line[6] # Modify By
+        RastType = line[7] # FinalRasterType
+        ReclassTable = line[8] # Reclass Conversion Table
+        RasterAttTable = line[9] # Use Raster Attribute Table
+        ShapeFieldCalc = line[10] #ShapefileFieldCalc
+        Convert = line[11] # Convert To Raster
+        ConvertFields = line[12] # Convert_Fields
+        ConvertRes = int(line[13]) # Convert_Resolution
+        UseArcpy = line[14] # Use_Arcpy?
+        UseStatesMask = line[15] # Use_States_Mask?
         if FileType != 'ESRI Shapefile':
             #get raster info for input raster
             if FileType == 'Image file':
@@ -86,17 +90,18 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 InRas = InFile + '.tif'
             else:
                 InRas = InFile
-
-            NDV, Stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType = getRasterInfo(InDir + '/' + InRas)
-            print DataType
+            
+            rast_ops = RasterOperations(InDir + '/' + InRas)
+            NDV, Stats, xsize, ysize, GeoT, Proj_projcs, Proj_geogcs, DataType = rast_ops.get_raster_info()
+            print(DataType)
 
             # Check if we need to reclass any raster values
             if ReclassTable=='Yes':
                 reclass_dict = dict()
                 if RasterAttTable!='No':
                     rat_dict = dict()
-                    ingrid = InDir + '/' + InRas
-                    rat_dict = rat_to_dict(ingrid, RasterAttTable.split(';')[0], RasterAttTable.split(';')[1])
+                    ingrid = rast_ops.raster_file #InDir + '/' + InRas
+                    rat_dict = rast_ops.rat_to_dict(ingrid, RasterAttTable.split(';')[0], RasterAttTable.split(';')[1])
                     g = ReClassTable.loc[ReClassTable['FileName'] == OutFile]
                     lookup = g.set_index('OldVal')['NewVal'].to_dict()
                     for k,v in rat_dict.iteritems():
@@ -115,17 +120,17 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                     NewVal = ReClassTable.loc[ReClassTable['FileName'] == OutFile,'NewVal']
                     # Need to pull values out of a pandas series as a simple integer or float to use in reclass
                     for i in OldVal.index.tolist():
-                        print i
+                        print(i)
                         reclass_dict[float(OldVal[i])] = float(NewVal[i])
                 tempras = TempDir + '/' + OutFile + '.tif'
                 if not os.path.isfile(tempras):
-                    Reclass(InDir + '/' + InRas, tempras, reclass_dict)
+                    RasterOperations.Reclass(rast_ops.raster_file, tempras, reclass_dict) #InDir + '/' + InRas
             # Check if we need to multiply or modify any raster values
             if not ModifyBy == 0:
                 tempras = TempDir + '/' + OutFile + '_2.tif'
-                inras = InDir + '/' + InRas
+                inras = rast_ops.raster_file # InDir + '/' + InRas
                 if not os.path.isfile(tempras):
-                    rasterMath(inras, tempras, expression= inras + ' * ' + str(ModifyBy), out_dtype=RastType)
+                    rast_ops.rasterMath(tempras, expression= inras + ' * ' + str(ModifyBy), out_dtype=RastType)
             # if temp raster hasn't been created in previous steps, just poiint to input raster
             if not os.path.isfile(TempDir + '/' + OutFile + '.tif') and not os.path.isfile(TempDir + '/' + OutFile + '_2.tif'):
                 if FileType == 'ESRI raster':
@@ -137,7 +142,10 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 elif FileType == 'ASCII':
                     tempras = InDir + '/' + InFile
 
-                    # ADD ELSE HERE IF NO CONDITIONS ARE MET, KICK OUT ERROR STATEMENT AND MOVE TO NEXT LINE OF LOOP
+                    # TODO ADD ELSE HERE IF NO CONDITIONS ARE MET, KICK OUT ERROR STATEMENT AND MOVE TO NEXT LINE OF LOOP
+                else:
+                    print(f"ERROR: File type {FileType} for {InFile} not one of: ESRI raster, Geotiff, Image file, ASCII")
+                    continue
 
             # get raster info from temp raster
             minx = GeoT[0]
@@ -190,7 +198,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                        creation_options = {'COMPRESS': 'LZW', 'TFW': 'YES'}
                        gdal.Warp(input_raster, final_raster, resampleAlg = gdal.GRA_NearestNeighbour,dstSRS="EPSG:{}".format(target_epsg), dstNodata=0, creationOptions=creation_options)
                        #call(resamp_string)
-                       print "elapsed time " + str(dt.now()-startTime)
+                       print("elapsed time " + str(dt.now()-startTime))
                    if DataCategory == 'continuous':
                        startTime = dt.now()
                        target_espg = 5070
@@ -201,7 +209,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                        dstSRS="EPSG:{}".format(target_epsg),creationOptions=["TFW=YES"])
                        gdal.Warp(output_raster, final_raster, cutlineDSName=mask_shp, 
                        cropToCutline=True, creationOptions=["TFW=YES",'COMPRESS=LZW'])
-                       print "elapsed time " + str(dt.now()-startTime)
+                       print("elapsed time " + str(dt.now()-startTime))
                    # if not Proj_projcs==dst_crs:
                    #      resamp_ras = FinalDir + '/' + OutFile + '.tif'
                    #      resamp_string = "gdalwarp --config GDAL_DATA " + '"C:/Users/mweber/AppData/Local/Continuum/Anaconda/pkgs/libgdal-1.11.2-2/Library/data" ' +' -tr ' + str(ConvertRes) + ' -' + str(ConvertRes) + " -te " + bounds + " -srcnodata " + str(outNDV) +  " -dstnodata "  + str(outNDV) +  " -of GTiff -r near -t_srs " + dst_crs + " -co COMPRESS=DEFLATE -co TFW=YES -co TILED=YES -co TIFF_USE_OVR=TRUE -ot " + outDataType + " " + tempras + " " + resamp_ras
@@ -266,7 +274,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
             # Do we need to rasterize shapefile? (Right now only for census block groups)
             if Convert == 'Yes':
                 for item in ConvertFields.split(';'):
-                    print item
+                    print(item)
                     InShp = FinalDir + '/' + InFile + '.shp'
         #            InShp = InDir + '/' + Rast + '.shp'
                     OutRas =  FinalDir + '/' + item + '.tif'
@@ -275,6 +283,6 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
 #                    call(resamp_string)
                     ##  call() statement not working for me, use arcpy, rickD
                     arcpy.PolygonToRaster_conversion(InShp, item, OutRas, 'CELL_CENTER', "", str(ConvertRes))
-                    print "elapsed time " + str(dt.now()-startTime)
+                    print("elapsed time " + str(dt.now()-startTime))
 
 
