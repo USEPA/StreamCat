@@ -22,8 +22,9 @@ class ZonalOperations:
         self.num_workers = num_workers
         self.use_dask = False
 
-        if use_arcpy and num_workers:
+        if not use_arcpy and num_workers:
             self.use_dask = True
+
     @staticmethod
     def get_rat_vals(raster):
         """

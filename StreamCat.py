@@ -60,9 +60,16 @@ from functions import Accumulation, RasterOperations, SpatialOperations, ZonalOp
 # )
 
     
-def process_metric(args, row, inter_vpu, INPUTS, use_arcpy, num_workers):
+def process_metric(args, row, inter_vpu, INPUTS, use_arcpy, use_dask, num_workers):
     
+    if use_dask:
+        from dask.distributed import Client, LocalCluster
+        cluster = LocalCluster(n_workers=num_workers)
+        client = Client(cluster)
+        click.echo(client.dashboard_link)
+
     already_processed = []
+    zonal_ops = ZonalOperations(use_arcpy, num_workers)
     for _, row in ctl.query("run == 1").iterrows():
 
         apm = "" if row.AppendMetric == "none" else row.AppendMetric
@@ -91,7 +98,8 @@ def process_metric(args, row, inter_vpu, INPUTS, use_arcpy, num_workers):
             )
             points = gpd.read_file(layer)
             if mask_dir:
-                points = SpatialOperations.mask_points(points, mask_dir, INPUTS)
+                spatial_ops = SpatialOperations(points)
+                points = spatial_ops.mask_points(mask_dir, INPUTS)
         # File string to store InterVPUs needed for adjustments
         Connector = f"{args.OUT_DIR}/{row.FullTableName}_connectors.csv"
         click.echo(
@@ -107,7 +115,7 @@ def process_metric(args, row, inter_vpu, INPUTS, use_arcpy, num_workers):
                         if mask_dir
                         else f"{pre}/NHDPlusCatchment/cat"
                     )
-                    cat = ZonalOperations.createCatStats(
+                    cat = zonal_ops.createCatStats(
                         row.accum_type,
                         layer,
                         izd,
@@ -121,7 +129,8 @@ def process_metric(args, row, inter_vpu, INPUTS, use_arcpy, num_workers):
                     )
                 if row.accum_type == "Point":
                     izd = f"{pre}/NHDPlusCatchment/Catchment.shp"
-                    cat = SpatialOperations.point_in_poly(
+                    spatial_ops = SpatialOperations(points, use_dask=use_dask, num_workers=num_workers)
+                    cat = spatial_ops.point_in_poly(
                         points, zone, izd, pct_full, mask_dir, apm, summary
                     )
                 cat.to_csv(f"{args.OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
@@ -181,7 +190,7 @@ def process_metric(args, row, inter_vpu, INPUTS, use_arcpy, num_workers):
             )
 
 if __name__ == '__main__':
-    #args = ConfigArgs()
+    args = ConfigArgs()
 
     ctl = pd.read_csv(args.control_table)
     # Load table of inter vpu connections

@@ -31,6 +31,7 @@ from subprocess import call
 import arcpy
 
 from functions.raster_operations import RasterOperations
+from functions.utils import dbf2df
 
 #############################
 # Parameters
@@ -100,8 +101,8 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 reclass_dict = dict()
                 if RasterAttTable!='No':
                     rat_dict = dict()
-                    ingrid = rast_ops.raster_file #InDir + '/' + InRas
-                    rat_dict = rast_ops.rat_to_dict(ingrid, RasterAttTable.split(';')[0], RasterAttTable.split(';')[1])
+                    #ingrid = rast_ops.raster_file #InDir + '/' + InRas
+                    rat_dict = rast_ops.rat_to_dict(RasterAttTable.split(';')[0], RasterAttTable.split(';')[1])
                     g = ReClassTable.loc[ReClassTable['FileName'] == OutFile]
                     lookup = g.set_index('OldVal')['NewVal'].to_dict()
                     for k,v in rat_dict.iteritems():
@@ -241,7 +242,7 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                 rangelist = JoinTable.index.tolist()
                 for k in rangelist:
                     if not pd.isnull(JoinTable[k]) and not InField[k] in list(Feat):
-                        lookup = dbf2DF(InDir + '/' + JoinTable[k])
+                        lookup = dbf2df(InDir + '/' + JoinTable[k])
                         lookup=lookup[[InField[k],'STCNTRBG']]
                         lookup.rename(columns={'STCNTRBG':'GEOID10'}, inplace=True)
     #                    Feat = pd.merge(left=Feat,right=lookup, how='left', left_on='GEOID10', right_on='STCNTRBG')

@@ -9,10 +9,29 @@ from geopandas.tools import sjoin
 import rasterio
 from typing import Generator
 from utils import dbf2df
+import dask_geopandas as dg
 
 class SpatialOperations:
-    @staticmethod
-    def point_in_poly(points, vpu, catchments, pct_full, mask_dir, append_metric, summary=None):
+    def __init__(self, points, fieldname=None, use_dask=False, num_workers=None):
+        self.num_workers = num_workers
+        self.use_dask = use_dask
+
+        if isinstance(points, str):
+            self.points = gpd.read_file(points)
+        if isinstance(points, gpd.GeoDataFrame):
+            assert points.geometry.type.all() == "Point"
+            if fieldname:
+                points.set_index(fieldname)
+            self.points = points.geometry.apply(lambda g: (g.x, g.y))
+        if isinstance(points, Generator):
+            pass
+
+        if use_dask:
+            self.points = dg.from_geopandas(self.points, chunksize=25000)
+
+
+
+    def point_in_poly(self, vpu, catchments, pct_full, mask_dir, append_metric, summary=None):
         """
         Filter points to those that only lie within the mask.
 
@@ -21,9 +40,10 @@ class SpatialOperations:
         points: gpd.GeoDataFrame
             point GeoDataFrame
         vpu: str
-            Vector Processing Unit from NHDPlusV21
-        catchments: collections.OrderedDict
-            dictionary of vector processing units and hydroregions from NHDPlusV21
+            Vector Processing Unit from NHDPlusV21 dictionary of vector processing units and hydroregions from NHDPlusV21
+        catchments: str
+            path to in zone data for catchment
+            
         pct_full: pd.DataFrame
             DataFrame with `PCT_FULL` calculated from catchments that
             intersect the US border from TIGER files
@@ -42,8 +62,11 @@ class SpatialOperations:
             optionally with the summary of attributes from the points attribute
             table.
         """
-        polys = gpd.read_file(catchments)
-        polys.to_crs(points.crs, inplace=True)
+        if self.use_dask:
+            polys = dg.read_file(catchments, chunksize=25000)
+        else: 
+            polys = gpd.read_file(catchments)
+        polys.to_crs(self.points.crs, inplace=True)
 
         if mask_dir:
             rat = pd.read_csv(f"{mask_dir}/{vpu}.tif.vat.dbf")
@@ -57,17 +80,20 @@ class SpatialOperations:
             )
 
         # Get list of lat/long fields in the table
-        points["latlon_tuple"] = tuple(
+        self.points["latlon_tuple"] = tuple(
             zip(
-                points.geometry.map(lambda point: point.x),
-                points.geometry.map(lambda point: point.y),
+                self.points.geometry.map(lambda point: point.x),
+                self.points.geometry.map(lambda point: point.y),
             )
         )
         # Remove duplicate points for 'Count'
-        points2 = points.drop_duplicates("latlon_tuple")
+        points2 = self.points.drop_duplicates("latlon_tuple")
 
         try:
-            point_poly_join = sjoin(points2, polys, how="left", predicate="within")
+            if self.use_dask:
+                point_poly_join = dg.sjoin(points2, polys, how="left", predicate="within")
+            else: 
+                point_poly_join = sjoin(points2, polys, how="left", predicate="within")
             fld = "GRIDCODE"
         except Exception:
             polys["link"] = None
@@ -82,10 +108,15 @@ class SpatialOperations:
         # Join Count column on to NHDCatchments table and keep only relevant columns
         final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
         final = final[["FEATUREID", "AreaSqKM", "COUNT"]].fillna(0)
+        if self.use_dask:
+            final = final.compute()
         cols = ["COMID", f"CatAreaSqKm{append_metric}", f"CatCount{append_metric}"]
 
         if summary:  # Summarize fields including duplicates
-            point_poly_dups = sjoin(points, polys, how="left", predicate="within")
+            if self.use_dask:
+                point_poly_dups = dg.sjoin(self.points, polys, how="left", predicate="within")
+                point_poly_dups = point_poly_dups.compute()
+            point_poly_dups = sjoin(self.points, polys, how="left", predicate="within")
             grouped2 = point_poly_dups.groupby("FEATUREID")
             for x in summary:  # Sum the field in summary field list for each catchment
                 point_poly_stats = grouped2[x].sum()
@@ -117,8 +148,7 @@ class SpatialOperations:
         final.loc[(final[area] == 0), final.columns[2:]] = None
         return final
 
-    @staticmethod
-    def mask_points(points, mask_dir, inputs, nodata_vals=[0, -2147483648.0]):
+    def mask_points(self, mask_dir, inputs, nodata_vals=[0, -2147483648.0]):
         """
         Filter points to those that only lie within the mask.
 
@@ -138,17 +168,17 @@ class SpatialOperations:
         gpd.GeoDataFrame
             filtered points that only lie within the masked areas
         """
-        temp = pd.DataFrame(index=points.index)
+        temp = pd.DataFrame(index=self.points.index)
         for zone, hydroregion in inputs.items():
-            pts = SpatialOperations.get_raster_value_at_points(
-                points, f"{mask_dir}/{zone}.tif", out_df=True
+            pts = self.get_raster_value_at_points(
+                self.points, f"{mask_dir}/{zone}.tif", out_df=True
             )
             temp = temp.merge(~pts.isin(nodata_vals), left_index=True, right_index=True)
         xx = temp.sum(axis=1)
-        return points.iloc[xx.loc[xx == 1].index]
+        return self.points.iloc[xx.loc[xx == 1].index]
 
     @staticmethod
-    def get_raster_value_at_points(points, rasterfile, fieldname=None, val_name=None, out_df=False):
+    def get_raster_value_at_points(self, rasterfile, fieldname=None, val_name=None, out_df=False):
         """
         Find value at point (x,y) for every point in points of the given rasterfile.
 
@@ -169,21 +199,13 @@ class SpatialOperations:
         list | pd.DataFrame
             Values of rasterfile | if `out_df` True, dataframe of values.
         """
-        if isinstance(points, str):
-            points = gpd.read_file(points)
-        if isinstance(points, gpd.GeoDataFrame):
-            assert points.geometry.type.all() == "Point"
-            if fieldname:
-                points.set_index(fieldname)
-            points = points.geometry.apply(lambda g: (g.x, g.y))
-        if isinstance(points, Generator):
-            pass
+        
 
         with rasterio.open(rasterfile) as src:
-            data = [s[0] for s in src.sample(points)]
+            data = [s[0] for s in src.sample(self.points)]
 
         if out_df:
-            return pd.DataFrame(index=points.index, data={val_name: data})
+            return pd.DataFrame(index=self.points.index, data={val_name: data})
         else:
             return data
 
