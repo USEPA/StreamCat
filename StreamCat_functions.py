@@ -26,15 +26,15 @@ from typing import Generator
 
 import numpy as np
 import pandas as pd
-import rasterio
+# import rasterio
 #from gdalconst import *
 # from osgeo import gdal, ogr, osr
-from rasterio import transform
+# from rasterio import transform
 
-if rasterio.__version__[0] == "0":
-    from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
-if rasterio.__version__[0] == "1":
-    from rasterio.warp import calculate_default_transform, reproject, Resampling
+# if rasterio.__version__[0] == "0":
+#     from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
+# if rasterio.__version__[0] == "1":
+#     from rasterio.warp import calculate_default_transform, reproject, Resampling
 
 import fiona
 import geopandas as gpd
@@ -48,7 +48,7 @@ from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 ###
 # Speed up imports
 #import pyogrio 
-from joblib import Parallel, delayed
+# from joblib import Parallel, delayed
 
 ##############################################################################
 

@@ -33,9 +33,9 @@ VPU = COMID_VPU['VPU'].unique()
 # nut_dir = 'E:/WorkingData/To_Be_Flow_Accumulated/'
 # nut = pd.read_csv(nut_dir + 'ClimTerms_2012_10.csv')
 #nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/AmaliaHandler/'
-nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/NutrientInventory/CountyCatResultsData/'
-nut = pd.read_parquet(nut_dir + 'p_crop_remCountyCatResults.parquet')
-
+# nut_dir = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/NutrientInventory/CountyCatResultsData/'
+# nut = pd.read_parquet(nut_dir + 'p_crop_remCountyCatResults.parquet')
+nut = pd.read_parquet('L:/Public/salford/WetInt/streamcat_wetlandchains.parquet')
 cat_area = StreamCat_template[['COMID','CatAreaSqKm']]
 cat_area.head()
 # add VPU using lookup table
@@ -47,7 +47,7 @@ nut = pd.merge(nut, cat_area, how='left', left_on=['COMID'], right_on=['COMID'])
 # select columns - this part we can modify to iterate through columns
 nut.columns = nut.columns.str.replace('_Cat','')
 cols = [i for i in nut.columns if i not in ["COMID", "VPU", "CatAreaSqKm"]]
-cols = cols[29:31]
+# cols = cols[29:31]
 for col in cols:
     final = nut[['COMID', col, 'CatAreaSqKm', 'VPU']]
     final = final.rename(columns={col: 'CatSum'})
@@ -61,6 +61,7 @@ for col in cols:
         df = final[final['VPU'] == i]
         df = df.drop(columns=['VPU'])
         table = pa.Table.from_pandas(df)
-        pq.write_table(table, nut_dir + 'Allocation_and_Accumulation/' + col + '_' + str(i) + '.parquet')
+        # pq.write_table(table, nut_dir + 'Allocation_and_Accumulation/' + col + '_' + str(i) + '.parquet')
+        pq.write_table(table, 'L:/Public/salford/WetInt/Allocation_and_Accumulation/' + col + '_' + str(i) + '.parquet')
         #df.to_csv(nut_dir + '/Allocation_and_Accumulation/' + col + '_' + str(i) + '.csv',
         #          index=False)

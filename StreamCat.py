@@ -69,11 +69,12 @@ from StreamCat_functions import (
 # Load table of layers to be run...
 ctl = pd.read_csv(control)
 
+
 # Load table of inter vpu connections
 inter_vpu = pd.read_csv("InterVPU.csv")
 
 # Skip to accumulation if PartitionDownscaledResults ran
-skip_aquiring_catstats = True
+skip_aquiring_catstats = False
 
 # if not os.path.exists(OUT_DIR):
 #     os.mkdir(OUT_DIR)
@@ -89,14 +90,10 @@ INPUTS = np.load(ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 
 already_processed = []
 
-<<<<<<< HEAD
+
 for _, row in ctl.query("run == 1").iterrows():
     #if row.Year is not None:
         #row.FullTableName = row.FullTableName + "_" + str(row.Year)[:-2]
-=======
-#for _, row in ctl.query("run == 1").iterrows():
-def process_row(row):
->>>>>>> bd46c1b5b7b9509267afca5e4a574b715b029865
     apm = "" if row.AppendMetric == "none" else row.AppendMetric
     if row.use_mask == 1:
         mask_dir = MASK_DIR_RP100
@@ -160,15 +157,21 @@ def process_row(row):
                     cat = PointInPoly(
                         points, zone, izd, pct_full, mask_dir, apm, summary
                     )
-                cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+                # cat.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv", index=False)
+                finaltable = pa.Table.from_pandas(cat)
+                pq.write_table(finaltable, f"{OUT_DIR}/{row.FullTableName}_{zone}.parquet")
         #zonal_results = Parallel(os.cpu_count()/2)(
             #delayed(zonal_stats)(zone, hydroregion, row, OUT_DIR, NHD_DIR) for zone, hydroregion in INPUTS.items()
         #)
         print("done!")
+        
+
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:
         fn = f"{OUT_DIR}/{row.FullTableName}_{zone}.parquet"
+        # fn = f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"
         cat = pd.read_parquet(fn)
+        # cat = pd.read_csv(fn)
         processed = cat.columns.str.extract(r"^(UpCat|Ws)").any().bool()
         if processed:
             print("skipping!")
@@ -194,6 +197,7 @@ def process_row(row):
 
         if zone in inter_vpu.ToZone.values:
             cat = pd.read_parquet(f"{OUT_DIR}/{row.FullTableName}_{zone}.parquet")
+            # cat = pd.read_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv")
         if zone in inter_vpu.FromZone.values:
             interVPU(
                 ws,
@@ -207,6 +211,7 @@ def process_row(row):
         final = pd.merge(cat, upFinal, on="COMID")
         finaltable = pa.Table.from_pandas(final)
         pq.write_table(finaltable, f"{OUT_DIR}/{row.FullTableName}_{zone}.parquet")
+        # final.to_csv(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv")
     print(end="") if processed else print("done!")
     if already_processed:
         print(
@@ -217,12 +222,11 @@ def process_row(row):
             f"output used in 'Continuous' and 'Categorical' metrics!!!"
         )
 
-<<<<<<< HEAD
-=======
+
 # row_results = Parallel(n_jobs=os.cpu_count/2)(
 #     delayed(process_row)(row) for _, row in ctl.query("run == 1").iterrows()
 # )
 if __name__ == '__main__':
     for _, row in ctl.query("run == 1").iterrows():
         process_row(row)
->>>>>>> bd46c1b5b7b9509267afca5e4a574b715b029865
+
