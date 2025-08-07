@@ -26,15 +26,15 @@ from typing import Generator
 
 import numpy as np
 import pandas as pd
-import rasterio
+# import rasterio
 #from gdalconst import *
-from osgeo import gdal, ogr, osr
-from rasterio import transform
+# from osgeo import gdal, ogr, osr
+# from rasterio import transform
 
-if rasterio.__version__[0] == "0":
-    from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
-if rasterio.__version__[0] == "1":
-    from rasterio.warp import calculate_default_transform, reproject, Resampling
+# if rasterio.__version__[0] == "0":
+#     from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
+# if rasterio.__version__[0] == "1":
+#     from rasterio.warp import calculate_default_transform, reproject, Resampling
 
 import fiona
 import geopandas as gpd
@@ -47,8 +47,8 @@ from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 
 ###
 # Speed up imports
-import pyogrio 
-from joblib import Parallel, delayed
+#import pyogrio 
+# from joblib import Parallel, delayed
 
 ##############################################################################
 
@@ -810,11 +810,11 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl):
     # COMIDs in the toCOMID column need to swap values with COMIDs in other
     # zones, those COMIDS are then sorted in toVPUS
     if any(interVPUtbl.toCOMIDs.values > 0):
-        interAlloc = "%s_%s.csv" % (
+        interAlloc = "%s_%s.parquet" % (
             Connector[: Connector.find("_connectors")],
             interVPUtbl.ToZone.values[0],
         )
-        tbl = pd.read_csv(interAlloc).set_index("COMID")
+        tbl = pd.read_parquet(interAlloc).set_index("COMID")
         toVPUs = tbl[tbl.index.isin([x for x in interVPUtbl.toCOMIDs if x > 0])].copy()
     for _, row in interVPUtbl.iterrows():
         # Loop through sub-setted interVPUtbl to make adjustments to COMIDS listed in the table
@@ -857,6 +857,7 @@ def AdjustCOMs(tbl, comid1, comid2, tbl2=None):
     for idx in tbl.columns[:-1]:
         tbl.loc[comid1, idx] = tbl.loc[comid1, idx] - tbl2.loc[comid2, idx]
 
+
 ##############################################################################
 def accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, lengths):
     # Function used to parallelize accumulation step
@@ -897,13 +898,10 @@ def accum_values(index, column, tbl, indices, accumulated_indexes, tbl_type, len
 
 
 ##############################################################################
-
-
 def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     """
-    __author__ =  "Ryan Hill <hill.ryan@epa.gov>"
-                  "Marc Weber <weber.marc@epa.gov>"
-                  
+    __author__ =  "Marc Weber <weber.marc@epa.gov>"
+                  "Ryan Hill <hill.ryan@epa.gov>"
     Uses the 'Cat' and 'UpCat' columns to caluculate watershed values and returns those values in 'Cat' columns
         so they can be appended to 'CatResult' tables in other zones before accumulation.
 
@@ -960,7 +958,6 @@ def Accumulation(tbl, comids, lengths, upstream, tbl_type, icol="COMID"):
     no_area_rows, na_columns = (outDF[areaName] == 0), outDF.columns[2:]
     outDF.loc[no_area_rows, na_columns] = np.nan
     return outDF
-
 
 ##############################################################################
 
