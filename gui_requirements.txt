@@ -1,5 +1,0 @@
-pandas
-SQLAlchemy
-customtkinter
-CTkListbox
-CTkMessagebox
