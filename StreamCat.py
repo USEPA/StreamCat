@@ -27,14 +27,14 @@
 """
 import os
 
-import click
+#import click
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-
-from joblib import Parallel, delayed
+from collections import OrderedDict
+#from joblib import Parallel, delayed
 
 control = "ControlTable_StreamCat.csv"
 
@@ -89,14 +89,10 @@ INPUTS = np.load(ACCUM_DIR +"/vpu_inputs.npy", allow_pickle=True).item()
 
 already_processed = []
 
-<<<<<<< HEAD
 for _, row in ctl.query("run == 1").iterrows():
     #if row.Year is not None:
         #row.FullTableName = row.FullTableName + "_" + str(row.Year)[:-2]
-=======
-#for _, row in ctl.query("run == 1").iterrows():
-def process_row(row):
->>>>>>> bd46c1b5b7b9509267afca5e4a574b715b029865
+    #row.FullTableName = row.FullTableName + "_" #+ str(row.Year)[:-2]
     apm = "" if row.AppendMetric == "none" else row.AppendMetric
     if row.use_mask == 1:
         mask_dir = MASK_DIR_RP100
@@ -132,7 +128,9 @@ def process_row(row):
             end="",
             flush=True,
         )
-        for zone, hydroregion in INPUTS.items():
+        Inputslist = list(INPUTS.items())#[8:9]
+        INPUTSsub = OrderedDict(Inputslist)
+        for zone, hydroregion in INPUTSsub.items():
         #def zonal_stats(zone, hydroregion, row, OUT_DIR, NHD_DIR):
             if not os.path.exists(f"{OUT_DIR}/{row.FullTableName}_{zone}.csv"):
                 print(zone, end=", ", flush=True)
@@ -165,6 +163,7 @@ def process_row(row):
             #delayed(zonal_stats)(zone, hydroregion, row, OUT_DIR, NHD_DIR) for zone, hydroregion in INPUTS.items()
         #)
         print("done!")
+
     print("Accumulating...", end="", flush=True)
     for zone in INPUTS:
         fn = f"{OUT_DIR}/{row.FullTableName}_{zone}.parquet"
@@ -215,14 +214,10 @@ def process_row(row):
             "Be sure to delete the associated files in your `OUTDIR` to rerun:"
             f"\n\t> {OUT_DIR}\n\n!!! `$OUT_DIR/DBF_stash/*` "
             f"output used in 'Continuous' and 'Categorical' metrics!!!"
+
         )
 
-<<<<<<< HEAD
-=======
+# =============================================================================
 # row_results = Parallel(n_jobs=os.cpu_count/2)(
 #     delayed(process_row)(row) for _, row in ctl.query("run == 1").iterrows()
 # )
-if __name__ == '__main__':
-    for _, row in ctl.query("run == 1").iterrows():
-        process_row(row)
->>>>>>> bd46c1b5b7b9509267afca5e4a574b715b029865

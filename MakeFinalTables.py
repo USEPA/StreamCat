@@ -14,7 +14,7 @@ examples:
     * `$ python StreamCat.py -c /abs/path/alt.csv`
 """
 
-import math
+#import math
 import os
 import sys
 from pathlib import Path
@@ -94,7 +94,7 @@ for table, metrics in tables.items():
 
             a_m = "" if row.AppendMetric == "none" else row.AppendMetric
             # Read in the StreamCat allocation and accumulation table
-            files = [f for f in OUT_DIR.iterdir() if metric in f.name and 'connectors' not in f.name]
+            files = [f for f in OUT_DIR.iterdir() if '.parquet' in f.name and metric in f.name and 'connectors' not in f.name]
             dfs = [pd.read_parquet(OUT_DIR / file) for file in files]
             tbl = pd.concat(dfs, ignore_index=True)
             
@@ -117,16 +117,13 @@ for table, metrics in tables.items():
 
             weighted_cat_area = tbl[catArea] * (tbl[catPct] / 100)
             weighted_ws_area = tbl[wsArea] * (tbl[wsPct] / 100)
-
             if row.MetricType == "Mean":
                 cat_colname = row.MetricName + "Cat" + a_m
                 ws_colname = row.MetricName + "Ws" + a_m
-                tbl[cat_colname] = (
-                    tbl["CatSum%s" % a_m] #/ tbl["CatCount%s" % a_m]
-                ) #* row.Conversion
-                tbl[ws_colname] = (
-                    tbl["WsSum%s" % a_m] #/ tbl["WsCount%s" % a_m]
-                ) #* row.Conversion
+                tbl[cat_colname] = tbl["CatSum%s" % a_m] #/ tbl["CatCount%s" % a_m]
+                #) * row.Conversion
+                tbl[ws_colname] = tbl["WsSum%s" % a_m] #/ tbl["WsCount%s" % a_m]
+                #) * row.Conversion
                 if metric_count == 0:
                     final = tbl[front_cols + [cat_colname] + [ws_colname]]
                 else:
@@ -159,10 +156,10 @@ for table, metrics in tables.items():
                     tbl[ws_colname] = tbl.WsSum / weighted_ws_area * row.Conversion
                 else:
                     tbl[cat_colname] = (
-                        tbl["CatCount%s" % a_m] / weighted_cat_area * row.Conversion
+                        tbl["CatCount%s" % a_m] #/ weighted_cat_area * row.Conversion
                     )
                     tbl[ws_colname] = (
-                        tbl["WsCount%s" % a_m] / weighted_ws_area * row.Conversion
+                        tbl["WsCount%s" % a_m] #/ weighted_ws_area * row.Conversion
                     )
                 if summaries:
                     end_cols = (

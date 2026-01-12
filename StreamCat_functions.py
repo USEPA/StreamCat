@@ -26,29 +26,30 @@ from typing import Generator
 
 import numpy as np
 import pandas as pd
-import rasterio
+#import rasterio
 #from gdalconst import *
-# from osgeo import gdal, ogr, osr
-from rasterio import transform
+#from osgeo import gdal, ogr, osr
+#from rasterio import transform
 
-if rasterio.__version__[0] == "0":
-    from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
-if rasterio.__version__[0] == "1":
-    from rasterio.warp import calculate_default_transform, reproject, Resampling
+#if rasterio.__version__[0] == "0":
+#    from rasterio.warp import RESAMPLING, calculate_default_transform, reproject
+#if rasterio.__version__[0] == "1":
+#    from rasterio.warp import calculate_default_transform, reproject, Resampling
 
-import fiona
+#import fiona
+#import pyproj
 import geopandas as gpd
 from geopandas.tools import sjoin
 
-os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
-sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
+#os.environ["PATH"] += r";C:\Program Files\ArcGIS\Pro\bin"
+#sys.path.append(r"C:\Program Files\ArcGIS\Pro\Resources\ArcPy")
 import arcpy
 from arcpy.sa import TabulateArea, ZonalStatisticsAsTable
 
 ###
 # Speed up imports
 #import pyogrio 
-from joblib import Parallel, delayed
+#from joblib import Parallel, delayed
 
 ##############################################################################
 
@@ -674,7 +675,6 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
         table
 
     """
-
     polys = gpd.GeoDataFrame.from_file(catchments)
     polys.to_crs(points.crs, inplace=True)
     if mask_dir:
@@ -696,22 +696,72 @@ def PointInPoly(points, vpu, catchments, pct_full, mask_dir, appendMetric, summa
         )
     )
     # Remove duplicate points for 'Count'
-    points2 = points.drop_duplicates("latlon_tuple")
+# =============================================================================
+#     points2 = points.drop_duplicates("latlon_tuple")
+#     try:
+#         point_poly_join = sjoin(points2, polys, how="left", op="within")
+#         fld = "GRIDCODE"
+#     except:
+#         polys["link"] = np.nan
+#         point_poly_join = polys
+#         fld = "link"
+#     # Create group of all points in catchment
+#     grouped = point_poly_join.groupby("FEATUREID")
+#     point_poly_count = grouped[fld].count()
+#     point_poly_count.name = "COUNT"
+#     # Join Count column on to NHDCatchments table and keep only
+#     # ['COMID','CatAreaSqKm','CatCount']
+#     final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
+#     final = final[["FEATUREID", "AreaSqKM", "COUNT"]].fillna(0)
+#     cols = ["COMID", f"CatAreaSqKm{appendMetric}", f"CatCount{appendMetric}"]
+#     if not summary == None:  # Summarize fields including duplicates
+#         point_poly_dups = sjoin(points, polys, how="left", op="within")
+#         grouped2 = point_poly_dups.groupby("FEATUREID")
+#         for x in summary:  # Sum the field in summary field list for each catchment
+#             point_poly_stats = grouped2[x].sum()
+#             point_poly_stats.name = x
+#             final = final.join(point_poly_stats, on="FEATUREID", how="left").fillna(0)
+#             cols.append("Cat" + x + appendMetric)
+#     final.columns = cols
+#     # Merge final table with Pct_Full table based on COMID and fill NA's with 0
+#     final = pd.merge(final, pct_full, on="COMID", how="left")
+#     if len(mask_dir) > 0:
+#         if not summary == None:
+#             final.columns = (
+#                 ["COMID", "CatAreaSqKmRp100", "CatCountRp100"]
+#                 + ["Cat" + y + appendMetric for y in summary]
+#                 + ["CatPctFullRp100"]
+#             )
+#         else:
+#             final.columns = [
+#                 "COMID",
+#                 "CatAreaSqKmRp100",
+#                 "CatCountRp100",
+#                 "CatPctFullRp100",
+#             ]
+#     final[f"CatPctFull{appendMetric}"] = final[f"CatPctFull{appendMetric}"].fillna(100)
+#     for name in final.columns:
+#         if "AreaSqKm" in name:
+#             area = name
+#     final.loc[(final[area] == 0), final.columns[2:]] = np.nan
+#     return final
+# =============================================================================
+    #points2 = points.drop_duplicates("latlon_tuple")
     try:
-        point_poly_join = sjoin(points2, polys, how="left", op="within")
-        fld = "GRIDCODE"
+        point_poly_join = sjoin(points, polys, how="left", predicate="within")
+        fld = "link"
     except:
         polys["link"] = np.nan
         point_poly_join = polys
         fld = "link"
     # Create group of all points in catchment
     grouped = point_poly_join.groupby("FEATUREID")
-    point_poly_count = grouped[fld].count()
-    point_poly_count.name = "COUNT"
+    point_poly_count = grouped['TPLd_kg'].sum()
+    point_poly_count.name = "CatSum"
     # Join Count column on to NHDCatchments table and keep only
     # ['COMID','CatAreaSqKm','CatCount']
     final = polys.join(point_poly_count, on="FEATUREID", lsuffix="_", how="left")
-    final = final[["FEATUREID", "AreaSqKM", "COUNT"]].fillna(0)
+    final = final[["FEATUREID", "AreaSqKM", "CatSum"]].fillna(0)
     cols = ["COMID", f"CatAreaSqKm{appendMetric}", f"CatCount{appendMetric}"]
     if not summary == None:  # Summarize fields including duplicates
         point_poly_dups = sjoin(points, polys, how="left", op="within")
@@ -814,7 +864,8 @@ def interVPU(tbl, cols, accum_type, zone, Connector, interVPUtbl):
             Connector[: Connector.find("_connectors")],
             interVPUtbl.ToZone.values[0],
         )
-        tbl = pd.read_parquet(interAlloc).set_index("COMID")
+        tbl = pd.read_parquet(interAlloc)#.set_index("COMID")
+        tbl.set_index('COMID', inplace=True)
         toVPUs = tbl[tbl.index.isin([x for x in interVPUtbl.toCOMIDs if x > 0])].copy()
     for _, row in interVPUtbl.iterrows():
         # Loop through sub-setted interVPUtbl to make adjustments to COMIDS listed in the table
