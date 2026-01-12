@@ -30,8 +30,9 @@ from stream_cat_config import(
     ACCUM_DIR,
     OUT_DIR
     )
+
 control = "ControlTable_StreamCat.csv"
-FINAL_DIR = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/NutrientInventory/CountyCatResultsData/Final_Tables'
+FINAL_DIR = 'O:/PRIV/CPHEA/PESD/COR/CORFILES/Geospatial_Library_Projects/StreamCat/FTP_Staging/FinalTables'
 
 def build_stats(tbl, stats):
     if not stats:
@@ -85,10 +86,11 @@ if len(missing) > 0:
 
 for table, metrics in tables.items():
     print(f"Running {table} .....into {FINAL_DIR}")
-    out_file = FINAL_DIR / fn.format(table, vpu)
-    final_file = FINAL_DIR / f"{table}.parquet"
-    if not out_file.exists():
+    out_file = str(FINAL_DIR) +  '/' +  str(table) + '_' + '.parquet'
+    final_file = str(FINAL_DIR) +  '/' +  str(table) + '_' + '.parquet'
+    if not Path(out_file).is_file():
         for metric_count, metric in enumerate(metrics):
+            print(metric)
             idx = ctl.loc[ctl.FullTableName == metric].index.item()
             row = ctl.iloc[idx].copy()
 
@@ -177,7 +179,7 @@ for table, metrics in tables.items():
                     final = pd.merge(final, tbl, on="COMID")
 
             if row.MetricType == "Percent":
-                lookup = pd.read_parquet(row.MetricName)
+                lookup = pd.read_csv(row.MetricName)
                 cat_named = [
                     "Pct{}Cat{}".format(x, a_m) for x in lookup.final_val.values
                 ]
@@ -186,12 +188,15 @@ for table, metrics in tables.items():
                 ]
                 catcols, wscols = [], []
                 for col in tbl.columns:
+                    print(col)
                     if "CatVALUE" in col and not "Up" in col:
                         tbl[col] = (tbl[col] * 1e-6) / weighted_cat_area * 100
-                        catcols = pd.concat([catcols,col], axis=0, ignore_index=False)
+                        # catcols = pd.concat([pd.Series(catcols),pd.Series(col)], axis=0, ignore_index=False)
+                        catcols = catcols + [col]
                     if "WsVALUE" in col:
                         tbl[col] = (tbl[col] * 1e-6) / weighted_ws_area * 100
-                        wscols = pd.concat([wscols,col], axis=0, ignore_index=False)
+                        # wscols = pd.concat([pd.Series(wscols),pd.Series(col)], axis=0, ignore_index=False)
+                        wscols = wscols + [col]
                 if metric_count == 0:
                     final = tbl[front_cols + catcols + wscols]
                     final.columns = front_cols + cat_named + ws_named
