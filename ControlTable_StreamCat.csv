@@ -1057,3 +1057,20 @@ p_usgsww_2006,Point,p_usgsww_2006,2006,none,2006usgsww.shp,,USGS Point Source Lo
 p_usgsww_2008,Point,p_usgsww_2008,2008,none,2008usgsww.shp,,USGS Point Source Loads,Density,1,0,0,0,,,,,
 p_usgsww_2010,Point,p_usgsww_2010,2010,none,2010usgsww.shp,,USGS Point Source Loads,Density,1,0,0,0,,,,,
 p_usgsww_2012,Point,p_usgsww_2012,2012,none,2012usgsww.shp,,USGS Point Source Loads,Density,1,0,0,0,,,,,
+p_dep_1997,Continuous,p_dep_1997,1997,none,pdep1997.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_1998,Continuous,p_dep_1998,1998,none,pdep1998.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_1999,Continuous,p_dep_1999,1999,none,pdep1999.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2000,Continuous,p_dep_2000,2000,none,pdep2000.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2001,Continuous,p_dep_2001,2001,none,pdep2001.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2002,Continuous,p_dep_2002,2002,none,pdep2002.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2003,Continuous,p_dep_2003,2003,none,pdep2003.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2004,Continuous,p_dep_2004,2004,none,pdep2004.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2005,Continuous,p_dep_2005,2005,none,pdep2005.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2006,Continuous,p_dep_2006,2006,none,pdep2006.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2007,Continuous,p_dep_2007,2007,none,pdep2007.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2008,Continuous,p_dep_2008,2008,none,pdep2008.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2009,Continuous,p_dep_2009,2009,none,pdep2009.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2010,Continuous,p_dep_2010,2010,none,pdep2010.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2011,Continuous,p_dep_2011,2011,none,pdep2011.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2012,Continuous,p_dep_2012,2012,none,pdep2012.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
+p_dep_2013,Continuous,p_dep_2013,2013,none,pdep2013.tif,,Total P Deposition,Mean,1,0,0,0,,No,No,Yes,8/1/2025
