@@ -193,13 +193,13 @@ for line in ControlTable.values: # loop through each landscape_var in control ta
                        print "elapsed time " + str(dt.now()-startTime)
                    if DataCategory == 'continuous':
                        startTime = dt.now()
-                       target_espg = 5070
+                       target_epsg = 5070
                        creation_options = {
                        'COMPRESS': 'LZW',
                        'TFW': 'YES'}
                        gdal.Warp(input_raster, temp_raster,resampleAlg = "bilinear",
                        dstSRS="EPSG:{}".format(target_epsg),creationOptions=["TFW=YES"])
-                       gdal.Warp(output_raster, final_raster, cutlineDSName=mask_shp, 
+                       gdal.Warp(temp_raster, final_raster, cutlineDSName=mask_shp, 
                        cropToCutline=True, creationOptions=["TFW=YES",'COMPRESS=LZW'])
                        print "elapsed time " + str(dt.now()-startTime)
                    # if not Proj_projcs==dst_crs:
