@@ -25,7 +25,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from stream_cat_config import(
-    # LOCAL_DIR,
+    LOCAL_DIR,
     FINAL_DIR,
     ACCUM_DIR,
     OUT_DIR
@@ -208,4 +208,10 @@ for table, metrics in tables.items():
         #final['COMID'] = final.index
         #final = final.set_index("COMID")
         final_table = pa.Table.from_pandas(final)
+        # Final screen to ensure we don't have extra Great Lake catchments included
+        # in order to match standard COMIDs delivered in StreamCat products
+        exludes = pd.read_parquet(LOCAL_DIR + "/GreatLakesExcludeCOMIDs.parquet")
+        final_table = final_table.filter(
+            ~final_table.column("COMID").isin(exludes["COMID"].to_list())
+        )
         pq.write_table(final_table, final_file)
