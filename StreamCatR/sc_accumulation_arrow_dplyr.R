@@ -66,7 +66,7 @@ compute_ws_union_metrics <- function(pairs_dir,
     collect()
   
   res
-}
+} 
 
 
 
