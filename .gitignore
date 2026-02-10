@@ -22,3 +22,7 @@ db_updates_03_19_2025.sql
 db_updates_03_18_2025.sql
 db_updates_03_20_2025.sql
 **/streamcat_files/
+**/cat_rasters/
+**/terra/
+**/zonal_out
+**/landscape_rasters

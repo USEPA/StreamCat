@@ -65,8 +65,8 @@ terra::terraOptions(threads = parallel::detectCores(),
 tictoc::tic()
 dt2 <- run_region_accumulation(
   region_id = region_id,
-  zone_dir = "./StreamCatR/zonal_stats_r/cat_rasters",                 # folder with Zidx and parquet files
-  predictor_path = "./StreamCatR/zonal_stats_r/landscape_rasters/bfi_512.tif",           # full path to the predictor raster (any tiling/size)
+  zone_dir = "./StreamCatR/zonal_stats_r/cat_rasters", # folder with Zidx and parquet files
+  predictor_path = "./StreamCatR/zonal_stats_r/landscape_rasters/bfi_512.tif", # full path to the predictor raster (any tiling/size)
   blocksize = 6144,                # e.g., 6144L (used only for Zidx/windows)
   method = "near",
   stats  = "sum",
@@ -82,7 +82,7 @@ head(dt2)
 dbf_folder <- "//aa/ord/ORD/DATA/LAB/COR/Geospatial_Library_Projects/StreamCat/Allocation_and_Accumulation/DBF_stash/"
 
 test <- 
-  foreign::read.dbf(paste0(dbf_folder, "zonalstats_bfi16.dbf")) %>% 
+  foreign::read.dbf(paste0(dbf_folder, "zonalstats_bfi17.dbf")) %>% 
   dplyr::select(VALUE, SUM, COUNT) %>% 
   dplyr::rename(SUM_ORIG = SUM,
                 COUNT_ORIG = COUNT)

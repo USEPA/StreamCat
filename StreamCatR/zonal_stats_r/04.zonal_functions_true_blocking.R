@@ -2,7 +2,7 @@ library(terra)
 library(arrow)
 library(data.table)
 
-source("03.rcpp_accum.R")
+source("./StreamCatR/zonal_stats_r/03.rcpp_accum.R")
 
 zonal_window_resample_accum_idx_fast2 <- function(P800, Zidx, ids, windows,
                                                   method = "near",
