@@ -11,23 +11,24 @@ Sys.setenv(GDAL_NUM_THREADS = "ALL_CPUS")
 Sys.setenv(OMP_NUM_THREADS  = as.character(parallel::detectCores()))
 terraOptions(threads = parallel::detectCores(), memfrac = 0.9)
 
-region_id <- "Region17"
+region_id <- "Region18"
 
 #-------------------------------------------------------
 # Prepare region catchment raster
 #-------------------------------------------------------
 source("./StreamCatR/zonal_stats_r/01.build_optimized_catchments.R")
-catchment_path   <- "C:/Users/RHill04/WorkFolder/GIS/NHDPlusV21/NHDPlusPN/NHDPlus17/NHDPlusCatchment/cat"
+catchment_path   <- "C:/Users/RHill04/WorkFolder/GIS/NHDPlusV21/NHDPlusCA/NHDPlus18/NHDPlusCatchment/cat"
 tic()
 prepare_optimized_catchments(
   catchment_path   = catchment_path,
   region_id        = region_id,
   blocksize        = 6144L,
-  outdir           = "./StreamCatR/zonal_stats_r/cat_rasters",
+  outdir           = "./StreamCatR/zonal_stats_r/cat_rasters2",
   target_crs       = "EPSG:5070",
   overwrite_rasters = TRUE,
   build_windows     = TRUE,  
-  progress_every   = 0L
+  progress_every   = 0L,
+  out_format     = "MRF"
 )
 toc()
 
@@ -82,7 +83,7 @@ head(dt2)
 dbf_folder <- "//aa/ord/ORD/DATA/LAB/COR/Geospatial_Library_Projects/StreamCat/Allocation_and_Accumulation/DBF_stash/"
 
 test <- 
-  foreign::read.dbf(paste0(dbf_folder, "zonalstats_bfi17.dbf")) %>% 
+  foreign::read.dbf(paste0(dbf_folder, "zonalstats_bfi18.dbf")) %>% 
   dplyr::select(VALUE, SUM, COUNT) %>% 
   dplyr::rename(SUM_ORIG = SUM,
                 COUNT_ORIG = COUNT)

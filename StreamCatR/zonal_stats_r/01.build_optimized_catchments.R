@@ -1,5 +1,6 @@
 library(terra)
 library(arrow)
+library(data.table)
 
 # ------------- helper: unique GRIDCODE -> idx parquet (streamed) -------------
 build_gridcode_index_parquet_stream <- function(Z, out_file, progress_every = 0L) {
@@ -303,10 +304,10 @@ build_nonempty_windows <- function(Zidx,
 #   ))
 # }
 
-library(terra)
-library(arrow)
-library(data.table)
-
+# library(terra)
+# library(arrow)
+# library(data.table)
+# 
 prepare_optimized_catchments <- function(
     catchment_path,
     region_id,
@@ -319,11 +320,11 @@ prepare_optimized_catchments <- function(
 ) {
   dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
   blocksize <- as.integer(blocksize)
-  
+
   grid_index_path <- file.path(outdir, sprintf("%s_gridcode_index.parquet", region_id))
   zidx_path       <- file.path(outdir, sprintf("%s_zone_index_block%d.tif", region_id, blocksize))
   wins_path       <- file.path(outdir, sprintf("%s_nonempty_windows_%d.parquet", region_id, blocksize))
-  
+
   # Remove target and common sidecars when overwriting
   safe_unlink <- function(path, do = TRUE) {
     if (!do) return(invisible(FALSE))
@@ -332,7 +333,7 @@ prepare_optimized_catchments <- function(
     suppressWarnings(file.remove(files[file.exists(files)]))
     invisible(TRUE)
   }
-  
+
   # 1) Read source; project only if needed, then write a tiled temp working file
   src <- terra::rast(catchment_path)
   if (!terra::same.crs(src, target_crs)) {
@@ -351,16 +352,16 @@ prepare_optimized_catchments <- function(
     )
   )
   work <- terra::rast(tmp_work)
-  
+
   # 2) Trim NA edges (skip if not applicable)
   work_trim <- try(terra::trim(work), silent = TRUE)
   if (inherits(work_trim, "try-error")) work_trim <- work
-  
+
   if (terra::is.factor(work_trim)) {
     # Important: no terra:: on the LHS; this is a replacement function
     try({ levels(work_trim) <- NULL }, silent = TRUE)
   }
-  
+
   # 3) Build GRIDCODE -> idx mapping parquet (skip if exists unless overwrite)
   if (file.exists(grid_index_path) && !overwrite_rasters) {
     message("Index exists, skipping: ", grid_index_path)
@@ -368,25 +369,25 @@ prepare_optimized_catchments <- function(
     if (file.exists(grid_index_path)) safe_unlink(grid_index_path, TRUE)
     build_gridcode_index_parquet_stream(work_trim, grid_index_path, progress_every = progress_every)
   }
-  
+
   # 4) Build Zidx (1..K) with app + match (no factor handling needed)
   ids_tbl <- arrow::read_parquet(grid_index_path, as_data_frame = TRUE)
   if (!"GRIDCODE" %in% names(ids_tbl)) stop("Index parquet lacks GRIDCODE column: ", grid_index_path)
-  
+
   # Ensure base-R type for IDs (avoid integer64)
   ids <- if (max(ids_tbl$GRIDCODE, na.rm = TRUE) <= .Machine$integer.max) {
     as.integer(ids_tbl$GRIDCODE)
   } else {
     as.numeric(ids_tbl$GRIDCODE)
   }
-  
+
   Zidx <- terra::app(work_trim, fun = function(x) {
     # x is numeric/integer; map to 1..K
     out <- match(x, ids)
     out[is.na(x)] <- NA_integer_
     as.integer(out)
   })
-  
+
   if (file.exists(zidx_path) && !overwrite_rasters) {
     message("Zidx exists, skipping: ", zidx_path)
   } else {
@@ -401,24 +402,24 @@ prepare_optimized_catchments <- function(
       )
     )
   }
-  
+
   # 5) Build non-empty windows via one-pass occupancy aggregate (fast)
   if (isTRUE(build_windows)) {
     if (file.exists(wins_path) && !overwrite_rasters) {
       message("Windows parquet exists, skipping: ", wins_path)
     } else {
       if (file.exists(wins_path)) safe_unlink(wins_path, TRUE)
-      
+
       Zidx_disk <- terra::rast(zidx_path)
       nr <- terra::nrow(Zidx_disk); nc <- terra::ncol(Zidx_disk)
-      
+
       # Aggregate presence/absence of data per block (no na.rm needed)
       occ <- terra::aggregate(
         !is.na(Zidx_disk),
         fact = c(blocksize, blocksize),
         fun  = function(x) as.integer(any(x != 0))   # instead of any(x)
       )
-      
+
       vals <- terra::values(occ, mat = FALSE)
       if (any(vals == 1L, na.rm = TRUE)) {
         cells <- which(vals == 1L)
@@ -434,10 +435,13 @@ prepare_optimized_catchments <- function(
       arrow::write_parquet(wins_dt, wins_path, compression = "zstd")
     }
   }
-  
+
   invisible(list(
     grid_index_path = grid_index_path,
     zidx_path       = zidx_path,
     wins_path       = if (build_windows) wins_path else NULL
   ))
 }
+
+
+

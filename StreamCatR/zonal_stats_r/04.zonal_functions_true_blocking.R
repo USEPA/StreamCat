@@ -1,8 +1,42 @@
+# 04.zonal_functions_true_blocking.R
+
 library(terra)
 library(arrow)
 library(data.table)
 
-source("./StreamCatR/zonal_stats_r/03.rcpp_accum.R")
+# Optional: collapse is used below; fail early if missing
+if (!requireNamespace("collapse", quietly = TRUE)) {
+  stop("Need collapse. install.packages('collapse')")
+}
+
+# Path helpers (use absolute paths to be robust in workers)
+.zr_dir <- normalizePath("./StreamCatR/zonal_stats_r", mustWork = FALSE)
+.rcpp_file <- file.path(.zr_dir, "cpp", "rcpp_accum.cpp")    # adjust if different
+.rcpp_script <- file.path(.zr_dir, "03.rcpp_accum.R")        # adjust if different
+
+init_accumulator <- function() {
+  # Preferred: compiled package
+  if (requireNamespace("scaccum", quietly = TRUE)) {
+    acc_sum_n_idx1K <<- scaccum::acc_sum_n_idx1K
+    return(invisible("scaccum"))
+  }
+  # Fallback: source Rcpp code (should define ensure_rcpp_accum)
+  if (file.exists(.rcpp_script)) {
+    # Source into this environment so acc_sum_n_idx1K becomes visible
+    sys.source(.rcpp_script, envir = environment())
+    if (exists("ensure_rcpp_accum", mode = "function")) {
+      # Try to load prebuilt DLL; compile only if missing
+      try(ensure_rcpp_accum(.rcpp_file), silent = TRUE)
+    }
+  }
+  if (!exists("acc_sum_n_idx1K", mode = "function")) {
+    stop("acc_sum_n_idx1K is not available. Install scaccum or ensure 03.rcpp_accum.R and its .cpp are present.")
+  }
+  invisible("fallback")
+}
+
+# Call once when this file is sourced
+init_accumulator()
 
 zonal_window_resample_accum_idx_fast2 <- function(P800, Zidx, ids, windows,
                                                   method = "near",
@@ -144,11 +178,11 @@ zonal_window_resample_accum_idx_fast2 <- function(P800, Zidx, ids, windows,
   if (want_mean) out[, mean := sumv / pmax(n, 1L)]
   
   elapsed <- proc.time()[3] - t_total
-  message(sprintf("← zonal_window_resample_accum_idx_fast2(): total %.2f sec", elapsed))
-  message(sprintf("    read idx(): %.2f sec", t_idx))
-  message(sprintf("    window resample(): %.2f sec", t_resamp))
-  message(sprintf("    agg(): %.2f sec", t_agg))
-  message(sprintf("    update(): %.2f sec", t_upd))
+  #message(sprintf("← zonal_window_resample_accum_idx_fast2(): total %.2f sec", elapsed))
+  #message(sprintf("    read idx(): %.2f sec", t_idx))
+  #message(sprintf("    window resample(): %.2f sec", t_resamp))
+  #message(sprintf("    agg(): %.2f sec", t_agg))
+  #message(sprintf("    update(): %.2f sec", t_upd))
   
   out[]
 }
@@ -667,10 +701,10 @@ zonal_window_resample_accum_idx_fast2_rcpp3 <- function(
   if (want_mean) out[, mean := sumv / pmax(n, 1L)]
   
   elapsed <- proc.time()[3] - t_total
-  message(sprintf("← zonal_window_resample_accum_idx_fast2_rcpp(): total %.2f sec", elapsed))
-  message(sprintf("    read idx():        %.2f sec", t_idx))
-  message(sprintf("    window resample(): %.2f sec", t_resamp))
-  message(sprintf("    C++ accumulate():  %.2f sec", t_acc))
+  #message(sprintf("← zonal_window_resample_accum_idx_fast2_rcpp(): total %.2f sec", elapsed))
+  #message(sprintf("    read idx():        %.2f sec", t_idx))
+  #message(sprintf("    window resample(): %.2f sec", t_resamp))
+  #message(sprintf("    C++ accumulate():  %.2f sec", t_acc))
   
   out[]
 }
