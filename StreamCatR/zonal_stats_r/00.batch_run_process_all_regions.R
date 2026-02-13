@@ -69,7 +69,7 @@ sapply(region_id, check_one, USE.NAMES = TRUE)
 # --------------------------------------------------------
 # Run regions in series
 # --------------------------------------------------------
-source("./StreamCatR/zonal_stats_r/04.zonal_functions_true_blocking.R")
+source("./StreamCatR/zonal_stats_r/04c.zonal_functions_true_blocking.R")
 source("./StreamCatR/zonal_stats_r/05.run_region_accumulation.R")
 
 # Thread options (optional)
@@ -82,8 +82,9 @@ terra::terraOptions(threads = parallel::detectCores(),
 
 out <- list()
 
+tictoc::tic()
 for(i in 1:length(region_id)){
-  tictoc::tic()
+  #tictoc::tic()
   print(region_id[i])
   out[[i]] <- run_region_accumulation(
     region_id = region_id[i],
@@ -94,16 +95,17 @@ for(i in 1:length(region_id)){
     stats  = "sum",
     progress_every = 0L,
   )
-  print(head(out[[i]]))
-  tictoc::toc()
+  #print(head(out[[i]]))
+  #tictoc::toc()
 }
+tictoc::toc()
 #head(dt2)
 
 # --------------------------------------------------------
 # Run regions in parallel
 # --------------------------------------------------------
 scripts_dir <- normalizePath("./StreamCatR/zonal_stats_r", mustWork = TRUE)
-zonal_file  <- file.path(scripts_dir, "04.zonal_functions_true_blocking.R")
+zonal_file  <- file.path(scripts_dir, "04c.zonal_functions_true_blocking.R")
 
 # Optional preflight
 has_pkg <- requireNamespace("scaccum", quietly = TRUE)
@@ -114,7 +116,7 @@ if (!has_pkg && !has_fallback) {
 }
 
 # Source definitions
-source(file.path(scripts_dir, "04.zonal_functions_true_blocking.R"))
+source(file.path(scripts_dir, "04c.zonal_functions_true_blocking.R"))
 source(file.path(scripts_dir, "05.run_region_accumulation.R"))
 source(file.path(scripts_dir, "06.run_regions_parallel.R"))
 
@@ -136,7 +138,7 @@ res <- run_regions_parallel(
   approx_mem_per_worker_gb = NULL,     # disable RAM-based worker cap
   zonal_file     = zonal_file,
   r_libs_user    = "C:/Users/RHill04/AppData/Local/R/libraries",
-  verbose = FALSE
+  verbose = TRUE
 )
 toc()
 

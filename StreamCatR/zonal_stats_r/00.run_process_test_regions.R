@@ -27,8 +27,7 @@ prepare_optimized_catchments(
   target_crs       = "EPSG:5070",
   overwrite_rasters = TRUE,
   build_windows     = TRUE,  
-  progress_every   = 0L,
-  out_format     = "MRF"
+  progress_every   = 0L
 )
 toc()
 
@@ -52,7 +51,7 @@ optimize_continuous_raster(
 #-------------------------------------------------------
 # Run zonal
 #-------------------------------------------------------
-source("./StreamCatR/zonal_stats_r/04.zonal_functions_true_blocking.R")
+source("./StreamCatR/zonal_stats_r/04c.zonal_functions_true_blocking.R")
 source("./StreamCatR/zonal_stats_r/05.run_region_accumulation.R")
 
 # Thread options (optional)

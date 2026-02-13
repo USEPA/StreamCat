@@ -175,41 +175,32 @@ run_regions_parallel <- function(regions,
   res_list <- future.apply::future_lapply(
     regions,
     FUN = function(rid) {
-      # Optional: ensure workers see your user library
       if (!is.null(r_libs_user)) .libPaths(c(r_libs_user, .libPaths()))
       
-      # Per-worker threads/env settings
       Sys.setenv(GDAL_NUM_THREADS = as.character(layout$gdal_threads),
                  OMP_NUM_THREADS  = as.character(layout$omp_threads))
-      
-      # Limit BLAS/LAPACK threads to avoid hidden oversubscription
       Sys.setenv(OPENBLAS_NUM_THREADS   = as.character(layout$threads_per_worker),
                  MKL_NUM_THREADS        = as.character(layout$threads_per_worker),
                  BLIS_NUM_THREADS       = as.character(layout$threads_per_worker),
                  VECLIB_MAXIMUM_THREADS = as.character(layout$threads_per_worker))
+      Sys.setenv(GDAL_CACHEMAX = "2048")
       
-      # Increase GDAL block cache per worker (MB)
-      Sys.setenv(GDAL_CACHEMAX = "4096")  # try 512–1024; tune as needed
-      
-      # Per-worker terra tempdir and options
       wd <- file.path(out_terra_temp_base, paste0("worker_", Sys.getpid()))
       dir.create(wd, recursive = TRUE, showWarnings = FALSE)
       terra::terraOptions(threads = layout$terra_threads,
                           memfrac = layout$terra_memfrac,
                           tempdir = wd)
       
-      # Load required packages
       suppressPackageStartupMessages({
         library(terra); library(arrow); library(data.table)
-        if (!requireNamespace("collapse", quietly = TRUE)) {
-          stop("Need collapse. install.packages('collapse')")
+        # Prefer to load scaccum; init_accumulator() will then find the fast path
+        if (requireNamespace("scaccum", quietly = TRUE)) {
+          # library(scaccum) # optional
         }
       })
       
-      # Source zonal functions (this should init acc_sum_n_idx1K)
+      # Source zonal functions; this calls init_accumulator() internally
       sys.source(zonal_file, envir = environment())
-      
-      if (verbose) message(sprintf("[Worker %d] %s", Sys.getpid(), rid))
       
       out <- run_region_accumulation(
         region_id       = rid,
@@ -222,7 +213,7 @@ run_regions_parallel <- function(regions,
       )
       list(region = rid, result = out)
     },
-    future.packages = c("terra", "arrow", "data.table")  # core deps only
+    future.packages = c("terra", "arrow", "data.table", "scaccum")
   )
   
   names(res_list) <- vapply(res_list, `[[`, "", "region")
