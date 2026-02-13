@@ -176,10 +176,10 @@ zonal_window_resample_accum_idx_fast2_rcpp3 <- function(
   if (want_mean) out[, mean := sumv / pmax(n, 1L)]
   
   elapsed <- proc.time()[3] - t_total
-  message(sprintf("← zonal_window_resample_accum_idx_fast2_rcpp(): total %.2f sec", elapsed))
-  message(sprintf("    read idx():        %.2f sec", t_idx))
-  message(sprintf("    window resample(): %.2f sec", t_resamp))
-  message(sprintf("    C++ accumulate():  %.2f sec", t_acc))
+  #message(sprintf("← zonal_window_resample_accum_idx_fast2_rcpp(): total %.2f sec", elapsed))
+  #message(sprintf("    read idx():        %.2f sec", t_idx))
+  #message(sprintf("    window resample(): %.2f sec", t_resamp))
+  #message(sprintf("    C++ accumulate():  %.2f sec", t_acc))
   
   out[]
 }
