@@ -26,3 +26,5 @@ db_updates_03_20_2025.sql
 **/terra/
 **/zonal_out
 **/landscape_rasters
+**/StreamCatR/Index/
+StreamCatR/qa_check.aprx
