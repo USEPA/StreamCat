@@ -2,6 +2,7 @@
 
 <p align="center"> <a href="https://github.com/USEPA/StreamCatTools"> <img src="https://gh-card.dev/repos/USEPA/StreamCatTools.svg?fullname=" alt="StreamCatTools" /> </a> <!-- Add more cards below by duplicating the <a> block and changing the repo name --> <!-- <a href="https://github.com/USEPA/AnotherRepo"> <img src="https://gh-card.dev/repos/USEPA/AnotherRepo.svg?fullname=" alt="AnotherRepo" /> </a> --> </p>
 
+<p align="center"> <a href="https://github.com/USEPA/StreamCatWebServices_Public"> <img src="https://gh-card.dev/repos/USEPA/StreamCatWebServices_Public.svg?fullname=" alt="StreamCatWebServices_Public" /> </a> 
 
 <!--
 <table align="center">
