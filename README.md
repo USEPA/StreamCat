@@ -1,7 +1,5 @@
 # StreamCat Hub
 
-A landing page for StreamCat projects in the USEPA organization. Browse the components below.
-
 <!-- CARDS:START -->
 <table align="center">
   <tr>
@@ -14,7 +12,7 @@ A landing page for StreamCat projects in the USEPA organization. Browse the comp
         <img src="https://img.shields.io/github/stars/USEPA/StreamCatTools?label=Stars&style=social" alt="Stars" />
       </a>
       <p>Tools and utilities for working with StreamCat datasets.</p>
-   
+    </td>
     <td align="center" valign="top" width="33%">
       <a href="https://github.com/USEPA/StreamCatWebServices_Public">
         <img src="https://img.shields.io/badge/StreamCatWebServices_Public-Repository-0a77e8?style=for-the-badge" alt="StreamCatTools" />
