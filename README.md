@@ -1,15 +1,6 @@
 # StreamCat Hub
 
-<!-- CARDS:START -->
-<p align="center">
-  <a href="https://github.com/USEPA/StreamCatTools">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=USEPA&repo=StreamCatTools" alt="StreamCatTools" />
-  </a>
-  <a href="https://github.com/USEPA/AnotherRepo">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=USEPA&repo=StreamCatWebServices_Public" alt="StreamCatWebServices_Public" />
-  </a>
-</p>
-<!-- CARDS:END -->
+<p align="center"> <a href="https://github.com/USEPA/StreamCatTools"> <img src="https://gh-card.dev/repos/USEPA/StreamCatTools.svg?fullname=" alt="StreamCatTools" /> </a> <!-- Add more cards below by duplicating the <a> block and changing the repo name --> <!-- <a href="https://github.com/USEPA/AnotherRepo"> <img src="https://gh-card.dev/repos/USEPA/AnotherRepo.svg?fullname=" alt="AnotherRepo" /> </a> --> </p>
 
 
 <!--
