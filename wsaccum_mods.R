@@ -2,12 +2,12 @@ library(arrow)
 library(dplyr)
 library(rlang)
 
-# Function to perform watershed accumulated sum of catchement-level variables
+# Function to perform watershed accumulated sum of catchment-level variables
 # A list of specific variables from the input dataset can be provided in "var_cols"
 # The function will run across all numeric columns if var_cols = NULL (except id_col)
 # Number of threads to use to run the process in parallel can be specified in "num_threads"
-# All availible cores will be used to run the function if num_threads = NULL
-# Provide cathment identifiers in id_cols
+# All available cores will be used to run the function if num_threads = NULL
+# Provide catchment identifiers in id_cols
 
 library(arrow)
 library(dplyr)
